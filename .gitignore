@@ -51,7 +51,6 @@ htmlcov/
 # ==========================================
 node_modules/
 Frontend/node_modules/
-Frontend/dist/
 Frontend/dist-ssr/
 *.local
 
