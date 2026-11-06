@@ -22,6 +22,12 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = ""
     POSTGRES_DB: str = "db_renstra"
 
+    # OpenAI / Hermes Settings
+    AI_PROVIDER: str = "hermes"
+    HERMES_PATH: str = "/home/herry/.local/bin/hermes"
+    OPENAI_API_KEY: str = ""
+    OPENAI_MODEL: str = "gpt-5.5"
+
     # CORS
     BACKEND_CORS_ORIGINS: Union[str, List[str]] = (
         "http://localhost,http://localhost:5173,http://localhost:8080,"

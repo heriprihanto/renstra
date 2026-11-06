@@ -366,7 +366,7 @@
                     <td style="text-align: center;">
                       <button
                         class="btn-table-edit"
-                        @click="openEditIndikatorTujuan(indTujuan)"
+                        @click="openEditIndikatorTujuan(indTujuan, tujuan)"
                         title="Ubah Metadata & Target Perubahan"
                       >
                         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -558,7 +558,7 @@
                       <td style="text-align: center;">
                         <button
                           class="btn-table-edit"
-                          @click="openEditIndikatorSasaran(indSasaran)"
+                          @click="openEditIndikatorSasaran(indSasaran, sasaran)"
                           title="Ubah Metadata & Target Perubahan"
                         >
                           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
@@ -1720,15 +1720,22 @@ function openCreateIndikatorTujuan(tujuan) {
   crudModalMode.value = 'create_ind_tujuan';
   crudModalItem.value = {
     idtujuan: tujuan.idtujuan,
+    uraitujuan: tujuan.uraitujuan,
+    parent_uraian: tujuan.uraitujuan,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
     suggested_no: (tujuan.indikator_tujuan?.length || 0) + 1,
   };
   isCrudModalOpen.value = true;
 }
 
-function openEditIndikatorTujuan(ind) {
+function openEditIndikatorTujuan(ind, tujuan) {
   crudModalMode.value = 'edit_ind_tujuan';
   crudModalItem.value = {
     id: ind.id,
+    idtujuan: tujuan?.idtujuan,
+    uraitujuan: tujuan?.uraitujuan,
+    parent_uraian: tujuan?.uraitujuan,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
     uraian: ind.uraian,
     satuan: ind.satuan,
     status: ind.status,
@@ -1768,6 +1775,9 @@ function openCreateSasaran(tujuan) {
   crudModalMode.value = 'create_sasaran';
   crudModalItem.value = {
     idtujuan: tujuan.idtujuan,
+    uraitujuan: tujuan.uraitujuan,
+    parent_uraian: tujuan.uraitujuan,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
     suggested_no: (tujuan.sasaran?.length || 0) + 1,
   };
   isCrudModalOpen.value = true;
@@ -1799,15 +1809,22 @@ function openCreateIndikatorSasaran(sasaran) {
   crudModalMode.value = 'create_ind_sasaran';
   crudModalItem.value = {
     idsasaran: sasaran.idsasaran,
+    uraisasaran: sasaran.uraisasaran,
+    parent_uraian: sasaran.uraisasaran,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
     suggested_no: (sasaran.indikator_sasaran?.length || 0) + 1,
   };
   isCrudModalOpen.value = true;
 }
 
-function openEditIndikatorSasaran(ind) {
+function openEditIndikatorSasaran(ind, sasaran) {
   crudModalMode.value = 'edit_ind_sasaran';
   crudModalItem.value = {
     id: ind.id,
+    idsasaran: sasaran?.idsasaran,
+    uraisasaran: sasaran?.uraisasaran,
+    parent_uraian: sasaran?.uraisasaran,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
     uraian: ind.uraian,
     satuan: ind.satuan,
     status: ind.status,
@@ -1850,6 +1867,11 @@ function openCreateIndikatorKegiatan(prog, keg) {
     kodekegiatan: keg.kodekegiatan,
     kodeprogram: prog.kodeprogram,
     uraikegiatan: keg.uraikegiatan,
+    uraiprogram: prog.uraiprogram,
+    kinerja: keg.kinerja,
+    subkegiatan: keg.subkegiatan || [],
+    parent_uraian: prog.uraiprogram,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
     suggested_no: (keg.indikator_kegiatan?.length || 0) + 1,
   };
   isCrudModalOpen.value = true;
@@ -1859,6 +1881,15 @@ function openEditIndikatorKegiatan(prog, keg, indKeg) {
   crudModalMode.value = 'edit_ind_kegiatan';
   crudModalItem.value = {
     id: indKeg.id,
+    kodeskpd: selectedSubSkpd.value?.kode_sub_skpd,
+    kodekegiatan: keg.kodekegiatan,
+    kodeprogram: prog.kodeprogram,
+    uraikegiatan: keg.uraikegiatan,
+    uraiprogram: prog.uraiprogram,
+    kinerja: keg.kinerja,
+    subkegiatan: keg.subkegiatan || [],
+    parent_uraian: prog.uraiprogram,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
     uraian: indKeg.uraian,
     satuan: indKeg.satuan,
     status: indKeg.status,
@@ -1898,6 +1929,10 @@ function openEditIndikatorProgram(prog, indProg) {
   crudModalItem.value = {
     id: indProg.id,
     kodeprogram: prog.kodeprogram,
+    uraiprogram: prog.uraiprogram,
+    kinerja: prog.kinerja,
+    parent_uraian: prog.uraiprogram,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
     uraian: indProg.uraian,
     satuan: indProg.satuan,
     status: indProg.status,
@@ -1925,6 +1960,7 @@ function openCreateProgram() {
   crudModalMode.value = 'create_program';
   crudModalItem.value = {
     kodeskpd: selectedSubSkpd.value?.kode_sub_skpd,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
   };
   isCrudModalOpen.value = true;
 }
@@ -1937,6 +1973,7 @@ function openEditProgram(prog) {
     kodeprogram: prog.kodeprogram,
     uraiprogram: prog.uraiprogram,
     kinerja: prog.kinerja,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
   };
   isCrudModalOpen.value = true;
 }
@@ -1959,6 +1996,8 @@ function openCreateKegiatan(prog) {
   crudModalItem.value = {
     kodeskpd: selectedSubSkpd.value?.kode_sub_skpd,
     kodeprogram: prog.kodeprogram,
+    parent_uraian: prog.uraiprogram,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
   };
   isCrudModalOpen.value = true;
 }
@@ -1972,6 +2011,8 @@ function openEditKegiatan(prog, keg) {
     kodekegiatan: keg.kodekegiatan,
     uraikegiatan: keg.uraikegiatan,
     kinerja: keg.kinerja,
+    parent_uraian: prog.uraiprogram,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
   };
   isCrudModalOpen.value = true;
 }
@@ -1995,6 +2036,9 @@ function openCreateSubkegiatan(prog, keg) {
     kodeskpd: selectedSubSkpd.value?.kode_sub_skpd,
     kodeprogram: prog.kodeprogram,
     kodekegiatan: keg.kodekegiatan,
+    uraikegiatan: keg.uraikegiatan,
+    parent_uraian: keg.uraikegiatan,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
   };
   isCrudModalOpen.value = true;
 }
@@ -2006,6 +2050,9 @@ function openEditSubkegiatan(prog, keg, subkeg) {
     id: subkeg.id,
     kodeprogram: prog.kodeprogram,
     kodekegiatan: keg.kodekegiatan,
+    uraikegiatan: keg.uraikegiatan,
+    parent_uraian: keg.uraikegiatan,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
     kodesubkegiatan: subkeg.kodesubkegiatan,
     uraisubkegiatan: subkeg.uraisubkegiatan,
     kinerja: subkeg.kinerja,

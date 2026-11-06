@@ -7,7 +7,7 @@
       @click.self="closeModal"
       @keydown.esc="closeModal"
     >
-      <div class="crud-modal-card" role="dialog" aria-modal="true">
+      <div class="crud-modal-card" :class="{ 'wide-modal': showAiPanel }" role="dialog" aria-modal="true">
         <!-- Modal Header -->
         <div class="crud-modal-header" :class="{ 'delete-header': isDeleteMode }">
           <div class="crud-modal-title-group">
@@ -65,6 +65,34 @@
 
         <!-- Modal Body: FORM (TUJUAN / SASARAN) -->
         <div v-else-if="isTujuanSasaranForm" class="crud-modal-body">
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
+            <button
+              type="button"
+              class="btn-ai-toggle"
+              :class="{ 'active': showAiPanel }"
+              @click="toggleAiPanel"
+              title="Dapatkan rekomendasi perumusan indikator yang SMART berbasis AI"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              <span>{{ showAiPanel ? 'Sembunyikan Rekomendasi AI' : '🤖 Rekomendasi AI (SMART)' }}</span>
+            </button>
+          </div>
+
+          <SmartAiAssistant
+            v-if="showAiPanel"
+            :level="aiContextLevel"
+            :parent-uraian="aiParentUraian"
+            :entity-uraian="aiEntityUraian"
+            :kinerja="formData.kinerja || props.itemData?.kinerja"
+            :opd-name="props.itemData?.opd_name"
+            :subkegiatan-list="props.itemData?.subkegiatan"
+            :is-edit-mode="isEditMode"
+            @apply="handleApplySmartRecommendation"
+            @close="showAiPanel = false"
+          />
+
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
@@ -115,6 +143,36 @@
 
         <!-- Modal Body: FORM (INDIKATOR TUJUAN / INDIKATOR SASARAN) -->
         <div v-else-if="isIndikatorForm" class="crud-modal-body">
+          <!-- Tombol AI Assistant SMART -->
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
+            <button
+              type="button"
+              class="btn-ai-toggle"
+              :class="{ 'active': showAiPanel }"
+              @click="toggleAiPanel"
+              title="Dapatkan rekomendasi perumusan indikator yang SMART berbasis AI"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              <span>{{ showAiPanel ? 'Sembunyikan Rekomendasi AI' : '🤖 Rekomendasi AI (SMART)' }}</span>
+            </button>
+          </div>
+
+          <!-- Smart AI Assistant Panel -->
+          <SmartAiAssistant
+            v-if="showAiPanel"
+            :level="aiContextLevel"
+            :parent-uraian="aiParentUraian"
+            :entity-uraian="aiEntityUraian"
+            :kinerja="formData.kinerja || props.itemData?.kinerja"
+            :opd-name="props.itemData?.opd_name"
+            :subkegiatan-list="props.itemData?.subkegiatan"
+            :is-edit-mode="isEditMode"
+            @apply="handleApplySmartRecommendation"
+            @close="showAiPanel = false"
+          />
+
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
@@ -359,72 +417,40 @@
                   />
                 </div>
               </div>
-
-              <!-- Grid Pagu Anggaran Murni & Perubahan jika Indikator Kegiatan -->
-              <div v-if="props.mode.includes('ind_kegiatan')" style="margin-top: 1rem;">
-                <div class="form-section-header">
-                  <label class="form-label" style="font-weight: 600; color: #1e293b;">
-                    Pagu Anggaran Indikator Kegiatan (Murni)
-                  </label>
-                </div>
-                <div class="targets-form-grid" style="grid-template-columns: repeat(5, 1fr);">
-                  <div class="form-group">
-                    <label class="form-label sub">Pagu 2026</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu1" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub">Pagu 2027</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu2" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub">Pagu 2028</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu3" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub">Pagu 2029</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu4" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub">Pagu 2030</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu5" placeholder="0" />
-                  </div>
-                </div>
-
-                <div class="form-section-header" style="margin-top: 0.85rem;">
-                  <label class="form-label" style="font-weight: 600; color: #b45309; display: flex; align-items: center; gap: 0.35rem;">
-                    <span class="badge-perubahan">Perubahan</span>
-                    Pagu Anggaran Indikator Kegiatan (Perubahan)
-                  </label>
-                </div>
-                <div class="targets-form-grid targets-perubahan-grid" style="grid-template-columns: repeat(5, 1fr);">
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2026</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu1" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2027</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu2" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2028</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu3" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2029</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu4" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2030</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu5" placeholder="0" />
-                  </div>
-                </div>
-              </div>
             </div>
           </form>
         </div>
 
         <!-- Modal Body: FORM (PROGRAM) -->
         <div v-else-if="isProgramForm" class="crud-modal-body">
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
+            <button
+              type="button"
+              class="btn-ai-toggle"
+              :class="{ 'active': showAiPanel }"
+              @click="toggleAiPanel"
+              title="Dapatkan rekomendasi kinerja/indikator SMART berbasis AI"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              <span>{{ showAiPanel ? 'Sembunyikan AI' : '🤖 Rekomendasi AI SMART' }}</span>
+            </button>
+          </div>
+
+          <SmartAiAssistant
+            v-if="showAiPanel"
+            :level="aiContextLevel"
+            :parent-uraian="aiParentUraian"
+            :entity-uraian="aiEntityUraian"
+            :kinerja="formData.kinerja || props.itemData?.kinerja"
+            :opd-name="props.itemData?.opd_name"
+            :subkegiatan-list="props.itemData?.subkegiatan"
+            :is-edit-mode="isEditMode"
+            @apply="handleApplySmartRecommendation"
+            @close="showAiPanel = false"
+          />
+
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
               <label class="form-label">Kode Program <span style="color: #ef4444;">*</span></label>
@@ -460,6 +486,34 @@
 
         <!-- Modal Body: FORM (KEGIATAN) -->
         <div v-else-if="isKegiatanForm" class="crud-modal-body">
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 0.75rem;">
+            <button
+              type="button"
+              class="btn-ai-toggle"
+              :class="{ 'active': showAiPanel }"
+              @click="toggleAiPanel"
+              title="Dapatkan rekomendasi kinerja/indikator SMART berbasis AI"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+              </svg>
+              <span>{{ showAiPanel ? 'Sembunyikan AI' : '🤖 Rekomendasi AI SMART' }}</span>
+            </button>
+          </div>
+
+          <SmartAiAssistant
+            v-if="showAiPanel"
+            :level="aiContextLevel"
+            :parent-uraian="aiParentUraian"
+            :entity-uraian="aiEntityUraian"
+            :kinerja="formData.kinerja || props.itemData?.kinerja"
+            :opd-name="props.itemData?.opd_name"
+            :subkegiatan-list="props.itemData?.subkegiatan"
+            :is-edit-mode="isEditMode"
+            @apply="handleApplySmartRecommendation"
+            @close="showAiPanel = false"
+          />
+
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
               <label class="form-label">Kode Kegiatan <span style="color: #ef4444;">*</span></label>
@@ -528,10 +582,38 @@
 
             <!-- Bagian Indikator Subkegiatan & Target Volume -->
             <div style="margin-top: 1.25rem; padding: 0.85rem; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
-              <div style="font-weight: 700; font-size: 0.88rem; color: #1e3a8a; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem;">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-                <span>Indikator Kinerja Subkegiatan</span>
+              <div style="font-weight: 700; font-size: 0.88rem; color: #1e3a8a; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between;">
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
+                  <span>Indikator Kinerja Subkegiatan</span>
+                </div>
+                <button
+                  type="button"
+                  class="btn-ai-toggle"
+                  :class="{ 'active': showAiPanel }"
+                  @click="toggleAiPanel"
+                  title="Dapatkan rekomendasi perumusan indikator yang SMART berbasis AI"
+                >
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/>
+                  </svg>
+                  <span>{{ showAiPanel ? 'Sembunyikan AI' : '🤖 Rekomendasi AI SMART' }}</span>
+                </button>
               </div>
+
+              <!-- SMART AI Assistant Panel Component -->
+              <SmartAiAssistant
+                v-if="showAiPanel"
+                :level="aiContextLevel"
+                :parent-uraian="aiParentUraian"
+                :entity-uraian="aiEntityUraian"
+                :kinerja="formData.kinerja || props.itemData?.kinerja"
+                :opd-name="props.itemData?.opd_name"
+                :subkegiatan-list="props.itemData?.subkegiatan"
+                :is-edit-mode="isEditMode"
+                @apply="handleApplySmartRecommendation"
+                @close="showAiPanel = false"
+              />
               <div class="form-group">
                 <label class="form-label">Uraian Indikator (uraisubkegiatan_indikator)</label>
                 <input
@@ -554,7 +636,7 @@
               <!-- Grid Target Volume (volume_0, volume_1, dst) -->
               <div style="margin-top: 0.85rem;">
                 <label class="form-label" style="font-weight: 600; color: #475569; font-size: 0.8rem;">
-                  Target Volume Capaian (volume_0, volume_1 .. volume_5)
+                  Target (Murni)
                 </label>
                 <div class="targets-form-grid" style="grid-template-columns: repeat(7, 1fr);">
                   <div class="form-group">
@@ -625,65 +707,6 @@
                   </div>
                 </div>
               </div>
-
-              <!-- Grid Pagu Anggaran Murni (pagu1..pagu5) -->
-              <div style="margin-top: 0.85rem;">
-                <label class="form-label" style="font-weight: 600; color: #475569; font-size: 0.8rem;">
-                  Pagu Anggaran Subkegiatan (Murni)
-                </label>
-                <div class="targets-form-grid" style="grid-template-columns: repeat(5, 1fr);">
-                  <div class="form-group">
-                    <label class="form-label sub">2026</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu1" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub">2027</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu2" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub">2028</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu3" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub">2029</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu4" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub">2030</label>
-                    <input type="number" class="form-input mono" v-model.number="formData.pagu5" placeholder="0" />
-                  </div>
-                </div>
-              </div>
-
-              <!-- Grid Pagu Anggaran Perubahan (p_pagu1..p_pagu5) -->
-              <div style="margin-top: 0.85rem;">
-                <label class="form-label" style="font-weight: 600; color: #b45309; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem;">
-                  <span class="badge-perubahan">Perubahan</span>
-                  Pagu Anggaran Subkegiatan (Perubahan)
-                </label>
-                <div class="targets-form-grid targets-perubahan-grid" style="grid-template-columns: repeat(5, 1fr);">
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2026</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu1" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2027</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu2" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2028</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu3" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2029</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu4" placeholder="0" />
-                  </div>
-                  <div class="form-group">
-                    <label class="form-label sub p-label">Pagu (P) 2030</label>
-                    <input type="number" class="form-input mono p-input" v-model.number="formData.p_pagu5" placeholder="0" />
-                  </div>
-                </div>
-              </div>
             </div>
           </form>
         </div>
@@ -720,6 +743,7 @@
 <script setup>
 import { ref, computed, watch } from 'vue';
 import api from '../services/api';
+import SmartAiAssistant from './SmartAiAssistant.vue';
 
 const props = defineProps({
   isOpen: {
@@ -743,6 +767,100 @@ const props = defineProps({
 const emit = defineEmits(['close', 'saved', 'deleted']);
 
 const submitting = ref(false);
+const showAiPanel = ref(false);
+
+const aiContextLevel = computed(() => {
+  if (props.mode.includes('ind_tujuan')) return 'tujuan';
+  if (props.mode.includes('ind_sasaran')) return 'sasaran';
+  if (props.mode.includes('ind_program')) return 'program';
+  if (props.mode.includes('ind_kegiatan')) return 'kegiatan';
+  if (isSubkegiatanForm.value) return 'subkegiatan';
+  if (isKegiatanForm.value) return 'kegiatan';
+  if (isProgramForm.value) return 'program';
+  if (isSasaran.value) return 'sasaran';
+  if (isTujuan.value) return 'tujuan';
+  return 'kegiatan';
+});
+
+const aiParentUraian = computed(() => {
+  return props.itemData?.parent_uraian || props.itemData?.uraiprogram || props.itemData?.uraikegiatan || props.itemData?.uraitujuan || '';
+});
+
+const aiEntityUraian = computed(() => {
+  if (props.mode.includes('ind_kegiatan')) {
+    return props.itemData?.uraikegiatan || formData.value.uraikegiatan || '';
+  }
+  if (props.mode.includes('ind_tujuan')) {
+    return props.itemData?.uraitujuan || '';
+  }
+  if (props.mode.includes('ind_sasaran')) {
+    return props.itemData?.uraisasaran || '';
+  }
+  if (props.mode.includes('ind_program')) {
+    return props.itemData?.uraiprogram || formData.value.uraiprogram || '';
+  }
+  if (isSubkegiatanForm.value) {
+    return formData.value.uraisubkegiatan || props.itemData?.uraisubkegiatan || '';
+  }
+  if (isKegiatanForm.value) {
+    return formData.value.uraikegiatan || props.itemData?.uraikegiatan || '';
+  }
+  if (isProgramForm.value) {
+    return formData.value.uraiprogram || props.itemData?.uraiprogram || '';
+  }
+  if (isTujuanSasaranForm.value) {
+    return formData.value.uraian || props.itemData?.uraian || '';
+  }
+  return formData.value.uraian || '';
+});
+
+function toggleAiPanel() {
+  showAiPanel.value = !showAiPanel.value;
+}
+
+function handleApplySmartRecommendation(rec) {
+  if (isSubkegiatanForm.value) {
+    formData.value.uraisubkegiatan_indikator = rec.uraian;
+    if (rec.satuan) formData.value.satuan = rec.satuan;
+    if (rec.target_awal && (!formData.value.volume_awal || formData.value.volume_awal === '-')) formData.value.volume_awal = rec.target_awal;
+    if (rec.target2026 && (!formData.value.volume_1 || formData.value.volume_1 === '-')) formData.value.volume_1 = rec.target2026;
+    if (rec.target2027 && (!formData.value.volume_2 || formData.value.volume_2 === '-')) formData.value.volume_2 = rec.target2027;
+    if (rec.target2028 && (!formData.value.volume_3 || formData.value.volume_3 === '-')) formData.value.volume_3 = rec.target2028;
+    if (rec.target2029 && (!formData.value.volume_4 || formData.value.volume_4 === '-')) formData.value.volume_4 = rec.target2029;
+    if (rec.target2030 && (!formData.value.volume_5 || formData.value.volume_5 === '-')) formData.value.volume_5 = rec.target2030;
+  } else if (isKegiatanForm.value || isProgramForm.value) {
+    formData.value.kinerja = rec.uraian;
+  } else if (isTujuanSasaranForm.value) {
+    if (!isEditMode.value) {
+      formData.value.uraian = rec.uraian;
+    }
+  } else {
+    if (!isEditMode.value) {
+      formData.value.uraian = rec.uraian;
+    }
+    if (rec.satuan) formData.value.satuan = rec.satuan;
+    if (rec.status) formData.value.status = rec.status;
+    if (rec.definisi_operasional) {
+      formData.value.definisi_operasional = rec.definisi_operasional;
+    }
+    if (!isEditMode.value) {
+      if (rec.target_awal) formData.value.target_awal = rec.target_awal;
+      if (rec.target2026) formData.value.target2026 = rec.target2026;
+      if (rec.target2027) formData.value.target2027 = rec.target2027;
+      if (rec.target2028) formData.value.target2028 = rec.target2028;
+      if (rec.target2029) formData.value.target2029 = rec.target2029;
+      if (rec.target2030) formData.value.target2030 = rec.target2030;
+      if (rec.target2029) formData.value.target_akhir = rec.target2029;
+    } else {
+      if (rec.target2026 && (!formData.value.p_target2026 || formData.value.p_target2026 === '-')) formData.value.p_target2026 = rec.target2026;
+      if (rec.target2027 && (!formData.value.p_target2027 || formData.value.p_target2027 === '-')) formData.value.p_target2027 = rec.target2027;
+      if (rec.target2028 && (!formData.value.p_target2028 || formData.value.p_target2028 === '-')) formData.value.p_target2028 = rec.target2028;
+      if (rec.target2029 && (!formData.value.p_target2029 || formData.value.p_target2029 === '-')) formData.value.p_target2029 = rec.target2029;
+      if (rec.target2030 && (!formData.value.p_target2030 || formData.value.p_target2030 === '-')) formData.value.p_target2030 = rec.target2030;
+      if (rec.target2029) formData.value.p_target_akhir = rec.target2029;
+    }
+  }
+}
 
 const formData = ref({
   uraian: '',
@@ -904,6 +1022,7 @@ watch(
   () => [props.isOpen, props.mode, props.itemData],
   ([open]) => {
     if (open) {
+      showAiPanel.value = false;
       if (props.mode.startsWith('edit_') && props.itemData) {
         formData.value = {
           uraian: props.itemData.uraian || props.itemData.uraitujuan || props.itemData.uraisasaran || '',
@@ -1226,16 +1345,6 @@ async function handleSubmit() {
         p_target2029: formData.value.p_target2029,
         p_target2030: formData.value.p_target2030,
         p_target_akhir: formData.value.p_target_akhir,
-        pagu1: formData.value.pagu1,
-        pagu2: formData.value.pagu2,
-        pagu3: formData.value.pagu3,
-        pagu4: formData.value.pagu4,
-        pagu5: formData.value.pagu5,
-        p_pagu1: formData.value.p_pagu1,
-        p_pagu2: formData.value.p_pagu2,
-        p_pagu3: formData.value.p_pagu3,
-        p_pagu4: formData.value.p_pagu4,
-        p_pagu5: formData.value.p_pagu5,
         no_urut: formData.value.no_urut,
       });
     } else if (props.mode === 'edit_ind_kegiatan') {
@@ -1260,16 +1369,6 @@ async function handleSubmit() {
         p_target2029: formData.value.p_target2029,
         p_target2030: formData.value.p_target2030,
         p_target_akhir: formData.value.p_target_akhir,
-        pagu1: formData.value.pagu1,
-        pagu2: formData.value.pagu2,
-        pagu3: formData.value.pagu3,
-        pagu4: formData.value.pagu4,
-        pagu5: formData.value.pagu5,
-        p_pagu1: formData.value.p_pagu1,
-        p_pagu2: formData.value.p_pagu2,
-        p_pagu3: formData.value.p_pagu3,
-        p_pagu4: formData.value.p_pagu4,
-        p_pagu5: formData.value.p_pagu5,
         no_urut: formData.value.no_urut,
       });
     } else if (props.mode === 'create_program') {
@@ -1326,16 +1425,6 @@ async function handleSubmit() {
         p_volume_4: formData.value.p_volume_4,
         p_volume_5: formData.value.p_volume_5,
         p_volume_akhir: formData.value.p_volume_akhir,
-        pagu1: formData.value.pagu1,
-        pagu2: formData.value.pagu2,
-        pagu3: formData.value.pagu3,
-        pagu4: formData.value.pagu4,
-        pagu5: formData.value.pagu5,
-        p_pagu1: formData.value.p_pagu1,
-        p_pagu2: formData.value.p_pagu2,
-        p_pagu3: formData.value.p_pagu3,
-        p_pagu4: formData.value.p_pagu4,
-        p_pagu5: formData.value.p_pagu5,
       });
     } else if (props.mode === 'edit_subkegiatan') {
       await api.updateSubkegiatan(props.itemData.id, {
@@ -1358,16 +1447,6 @@ async function handleSubmit() {
         p_volume_4: formData.value.p_volume_4,
         p_volume_5: formData.value.p_volume_5,
         p_volume_akhir: formData.value.p_volume_akhir,
-        pagu1: formData.value.pagu1,
-        pagu2: formData.value.pagu2,
-        pagu3: formData.value.pagu3,
-        pagu4: formData.value.pagu4,
-        pagu5: formData.value.pagu5,
-        p_pagu1: formData.value.p_pagu1,
-        p_pagu2: formData.value.p_pagu2,
-        p_pagu3: formData.value.p_pagu3,
-        p_pagu4: formData.value.p_pagu4,
-        p_pagu5: formData.value.p_pagu5,
       });
     }
 
@@ -1430,6 +1509,40 @@ async function handleDeleteConfirm() {
   overflow: hidden;
   animation: modalScale 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   border: 1px solid var(--border-subtle);
+  transition: max-width 0.25s ease;
+}
+
+.crud-modal-card.wide-modal {
+  max-width: 900px;
+}
+
+.btn-ai-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: 1px solid transparent;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(79, 70, 229, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-ai-toggle:hover {
+  background: linear-gradient(135deg, #4338ca 0%, #6d28d9 100%);
+  box-shadow: 0 4px 10px rgba(79, 70, 229, 0.35);
+  transform: translateY(-1px);
+}
+
+.btn-ai-toggle.active {
+  background: #f1f5f9;
+  color: #475569;
+  border-color: #cbd5e1;
+  box-shadow: none;
 }
 
 @keyframes modalScale {

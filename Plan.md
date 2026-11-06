@@ -178,3 +178,18 @@ tambah kolom pagu  tahun 2026 - 2030 field pagu1 - pagu5
 
 Aplikasi ini akan dideploy di https://monevrkpd.tegalkota.go.id/renstra
 Apache reverse proxy
+
+
+Dalam perumusan indikator kinerja, baik itu indikator tujuan, sasaran, program, kegiatan, dan subkegiatan harus memperhatikan Indikator kinerja SMART. Indikator kinerja SMART adalah ukuran atau kriteria yang digunakan untuk menentukan target atau tujuan kerja yang jelas, terstruktur, dan mudah dievaluasi.
+
+Kepanjangan dan Arti SMART
+
+• Specific (Spesifik): Tujuan harus jelas, rinci, dan tidak menimbulkan makna ganda (menjawab apa, siapa, di mana, dan mengapa).
+• Measurable (Terukur): Target harus memiliki ukuran atau angka yang pasti agar progresnya bisa dipantau.
+• Achievable / Attainable (Dapat Dicapai): Target bersifat realistis, dapat digapai berdasarkan kapasitas dan sumber daya yang ada.
+• Relevant (Relevan): Tujuan harus sesuai dengan visi, misi, atau prioritas utama organisasi maupun individu.
+• Time-Bound (Terikat Waktu): Memiliki batas waktu atau tenggat yang jelas kapan target tersebut harus mulai dan selesai dikerjakan.
+
+tambahkan fitur AI Assistan untuk membantu / rekomendasi  dalam perumusan indikator kinerja,
+berikan rekomendasi indikator kinerja yang SMART  berdasarkan inputan  uraian tujuan, sasaran, program, kegiatan, dan subkegiatan. pada Indikator Kegiatan, perhatikan data dibawah kegiatan yaitu subkegiatan dan indikator subkegiatan 
+gunakan openai, api key di file .env

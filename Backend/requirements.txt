@@ -23,6 +23,7 @@ MarkupSafe==3.0.3
 mdurl==0.1.2
 psycopg==3.3.8
 psycopg-binary==3.3.8
+openai==3.46.0
 pydantic==2.13.5
 pydantic-extra-types==2.11.1
 pydantic-settings==2.15.0

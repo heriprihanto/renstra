@@ -270,6 +270,14 @@ export const api = {
       method: 'DELETE',
     });
   },
+
+  // AI Assistant SMART Indicator Recommendations
+  async getSmartIndicatorRecommendations(payload) {
+    return fetchJson(`${API_BASE_URL}/ai/smart-indicator-recommendation`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
 };
 
 export default api;
