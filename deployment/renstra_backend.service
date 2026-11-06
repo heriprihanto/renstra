@@ -1,0 +1,17 @@
+[Unit]
+Description=FastAPI Uvicorn Backend Service for RENSTRA Kota Tegal
+After=network.target
+
+[Service]
+Type=simple
+User=herry
+Group=herry
+WorkingDirectory=/home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Backend
+ExecStart=/home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Backend/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 7878
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=multi-user.target
+

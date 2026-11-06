@@ -176,3 +176,5 @@ Data Program / Kegiatan / Subkegiatan
 
 tambah kolom pagu  tahun 2026 - 2030 field pagu1 - pagu5
 
+Aplikasi ini akan dideploy di https://monevrkpd.tegalkota.go.id/renstra
+Apache reverse proxy

@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "RENSTRA KOTA TEGAL"
     ENVIRONMENT: str = "local"
     TAHUN_ANGGARAN: int = 2026
+    ROOT_PATH: str = "/renstra"
 
     # Postgresql credentials
     POSTGRES_SERVER: str = "localhost"
@@ -22,7 +23,10 @@ class Settings(BaseSettings):
     POSTGRES_DB: str = "db_renstra"
 
     # CORS
-    BACKEND_CORS_ORIGINS: Union[str, List[str]] = "http://localhost,http://localhost:5173,http://localhost:8080"
+    BACKEND_CORS_ORIGINS: Union[str, List[str]] = (
+        "http://localhost,http://localhost:5173,http://localhost:8080,"
+        "https://monevrkpd.tegalkota.go.id,https://monevrkpd.tegalkota.go.id/renstra"
+    )
 
     @computed_field
     @property

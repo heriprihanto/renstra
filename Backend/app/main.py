@@ -8,6 +8,7 @@ app = FastAPI(
     title=settings.PROJECT_NAME,
     description="API Perencanaan Pembangunan RENSTRA (Rencana Strategis Perangkat Daerah) Kota Tegal",
     version="1.0.0",
+    root_path=settings.ROOT_PATH,
 )
 
 # CORS setup

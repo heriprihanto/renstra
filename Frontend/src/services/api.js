@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:7878/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '/renstra/api' : 'http://localhost:7878/api');
 
 /**
  * Helper function for HTTP requests with error handling
