@@ -399,7 +399,7 @@
                             </span>
                           </div>
                           <div v-if="indTujuan.definisi_operasional && indTujuan.definisi_operasional !== '-'" class="indikator-def-box">
-                            <span style="font-weight: 600; color: #1e40af;">Definisi / Metadata:</span> {{ indTujuan.definisi_operasional }}
+                           {{ indTujuan.definisi_operasional }}
                           </div>
                         </div>
                       </div>
@@ -591,7 +591,7 @@
                               </span>
                             </div>
                             <div v-if="indSasaran.definisi_operasional && indSasaran.definisi_operasional !== '-'" class="indikator-def-box">
-                              <span style="font-weight: 600; color: #1e40af;">Definisi / Metadata:</span> {{ indSasaran.definisi_operasional }}
+                             {{ indSasaran.definisi_operasional }}
                             </div>
                           </div>
                         </div>
@@ -1313,7 +1313,7 @@
                                 <span v-if="indKeg.iku === '1' || indKeg.iku === 1" class="badge-iku-tag">IKU</span>
                               </div>
                               <div v-if="indKeg.definisi_operasional && indKeg.definisi_operasional !== '-'" class="indikator-def-box">
-                                <span style="font-weight: 600; color: #0f766e;">Definisi / Metadata:</span> {{ indKeg.definisi_operasional }}
+                                {{ indKeg.definisi_operasional }}
                               </div>
                             </div>
                           </div>

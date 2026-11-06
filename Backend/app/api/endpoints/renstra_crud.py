@@ -1,7 +1,8 @@
 import uuid
 from typing import Any, Dict
 from fastapi import APIRouter, Depends, HTTPException
-from sqlmodel import Session, select, text
+from sqlmodel import select, text
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.db import get_session
 from app.models.opd import TaOpd
@@ -42,8 +43,8 @@ router = APIRouter(prefix="/renstra", tags=["RENSTRA CRUD"])
 # =====================================================================
 
 @router.post("/tujuan", response_model=Dict[str, Any])
-def create_tujuan(data: TujuanCreate, session: Session = Depends(get_session)):
-    opd = session.get(TaOpd, data.id_skpd)
+async def create_tujuan(data: TujuanCreate, session: AsyncSession = Depends(get_session)):
+    opd = await session.get(TaOpd, data.id_skpd)
     if not opd:
         raise HTTPException(status_code=404, detail="Perangkat Daerah tidak ditemukan")
 
@@ -58,7 +59,7 @@ def create_tujuan(data: TujuanCreate, session: Session = Depends(get_session)):
         perubahan_status=data.perubahan_status or "baru",
     )
     session.add(tujuan)
-    session.commit()
+    await session.commit()
     return {
         "success": True,
         "idtujuan": str(new_id),
@@ -67,13 +68,13 @@ def create_tujuan(data: TujuanCreate, session: Session = Depends(get_session)):
 
 
 @router.put("/tujuan/{idtujuan}", response_model=Dict[str, Any])
-def update_tujuan(idtujuan: str, data: TujuanUpdate, session: Session = Depends(get_session)):
+async def update_tujuan(idtujuan: str, data: TujuanUpdate, session: AsyncSession = Depends(get_session)):
     try:
         t_uuid = uuid.UUID(idtujuan)
     except ValueError:
         raise HTTPException(status_code=400, detail="Format ID Tujuan tidak valid")
 
-    tujuan = session.get(RenstraTujuan, t_uuid)
+    tujuan = await session.get(RenstraTujuan, t_uuid)
     if not tujuan:
         raise HTTPException(status_code=404, detail="Tujuan tidak ditemukan")
 
@@ -84,12 +85,12 @@ def update_tujuan(idtujuan: str, data: TujuanUpdate, session: Session = Depends(
         tujuan.perubahan_status = data.perubahan_status
 
     session.add(tujuan)
-    session.commit()
+    await session.commit()
     return {"success": True, "message": "Tujuan berhasil diperbarui"}
 
 
 @router.delete("/tujuan/{idtujuan}", response_model=Dict[str, Any])
-def delete_tujuan(idtujuan: str, session: Session = Depends(get_session)):
+async def delete_tujuan(idtujuan: str, session: AsyncSession = Depends(get_session)):
     raise HTTPException(
         status_code=403,
         detail="Data Tujuan tidak dapat dihapus pada RENSTRA Perubahan",
@@ -101,13 +102,13 @@ def delete_tujuan(idtujuan: str, session: Session = Depends(get_session)):
 # =====================================================================
 
 @router.post("/indikator-tujuan", response_model=Dict[str, Any])
-def create_indikator_tujuan(data: IndikatorCreate, session: Session = Depends(get_session)):
+async def create_indikator_tujuan(data: IndikatorCreate, session: AsyncSession = Depends(get_session)):
     try:
         t_uuid = uuid.UUID(data.parent_id)
     except ValueError:
         raise HTTPException(status_code=400, detail="Format ID Tujuan tidak valid")
 
-    tujuan = session.get(RenstraTujuan, t_uuid)
+    tujuan = await session.get(RenstraTujuan, t_uuid)
     if not tujuan:
         raise HTTPException(status_code=404, detail="Tujuan tidak ditemukan")
 
@@ -143,7 +144,7 @@ def create_indikator_tujuan(data: IndikatorCreate, session: Session = Depends(ge
         urut=data.no_urut or 1,
     )
     session.add(ind)
-    session.commit()
+    await session.commit()
     return {
         "success": True,
         "id": str(new_id),
@@ -152,13 +153,13 @@ def create_indikator_tujuan(data: IndikatorCreate, session: Session = Depends(ge
 
 
 @router.put("/indikator-tujuan/{id}", response_model=Dict[str, Any])
-def update_indikator_tujuan(id: str, data: IndikatorUpdate, session: Session = Depends(get_session)):
+async def update_indikator_tujuan(id: str, data: IndikatorUpdate, session: AsyncSession = Depends(get_session)):
     try:
         ind_uuid = uuid.UUID(id)
     except ValueError:
         raise HTTPException(status_code=400, detail="Format ID Indikator tidak valid")
 
-    ind = session.get(RenstraIndikatorTujuan, ind_uuid)
+    ind = await session.get(RenstraIndikatorTujuan, ind_uuid)
     if not ind:
         raise HTTPException(status_code=404, detail="Indikator Tujuan tidak ditemukan")
 
@@ -196,12 +197,12 @@ def update_indikator_tujuan(id: str, data: IndikatorUpdate, session: Session = D
         ind.p_target5 = data.p_target2030 or "-"
 
     session.add(ind)
-    session.commit()
+    await session.commit()
     return {"success": True, "message": "Metadata dan Target Perubahan Indikator Tujuan berhasil diperbarui"}
 
 
 @router.delete("/indikator-tujuan/{id}", response_model=Dict[str, Any])
-def delete_indikator_tujuan(id: str, session: Session = Depends(get_session)):
+async def delete_indikator_tujuan(id: str, session: AsyncSession = Depends(get_session)):
     raise HTTPException(
         status_code=403,
         detail="Data Indikator Tujuan tidak dapat dihapus pada RENSTRA Perubahan",
@@ -213,13 +214,13 @@ def delete_indikator_tujuan(id: str, session: Session = Depends(get_session)):
 # =====================================================================
 
 @router.post("/sasaran", response_model=Dict[str, Any])
-def create_sasaran(data: SasaranCreate, session: Session = Depends(get_session)):
+async def create_sasaran(data: SasaranCreate, session: AsyncSession = Depends(get_session)):
     try:
         t_uuid = uuid.UUID(data.idtujuan)
     except ValueError:
         raise HTTPException(status_code=400, detail="Format ID Tujuan tidak valid")
 
-    tujuan = session.get(RenstraTujuan, t_uuid)
+    tujuan = await session.get(RenstraTujuan, t_uuid)
     if not tujuan:
         raise HTTPException(status_code=404, detail="Tujuan tidak ditemukan")
 
@@ -236,7 +237,7 @@ def create_sasaran(data: SasaranCreate, session: Session = Depends(get_session))
         perubahan_status=data.perubahan_status or "baru",
     )
     session.add(sasaran)
-    session.commit()
+    await session.commit()
     return {
         "success": True,
         "idsasaran": str(new_id),
@@ -245,13 +246,13 @@ def create_sasaran(data: SasaranCreate, session: Session = Depends(get_session))
 
 
 @router.put("/sasaran/{idsasaran}", response_model=Dict[str, Any])
-def update_sasaran(idsasaran: str, data: SasaranUpdate, session: Session = Depends(get_session)):
+async def update_sasaran(idsasaran: str, data: SasaranUpdate, session: AsyncSession = Depends(get_session)):
     try:
         s_uuid = uuid.UUID(idsasaran)
     except ValueError:
         raise HTTPException(status_code=400, detail="Format ID Sasaran tidak valid")
 
-    sasaran = session.get(RenstraSasaran, s_uuid)
+    sasaran = await session.get(RenstraSasaran, s_uuid)
     if not sasaran:
         raise HTTPException(status_code=404, detail="Sasaran tidak ditemukan")
 
@@ -263,12 +264,12 @@ def update_sasaran(idsasaran: str, data: SasaranUpdate, session: Session = Depen
         sasaran.perubahan_status = data.perubahan_status
 
     session.add(sasaran)
-    session.commit()
+    await session.commit()
     return {"success": True, "message": "Sasaran berhasil diperbarui"}
 
 
 @router.delete("/sasaran/{idsasaran}", response_model=Dict[str, Any])
-def delete_sasaran(idsasaran: str, session: Session = Depends(get_session)):
+async def delete_sasaran(idsasaran: str, session: AsyncSession = Depends(get_session)):
     raise HTTPException(
         status_code=403,
         detail="Data Sasaran tidak dapat dihapus pada RENSTRA Perubahan",
@@ -280,13 +281,13 @@ def delete_sasaran(idsasaran: str, session: Session = Depends(get_session)):
 # =====================================================================
 
 @router.post("/indikator-sasaran", response_model=Dict[str, Any])
-def create_indikator_sasaran(data: IndikatorCreate, session: Session = Depends(get_session)):
+async def create_indikator_sasaran(data: IndikatorCreate, session: AsyncSession = Depends(get_session)):
     try:
         s_uuid = uuid.UUID(data.parent_id)
     except ValueError:
         raise HTTPException(status_code=400, detail="Format ID Sasaran tidak valid")
 
-    sasaran = session.get(RenstraSasaran, s_uuid)
+    sasaran = await session.get(RenstraSasaran, s_uuid)
     if not sasaran:
         raise HTTPException(status_code=404, detail="Sasaran tidak ditemukan")
 
@@ -322,7 +323,7 @@ def create_indikator_sasaran(data: IndikatorCreate, session: Session = Depends(g
         urut=data.no_urut or 1,
     )
     session.add(ind)
-    session.commit()
+    await session.commit()
     return {
         "success": True,
         "id": str(new_id),
@@ -331,13 +332,13 @@ def create_indikator_sasaran(data: IndikatorCreate, session: Session = Depends(g
 
 
 @router.put("/indikator-sasaran/{id}", response_model=Dict[str, Any])
-def update_indikator_sasaran(id: str, data: IndikatorUpdate, session: Session = Depends(get_session)):
+async def update_indikator_sasaran(id: str, data: IndikatorUpdate, session: AsyncSession = Depends(get_session)):
     try:
         ind_uuid = uuid.UUID(id)
     except ValueError:
         raise HTTPException(status_code=400, detail="Format ID Indikator tidak valid")
 
-    ind = session.get(RenstraIndikatorSasaran, ind_uuid)
+    ind = await session.get(RenstraIndikatorSasaran, ind_uuid)
     if not ind:
         raise HTTPException(status_code=404, detail="Indikator Sasaran tidak ditemukan")
 
@@ -375,12 +376,12 @@ def update_indikator_sasaran(id: str, data: IndikatorUpdate, session: Session = 
         ind.p_target5 = data.p_target2030 or "-"
 
     session.add(ind)
-    session.commit()
+    await session.commit()
     return {"success": True, "message": "Metadata dan Target Perubahan Indikator Sasaran berhasil diperbarui"}
 
 
 @router.delete("/indikator-sasaran/{id}", response_model=Dict[str, Any])
-def delete_indikator_sasaran(id: str, session: Session = Depends(get_session)):
+async def delete_indikator_sasaran(id: str, session: AsyncSession = Depends(get_session)):
     raise HTTPException(
         status_code=403,
         detail="Data Indikator Sasaran tidak dapat dihapus pada RENSTRA Perubahan",
@@ -392,7 +393,7 @@ def delete_indikator_sasaran(id: str, session: Session = Depends(get_session)):
 # =====================================================================
 
 @router.post("/indikator-kegiatan", response_model=Dict[str, Any])
-def create_indikator_kegiatan(data: IndikatorKegiatanCreate, session: Session = Depends(get_session)):
+async def create_indikator_kegiatan(data: IndikatorKegiatanCreate, session: AsyncSession = Depends(get_session)):
     p_target_2029_val = data.p_target2029 if data.p_target2029 and data.p_target2029 != "-" else (data.p_target_akhir or data.target_akhir or "-")
     target_2029_val = data.target2029 if data.target2029 and data.target2029 != "-" else (data.target_akhir or "-")
 
@@ -400,12 +401,12 @@ def create_indikator_kegiatan(data: IndikatorKegiatanCreate, session: Session = 
     uraikeg = data.uraikegiatan
     kodeprog = data.kodeprogram
     if not uraikeg or not kodeprog:
-        keg = session.exec(
+        keg = (await session.exec(
             select(RenstraKegiatan).where(
                 RenstraKegiatan.kodeskpd == data.kodeskpd,
                 RenstraKegiatan.kodekegiatan == data.kodekegiatan,
             )
-        ).first()
+        )).first()
         if keg:
             if not uraikeg:
                 uraikeg = keg.uraikegiatan
@@ -448,8 +449,8 @@ def create_indikator_kegiatan(data: IndikatorKegiatanCreate, session: Session = 
         urut=data.no_urut or 1,
     )
     session.add(ind)
-    session.commit()
-    session.refresh(ind)
+    await session.commit()
+    await session.refresh(ind)
     return {
         "success": True,
         "id": ind.id,
@@ -458,8 +459,8 @@ def create_indikator_kegiatan(data: IndikatorKegiatanCreate, session: Session = 
 
 
 @router.put("/indikator-kegiatan/{id}", response_model=Dict[str, Any])
-def update_indikator_kegiatan(id: int, data: IndikatorKegiatanUpdate, session: Session = Depends(get_session)):
-    ind = session.get(RenstraIndikatorKegiatan, id)
+async def update_indikator_kegiatan(id: int, data: IndikatorKegiatanUpdate, session: AsyncSession = Depends(get_session)):
+    ind = await session.get(RenstraIndikatorKegiatan, id)
     if not ind:
         raise HTTPException(status_code=404, detail="Indikator Kegiatan tidak ditemukan")
 
@@ -519,13 +520,13 @@ def update_indikator_kegiatan(id: int, data: IndikatorKegiatanUpdate, session: S
         ind.p_pagu5 = data.p_pagu5
 
     session.add(ind)
-    session.commit()
+    await session.commit()
     return {"success": True, "message": "Metadata, Target & Pagu Perubahan Indikator Kegiatan berhasil diperbarui"}
 
 
 @router.put("/indikator-program/{id}", response_model=Dict[str, Any])
-def update_indikator_program(id: int, data: IndikatorProgramUpdate, session: Session = Depends(get_session)):
-    ind = session.get(RenstraIndikatorProgram, id)
+async def update_indikator_program(id: int, data: IndikatorProgramUpdate, session: AsyncSession = Depends(get_session)):
+    ind = await session.get(RenstraIndikatorProgram, id)
     if not ind:
         raise HTTPException(status_code=404, detail="Indikator Program tidak ditemukan")
 
@@ -552,12 +553,12 @@ def update_indikator_program(id: int, data: IndikatorProgramUpdate, session: Ses
         ind.p_target5 = data.p_target2030 or "-"
 
     session.add(ind)
-    session.commit()
+    await session.commit()
     return {"success": True, "message": "Metadata dan Target Perubahan Indikator Program berhasil diperbarui"}
 
 
 @router.delete("/indikator-kegiatan/{id}", response_model=Dict[str, Any])
-def delete_indikator_kegiatan(id: int, session: Session = Depends(get_session)):
+async def delete_indikator_kegiatan(id: int, session: AsyncSession = Depends(get_session)):
     raise HTTPException(
         status_code=403,
         detail="Data Indikator Kegiatan tidak dapat dihapus pada RENSTRA Perubahan",
@@ -569,9 +570,9 @@ def delete_indikator_kegiatan(id: int, session: Session = Depends(get_session)):
 # =====================================================================
 
 @router.post("/program", response_model=Dict[str, Any])
-def create_program(data: ProgramCreate, session: Session = Depends(get_session)):
+async def create_program(data: ProgramCreate, session: AsyncSession = Depends(get_session)):
     new_id = uuid.uuid4()
-    next_idx = session.execute(text("SELECT nextval('renstra_program_idx_seq')")).scalar()
+    next_idx = (await session.execute(text("SELECT nextval('renstra_program_idx_seq')"))).scalar()
     program = RenstraProgram(
         id=new_id,
         idx=next_idx,
@@ -587,8 +588,8 @@ def create_program(data: ProgramCreate, session: Session = Depends(get_session))
         no=data.no or 1,
     )
     session.add(program)
-    session.commit()
-    session.refresh(program)
+    await session.commit()
+    await session.refresh(program)
     return {
         "success": True,
         "message": "Program berhasil ditambahkan",
@@ -602,13 +603,13 @@ def create_program(data: ProgramCreate, session: Session = Depends(get_session))
 
 
 @router.put("/program/{id}", response_model=Dict[str, Any])
-def update_program(id: str, data: ProgramUpdate, session: Session = Depends(get_session)):
+async def update_program(id: str, data: ProgramUpdate, session: AsyncSession = Depends(get_session)):
     try:
         prog_uuid = uuid.UUID(id)
     except ValueError:
         raise HTTPException(status_code=400, detail="ID Program tidak valid")
 
-    program = session.get(RenstraProgram, prog_uuid)
+    program = await session.get(RenstraProgram, prog_uuid)
     if not program:
         raise HTTPException(status_code=404, detail="Program tidak ditemukan")
 
@@ -623,8 +624,8 @@ def update_program(id: str, data: ProgramUpdate, session: Session = Depends(get_
         program.no = data.no
 
     session.add(program)
-    session.commit()
-    session.refresh(program)
+    await session.commit()
+    await session.refresh(program)
     return {
         "success": True,
         "message": "Program berhasil diperbarui",
@@ -638,48 +639,48 @@ def update_program(id: str, data: ProgramUpdate, session: Session = Depends(get_
 
 
 @router.delete("/program/{id}", response_model=Dict[str, Any])
-def delete_program(id: str, session: Session = Depends(get_session)):
+async def delete_program(id: str, session: AsyncSession = Depends(get_session)):
     try:
         prog_uuid = uuid.UUID(id)
     except ValueError:
         raise HTTPException(status_code=400, detail="ID Program tidak valid")
 
-    program = session.get(RenstraProgram, prog_uuid)
+    program = await session.get(RenstraProgram, prog_uuid)
     if not program:
         raise HTTPException(status_code=404, detail="Program tidak ditemukan")
 
     # Cascade delete child kegiatans & subkegiatans
-    kegiatans = session.exec(
+    kegiatans = (await session.exec(
         select(RenstraKegiatan).where(
             RenstraKegiatan.kodeskpd == program.kodeskpd,
             RenstraKegiatan.kodeprogram == program.kodeprogram,
         )
-    ).all()
+    )).all()
     for k in kegiatans:
         # Delete subkegiatans
-        subkegs = session.exec(
+        subkegs = (await session.exec(
             select(RenstraSubkegiatan).where(
                 RenstraSubkegiatan.kodeskpd == k.kodeskpd,
                 RenstraSubkegiatan.kodekegiatan == k.kodekegiatan,
             )
-        ).all()
+        )).all()
         for sk in subkegs:
-            session.delete(sk)
+            await session.delete(sk)
 
         # Delete indikator kegiatan
-        ind_kegs = session.exec(
+        ind_kegs = (await session.exec(
             select(RenstraIndikatorKegiatan).where(
                 RenstraIndikatorKegiatan.kodeskpd == k.kodeskpd,
                 RenstraIndikatorKegiatan.kodekegiatan == k.kodekegiatan,
             )
-        ).all()
+        )).all()
         for ik in ind_kegs:
-            session.delete(ik)
+            await session.delete(ik)
 
-        session.delete(k)
+        await session.delete(k)
 
-    session.delete(program)
-    session.commit()
+    await session.delete(program)
+    await session.commit()
     return {"success": True, "message": "Program dan seluruh turunannya berhasil dihapus"}
 
 
@@ -688,7 +689,7 @@ def delete_program(id: str, session: Session = Depends(get_session)):
 # =====================================================================
 
 @router.post("/kegiatan", response_model=Dict[str, Any])
-def create_kegiatan(data: KegiatanCreate, session: Session = Depends(get_session)):
+async def create_kegiatan(data: KegiatanCreate, session: AsyncSession = Depends(get_session)):
     kegiatan = RenstraKegiatan(
         kodepemda="3376",
         idperiode="20252029",
@@ -701,8 +702,8 @@ def create_kegiatan(data: KegiatanCreate, session: Session = Depends(get_session
         no=data.no or 1,
     )
     session.add(kegiatan)
-    session.commit()
-    session.refresh(kegiatan)
+    await session.commit()
+    await session.refresh(kegiatan)
     return {
         "success": True,
         "message": "Kegiatan berhasil ditambahkan",
@@ -716,8 +717,8 @@ def create_kegiatan(data: KegiatanCreate, session: Session = Depends(get_session
 
 
 @router.put("/kegiatan/{id}", response_model=Dict[str, Any])
-def update_kegiatan(id: int, data: KegiatanUpdate, session: Session = Depends(get_session)):
-    kegiatan = session.get(RenstraKegiatan, id)
+async def update_kegiatan(id: int, data: KegiatanUpdate, session: AsyncSession = Depends(get_session)):
+    kegiatan = await session.get(RenstraKegiatan, id)
     if not kegiatan:
         raise HTTPException(status_code=404, detail="Kegiatan tidak ditemukan")
 
@@ -731,8 +732,8 @@ def update_kegiatan(id: int, data: KegiatanUpdate, session: Session = Depends(ge
         kegiatan.no = data.no
 
     session.add(kegiatan)
-    session.commit()
-    session.refresh(kegiatan)
+    await session.commit()
+    await session.refresh(kegiatan)
     return {
         "success": True,
         "message": "Kegiatan berhasil diperbarui",
@@ -746,32 +747,32 @@ def update_kegiatan(id: int, data: KegiatanUpdate, session: Session = Depends(ge
 
 
 @router.delete("/kegiatan/{id}", response_model=Dict[str, Any])
-def delete_kegiatan(id: int, session: Session = Depends(get_session)):
-    kegiatan = session.get(RenstraKegiatan, id)
+async def delete_kegiatan(id: int, session: AsyncSession = Depends(get_session)):
+    kegiatan = await session.get(RenstraKegiatan, id)
     if not kegiatan:
         raise HTTPException(status_code=404, detail="Kegiatan tidak ditemukan")
 
     # Cascade delete child subkegiatans and indikator kegiatan
-    subkegs = session.exec(
+    subkegs = (await session.exec(
         select(RenstraSubkegiatan).where(
             RenstraSubkegiatan.kodeskpd == kegiatan.kodeskpd,
             RenstraSubkegiatan.kodekegiatan == kegiatan.kodekegiatan,
         )
-    ).all()
+    )).all()
     for sk in subkegs:
-        session.delete(sk)
+        await session.delete(sk)
 
-    ind_kegs = session.exec(
+    ind_kegs = (await session.exec(
         select(RenstraIndikatorKegiatan).where(
             RenstraIndikatorKegiatan.kodeskpd == kegiatan.kodeskpd,
             RenstraIndikatorKegiatan.kodekegiatan == kegiatan.kodekegiatan,
         )
-    ).all()
+    )).all()
     for ik in ind_kegs:
-        session.delete(ik)
+        await session.delete(ik)
 
-    session.delete(kegiatan)
-    session.commit()
+    await session.delete(kegiatan)
+    await session.commit()
     return {"success": True, "message": "Kegiatan dan seluruh turunannya berhasil dihapus"}
 
 
@@ -780,7 +781,7 @@ def delete_kegiatan(id: int, session: Session = Depends(get_session)):
 # =====================================================================
 
 @router.post("/subkegiatan", response_model=Dict[str, Any])
-def create_subkegiatan(data: SubkegiatanCreate, session: Session = Depends(get_session)):
+async def create_subkegiatan(data: SubkegiatanCreate, session: AsyncSession = Depends(get_session)):
     subkeg = RenstraSubkegiatan(
         kodepemda="3376",
         idperiode="20252029",
@@ -823,8 +824,8 @@ def create_subkegiatan(data: SubkegiatanCreate, session: Session = Depends(get_s
         no=data.no or 1,
     )
     session.add(subkeg)
-    session.commit()
-    session.refresh(subkeg)
+    await session.commit()
+    await session.refresh(subkeg)
     return {
         "success": True,
         "message": "Subkegiatan berhasil ditambahkan",
@@ -838,8 +839,8 @@ def create_subkegiatan(data: SubkegiatanCreate, session: Session = Depends(get_s
 
 
 @router.put("/subkegiatan/{id}", response_model=Dict[str, Any])
-def update_subkegiatan(id: int, data: SubkegiatanUpdate, session: Session = Depends(get_session)):
-    subkeg = session.get(RenstraSubkegiatan, id)
+async def update_subkegiatan(id: int, data: SubkegiatanUpdate, session: AsyncSession = Depends(get_session)):
+    subkeg = await session.get(RenstraSubkegiatan, id)
     if not subkeg:
         raise HTTPException(status_code=404, detail="Subkegiatan tidak ditemukan")
 
@@ -912,8 +913,8 @@ def update_subkegiatan(id: int, data: SubkegiatanUpdate, session: Session = Depe
         subkeg.no = data.no
 
     session.add(subkeg)
-    session.commit()
-    session.refresh(subkeg)
+    await session.commit()
+    await session.refresh(subkeg)
     return {
         "success": True,
         "message": "Subkegiatan berhasil diperbarui",
@@ -927,12 +928,12 @@ def update_subkegiatan(id: int, data: SubkegiatanUpdate, session: Session = Depe
 
 
 @router.delete("/subkegiatan/{id}", response_model=Dict[str, Any])
-def delete_subkegiatan(id: int, session: Session = Depends(get_session)):
-    subkeg = session.get(RenstraSubkegiatan, id)
+async def delete_subkegiatan(id: int, session: AsyncSession = Depends(get_session)):
+    subkeg = await session.get(RenstraSubkegiatan, id)
     if not subkeg:
         raise HTTPException(status_code=404, detail="Subkegiatan tidak ditemukan")
 
-    session.delete(subkeg)
-    session.commit()
+    await session.delete(subkeg)
+    await session.commit()
     return {"success": True, "message": "Subkegiatan berhasil dihapus"}
 

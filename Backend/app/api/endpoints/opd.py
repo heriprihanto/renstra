@@ -1,7 +1,8 @@
 from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
-from sqlmodel import Session, select
+from sqlmodel import select
+from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
 from app.core.db import get_session
@@ -12,10 +13,10 @@ router = APIRouter(prefix="/opd", tags=["Perangkat Daerah"])
 
 
 @router.get("", response_model=List[OpdListItem])
-def list_opd(
+async def list_opd(
     search: Optional[str] = Query(default=None, description="Cari nama atau kode SKPD"),
     has_sub: Optional[bool] = Query(default=None, description="Filter SKPD yang memiliki sub unit"),
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """
     Mengambil daftar seluruh Perangkat Daerah (ta_opd) beserta jumlah Sub SKPD.
@@ -44,7 +45,7 @@ def list_opd(
     elif has_sub is False:
         query = query.having(func.count(TaSubPd.id_sub_skpd) == 0)
 
-    results = session.exec(query).all()
+    results = (await session.exec(query)).all()
 
     items: List[OpdListItem] = []
     for row in results:
@@ -60,20 +61,20 @@ def list_opd(
 
 
 @router.get("/stats", response_model=DashboardStats)
-def get_dashboard_stats(session: Session = Depends(get_session)):
+async def get_dashboard_stats(session: AsyncSession = Depends(get_session)):
     """
     Mengambil statistik umum untuk dashboard eksekutif RENSTRA.
     """
-    total_opd = session.exec(select(func.count(TaOpd.id_skpd))).one() or 0
-    total_sub_pd = session.exec(select(func.count(TaSubPd.id_sub_skpd))).one() or 0
+    total_opd = (await session.exec(select(func.count(TaOpd.id_skpd)))).one() or 0
+    total_sub_pd = (await session.exec(select(func.count(TaSubPd.id_sub_skpd)))).one() or 0
 
     # Count distinct opds that have at least 1 sub pd
     opd_with_sub = (
-        session.exec(
+        (await session.exec(
             select(func.count(func.distinct(TaSubPd.id_skpd))).where(
                 TaSubPd.id_skpd.isnot(None)
             )
-        ).one()
+        )).one()
         or 0
     )
 
@@ -90,19 +91,19 @@ def get_dashboard_stats(session: Session = Depends(get_session)):
 
 
 @router.get("/{id_skpd}", response_model=OpdDetail)
-def get_opd_detail(id_skpd: int, session: Session = Depends(get_session)):
+async def get_opd_detail(id_skpd: int, session: AsyncSession = Depends(get_session)):
     """
     Mengambil detail satu Perangkat Daerah beserta seluruh Sub SKPD terkait.
     """
-    opd = session.get(TaOpd, id_skpd)
+    opd = await session.get(TaOpd, id_skpd)
     if not opd:
         raise HTTPException(status_code=404, detail="Perangkat Daerah tidak ditemukan")
 
-    sub_units = session.exec(
+    sub_units = (await session.exec(
         select(TaSubPd)
         .where(TaSubPd.id_skpd == id_skpd)
         .order_by(TaSubPd.kode_sub_skpd.asc())
-    ).all()
+    )).all()
 
     return OpdDetail(
         id_skpd=opd.id_skpd,
@@ -122,15 +123,15 @@ def get_opd_detail(id_skpd: int, session: Session = Depends(get_session)):
 
 
 @router.get("/{id_skpd}/sub", response_model=List[SubPdItem])
-def list_sub_pd_by_opd(
+async def list_sub_pd_by_opd(
     id_skpd: int,
     search: Optional[str] = Query(default=None, description="Cari nama atau kode Sub SKPD"),
-    session: Session = Depends(get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """
     Mengambil daftar Sub SKPD untuk Perangkat Daerah tertentu.
     """
-    opd = session.get(TaOpd, id_skpd)
+    opd = await session.get(TaOpd, id_skpd)
     if not opd:
         raise HTTPException(status_code=404, detail="Perangkat Daerah tidak ditemukan")
 
@@ -142,7 +143,7 @@ def list_sub_pd_by_opd(
             (TaSubPd.nama_sub_skpd.ilike(term)) | (TaSubPd.kode_sub_skpd.ilike(term))
         )
 
-    sub_units = session.exec(query).all()
+    sub_units = (await session.exec(query)).all()
     return [
         SubPdItem(
             id_sub_skpd=s.id_sub_skpd,
@@ -155,23 +156,31 @@ def list_sub_pd_by_opd(
 
 
 @router.get("/sub/{id_sub_skpd}", response_model=SubPdDetail)
-def get_sub_pd_detail(id_sub_skpd: int, session: Session = Depends(get_session)):
+async def get_sub_pd_detail(id_sub_skpd: int, session: AsyncSession = Depends(get_session)):
     """
     Mengambil detail satu Sub SKPD beserta data SKPD induknya.
     """
-    sub = session.get(TaSubPd, id_sub_skpd)
+    sub = await session.get(TaSubPd, id_sub_skpd)
     if not sub:
         raise HTTPException(status_code=404, detail="Sub SKPD tidak ditemukan")
 
     opd_dict = None
     if sub.id_skpd:
-        opd = session.get(TaOpd, sub.id_skpd)
+        opd = await session.get(TaOpd, sub.id_skpd)
         if opd:
             opd_dict = {
                 "id_skpd": opd.id_skpd,
                 "kode_skpd": opd.kode_skpd,
                 "nama_skpd": opd.nama_skpd,
             }
+
+    return SubPdDetail(
+        id_sub_skpd=sub.id_sub_skpd,
+        id_skpd=sub.id_skpd,
+        kode_sub_skpd=sub.kode_sub_skpd,
+        nama_sub_skpd=sub.nama_sub_skpd,
+        opd=opd_dict,
+    )
 
     return SubPdDetail(
         id_sub_skpd=sub.id_sub_skpd,
@@ -285,21 +294,21 @@ def evaluate_perubahan(
 
 
 @router.get("/{id_skpd}/renstra-cascading", response_model=OpdRenstraCascadingResponse)
-def get_opd_renstra_cascading(id_skpd: int, session: Session = Depends(get_session)):
+async def get_opd_renstra_cascading(id_skpd: int, session: AsyncSession = Depends(get_session)):
     """
     Mengambil data cascading RENSTRA: Tujuan -> Indikator Tujuan -> Sasaran -> Indikator Sasaran
     lengkap dengan target tahunan (Awal, 2026, 2027, 2028, 2029, Akhir) dan penanda perubahan / data baru.
     """
-    opd = session.get(TaOpd, id_skpd)
+    opd = await session.get(TaOpd, id_skpd)
     if not opd:
         raise HTTPException(status_code=404, detail="Perangkat Daerah tidak ditemukan")
 
     # Ambil Tujuan berdasarkan kodeskpd
-    tujuan_rows = session.exec(
+    tujuan_rows = (await session.exec(
         select(RenstraTujuan)
         .where(RenstraTujuan.kodeskpd == opd.kode_skpd)
         .order_by(RenstraTujuan.no_urut.asc())
-    ).all()
+    )).all()
 
     tujuan_items: List[TujuanCascadingItem] = []
     total_sasaran = 0
@@ -309,11 +318,11 @@ def get_opd_renstra_cascading(id_skpd: int, session: Session = Depends(get_sessi
 
     for t in tujuan_rows:
         # Ambil indikator tujuan
-        ind_tujuan_rows = session.exec(
+        ind_tujuan_rows = (await session.exec(
             select(RenstraIndikatorTujuan)
             .where(RenstraIndikatorTujuan.idtujuan == t.idtujuan)
             .order_by(RenstraIndikatorTujuan.urut.asc(), RenstraIndikatorTujuan.no_urut.asc())
-        ).all()
+        )).all()
 
         tujuan_perubahan_count = 0
         tujuan_baru_count = 0
@@ -373,21 +382,21 @@ def get_opd_renstra_cascading(id_skpd: int, session: Session = Depends(get_sessi
             )
 
         # Ambil sasaran
-        sasaran_rows = session.exec(
+        sasaran_rows = (await session.exec(
             select(RenstraSasaran)
             .where(RenstraSasaran.idtujuan == t.idtujuan)
             .order_by(RenstraSasaran.urut.asc(), RenstraSasaran.no.asc())
-        ).all()
+        )).all()
 
         sasaran_items: List[SasaranCascadingItem] = []
         for s in sasaran_rows:
             total_sasaran += 1
             # Ambil indikator sasaran
-            ind_sasaran_rows = session.exec(
+            ind_sasaran_rows = (await session.exec(
                 select(RenstraIndikatorSasaran)
                 .where(RenstraIndikatorSasaran.idsasaran == s.idsasaran)
                 .order_by(RenstraIndikatorSasaran.urut.asc(), RenstraIndikatorSasaran.no.asc())
-            ).all()
+            )).all()
 
             sasaran_perubahan_count = 0
             sasaran_baru_count = 0
@@ -497,24 +506,24 @@ def get_opd_renstra_cascading(id_skpd: int, session: Session = Depends(get_sessi
 # =====================================================================
 
 @router.get("/sub/{id_sub_skpd}/cascading", response_model=SubSkpdCascadingResponse)
-def get_sub_skpd_cascading(id_sub_skpd: int, session: Session = Depends(get_session)):
+async def get_sub_skpd_cascading(id_sub_skpd: int, session: AsyncSession = Depends(get_session)):
     """
     Mengambil data cascading Program -> Indikator Program -> Kegiatan -> Indikator Kegiatan -> Subkegiatan -> Indikator Subkegiatan
     berdasarkan id_sub_skpd dari ta_sub_pd.
     """
-    sub = session.get(TaSubPd, id_sub_skpd)
+    sub = await session.get(TaSubPd, id_sub_skpd)
     if not sub:
         raise HTTPException(status_code=404, detail="Sub SKPD tidak ditemukan")
 
-    opd = session.get(TaOpd, sub.id_skpd) if sub.id_skpd else None
+    opd = (await session.get(TaOpd, sub.id_skpd)) if sub.id_skpd else None
     kode_sub = sub.kode_sub_skpd
 
     # Query Programs
-    programs = session.exec(
+    programs = (await session.exec(
         select(RenstraProgram)
         .where(RenstraProgram.kodeskpd == kode_sub)
         .order_by(RenstraProgram.no.asc(), RenstraProgram.kodeprogram.asc())
-    ).all()
+    )).all()
 
     total_kegiatan = 0
     total_subkegiatan = 0
@@ -526,7 +535,7 @@ def get_sub_skpd_cascading(id_sub_skpd: int, session: Session = Depends(get_sess
 
     for p in programs:
         # 1. Indikator Program
-        ind_prog_rows = session.exec(
+        ind_prog_rows = (await session.exec(
             select(RenstraIndikatorProgram)
             .where(
                 RenstraIndikatorProgram.kodeskpd == kode_sub,
@@ -537,7 +546,7 @@ def get_sub_skpd_cascading(id_sub_skpd: int, session: Session = Depends(get_sess
                 RenstraIndikatorProgram.urut.asc(),
                 RenstraIndikatorProgram.id.asc(),
             )
-        ).all()
+        )).all()
 
         ind_prog_items: List[IndikatorProgramItem] = []
         for ip in ind_prog_rows:
@@ -585,28 +594,28 @@ def get_sub_skpd_cascading(id_sub_skpd: int, session: Session = Depends(get_sess
             )
 
         # 2. Kegiatan
-        keg_rows = session.exec(
+        keg_rows = (await session.exec(
             select(RenstraKegiatan)
             .where(
                 RenstraKegiatan.kodeskpd == kode_sub,
                 RenstraKegiatan.kodeprogram == p.kodeprogram,
             )
             .order_by(RenstraKegiatan.no.asc(), RenstraKegiatan.kodekegiatan.asc())
-        ).all()
+        )).all()
 
         keg_items: List[KegiatanCascadingItem] = []
         for k in keg_rows:
             total_kegiatan += 1
 
             # 2.1 Indikator Kegiatan
-            ind_keg_rows = session.exec(
+            ind_keg_rows = (await session.exec(
                 select(RenstraIndikatorKegiatan)
                 .where(
                     RenstraIndikatorKegiatan.kodeskpd == kode_sub,
                     RenstraIndikatorKegiatan.kodekegiatan == k.kodekegiatan,
                 )
                 .order_by(RenstraIndikatorKegiatan.no.asc(), RenstraIndikatorKegiatan.urut.asc(), RenstraIndikatorKegiatan.id.asc())
-            ).all()
+            )).all()
 
             ind_keg_items: List[IndikatorKegiatanItem] = []
             for ik in ind_keg_rows:
@@ -668,14 +677,14 @@ def get_sub_skpd_cascading(id_sub_skpd: int, session: Session = Depends(get_sess
                 )
 
             # 2.2 Subkegiatan
-            subkeg_rows = session.exec(
+            subkeg_rows = (await session.exec(
                 select(RenstraSubkegiatan)
                 .where(
                     RenstraSubkegiatan.kodeskpd == kode_sub,
                     RenstraSubkegiatan.kodekegiatan == k.kodekegiatan,
                 )
                 .order_by(RenstraSubkegiatan.no.asc(), RenstraSubkegiatan.kodesubkegiatan.asc())
-            ).all()
+            )).all()
 
             subkeg_items: List[SubkegiatanCascadingItem] = []
             for sk in subkeg_rows:
