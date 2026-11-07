@@ -193,3 +193,19 @@ Kepanjangan dan Arti SMART
 tambahkan fitur AI Assistan untuk membantu / rekomendasi  dalam perumusan indikator kinerja,
 berikan rekomendasi indikator kinerja yang SMART  berdasarkan inputan  uraian tujuan, sasaran, program, kegiatan, dan subkegiatan. pada Indikator Kegiatan, perhatikan data dibawah kegiatan yaitu subkegiatan dan indikator subkegiatan 
 gunakan openai, api key di file .env
+
+
+Buatkan Menu Laporan :
+1. Tujuan dan Sasaran 
+2. Cascading Kinerja 
+3. Rencana Program, Kegiatan, Sub Kegiatan dan Pendanaan Perangkat Daerah
+4. Indikator Kinerja Utama
+
+Laporan hanya bisa export excel
+sekarang buat laporan Tujuan dan sasaran dulu, layout seperti contoh gambar
+
+Buat laporan 
+Indikator Kinerja Utama
+Nama Perangkat Daerah
+No  | Tujuan /Sasaran | Indikator | Satuan  |  Target Tahun                               | 
+                                            | 2025  | 2026  | 2027  | 2028 | 2029 | 2030 |

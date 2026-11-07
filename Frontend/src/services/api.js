@@ -278,6 +278,69 @@ export const api = {
       body: JSON.stringify(payload),
     });
   },
+
+  // Laporan RENSTRA
+  async getLaporanOpdList() {
+    return fetchJson(`${API_BASE_URL}/laporan/opd-list`);
+  },
+  async getLaporanTujuanSasaran(idSkpd, tipe = 'murni') {
+    return fetchJson(`${API_BASE_URL}/laporan/tujuan-sasaran/${idSkpd}?tipe=${encodeURIComponent(tipe)}`);
+  },
+  getLaporanTujuanSasaranExcelUrl(idSkpd, tipe = 'murni') {
+    return `${API_BASE_URL}/laporan/tujuan-sasaran/${idSkpd}/export-excel?tipe=${encodeURIComponent(tipe)}`;
+  },
+  async downloadLaporanTujuanSasaranExcel(idSkpd, tipe = 'murni') {
+    const url = this.getLaporanTujuanSasaranExcelUrl(idSkpd, tipe);
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Gagal mengunduh Excel: HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get('content-disposition');
+    let filename = `Tabel_3.1_Tujuan_dan_Sasaran_OPD_${idSkpd}.xlsx`;
+    if (disposition && disposition.includes('filename=')) {
+      const match = disposition.match(/filename=["']?([^"']+)["']?/);
+      if (match && match[1]) filename = match[1];
+    }
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  },
+
+  // Laporan IKU (Indikator Kinerja Utama)
+  async getLaporanIku(idSkpd, tipe = 'murni') {
+    return fetchJson(`${API_BASE_URL}/laporan/iku/${idSkpd}?tipe=${encodeURIComponent(tipe)}`);
+  },
+  getLaporanIkuExcelUrl(idSkpd, tipe = 'murni') {
+    return `${API_BASE_URL}/laporan/iku/${idSkpd}/export-excel?tipe=${encodeURIComponent(tipe)}`;
+  },
+  async downloadLaporanIkuExcel(idSkpd, tipe = 'murni') {
+    const url = this.getLaporanIkuExcelUrl(idSkpd, tipe);
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Gagal mengunduh Excel IKU: HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get('content-disposition');
+    let filename = `IKU_OPD_${idSkpd}.xlsx`;
+    if (disposition && disposition.includes('filename=')) {
+      const match = disposition.match(/filename=["']?([^"']+)["']?/);
+      if (match && match[1]) filename = match[1];
+    }
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  },
 };
 
 export default api;

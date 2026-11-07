@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.endpoints.opd import router as opd_router
 from app.api.endpoints.renstra_crud import router as renstra_crud_router
 from app.api.endpoints.ai_indicator import router as ai_router
+from app.api.endpoints.laporan import router as laporan_router
 from app.core.config import settings
 
 app = FastAPI(
@@ -25,6 +26,7 @@ app.add_middleware(
 app.include_router(opd_router, prefix="/api")
 app.include_router(renstra_crud_router, prefix="/api")
 app.include_router(ai_router, prefix="/api")
+app.include_router(laporan_router, prefix="/api")
 
 
 @app.get("/api/health", tags=["Health"])

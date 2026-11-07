@@ -3,6 +3,8 @@ import OpdListView from '../views/OpdListView.vue';
 import OpdRenstraView from '../views/OpdRenstraView.vue';
 import SubOpdTableView from '../views/SubOpdTableView.vue';
 import RenstraSubOpdView from '../views/RenstraSubOpdView.vue';
+import TujuanSasaranReportView from '../views/TujuanSasaranReportView.vue';
+import IkuReportView from '../views/IkuReportView.vue';
 
 const routes = [
   {
@@ -24,6 +26,20 @@ const routes = [
     component: RenstraSubOpdView,
     props: true,
     meta: { title: 'Dokumen RENSTRA - Pemerintah Kota Tegal' }
+  },
+  {
+    path: '/laporan/tujuan-sasaran/:id?',
+    name: 'LaporanTujuanSasaran',
+    component: TujuanSasaranReportView,
+    props: true,
+    meta: { title: 'Laporan Tabel 3.1: Tujuan dan Sasaran - RENSTRA Kota Tegal' }
+  },
+  {
+    path: '/laporan/iku/:id?',
+    name: 'LaporanIku',
+    component: IkuReportView,
+    props: true,
+    meta: { title: 'Laporan Indikator Kinerja Utama (IKU) - RENSTRA Kota Tegal' }
   },
   {
     path: '/:pathMatch(.*)*',

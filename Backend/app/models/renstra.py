@@ -267,3 +267,43 @@ class RenstraSubkegiatan(SQLModel, table=True):
     p_pagu4: Optional[float] = None
     p_pagu5: Optional[float] = None
     no: Optional[int] = None
+
+
+class RefSubkegiatan(SQLModel, table=True):
+    __tablename__ = "ref_subkegiatan"
+
+    id: Optional[int] = Field(default=None, primary_key=True)
+    tahun: Optional[str] = None
+    versipemutakhiran: Optional[str] = None
+    idpemutakhiran: Optional[str] = Field(default=None, index=True)
+    jnspemda: Optional[str] = Field(default=None, index=True)
+    kodebidang: Optional[str] = Field(default=None, index=True)
+    uraibidang: Optional[str] = None
+    kodeprogram: Optional[str] = Field(default=None, index=True)
+    uraiprogram: Optional[str] = None
+    kodekegiatan: Optional[str] = Field(default=None, index=True)
+    uraikegiatan: Optional[str] = None
+    kodesubkegiatan: Optional[str] = Field(default=None, index=True)
+    uraisubkegiatan: Optional[str] = None
+    referensi_kodesubkegiatan: Optional[str] = None
+    referensi_uraisubkegiatan: Optional[str] = None
+    referensi_subkegiatan: Optional[str] = None
+    definisi_operasional: Optional[str] = None
+    bidang_pelaksana: Optional[str] = None
+    spm: Optional[str] = None
+    jenis: Optional[str] = None
+    bidang: Optional[str] = None
+    program: Optional[str] = None
+    kegiatan: Optional[str] = None
+    subkegiatan: Optional[str] = None
+    subkegiatan_tampil: Optional[str] = None
+    kinerja: Optional[str] = None
+    indikator: Optional[str] = None
+    status_indikator: Optional[str] = None
+    satuan: Optional[str] = None
+    disabled: Optional[str] = None
+    tag: Optional[str] = None
+    pemda: Optional[str] = None
+    ketergunaan: Optional[str] = None
+    no: Optional[int] = None
+
