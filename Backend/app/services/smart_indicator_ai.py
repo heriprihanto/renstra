@@ -195,7 +195,7 @@ async def _generate_hermes_recommendations(req: SmartRecommendationRequest) -> O
         logger.info("Menjalankan Hermes AI lokal via: %s", hermes_bin)
         proc = await asyncio.create_subprocess_exec(
             hermes_bin,
-            "--safe-mode",
+            #"--safe-mode",
             "-z",
             full_prompt,
             stdout=asyncio.subprocess.PIPE,
