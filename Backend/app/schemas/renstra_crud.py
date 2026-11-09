@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -53,6 +53,12 @@ class IndikatorCreate(BaseModel):
     p_target2029: Optional[str] = "-"
     p_target2030: Optional[str] = "-"
     p_target_akhir: Optional[str] = "-"
+    realisasi2025: Optional[str] = "-"
+    realisasi2026: Optional[str] = "-"
+    realisasi2027: Optional[str] = "-"
+    realisasi2028: Optional[str] = "-"
+    realisasi2029: Optional[str] = "-"
+    realisasi2030: Optional[str] = "-"
     no_urut: Optional[int] = 1
 
 
@@ -77,6 +83,12 @@ class IndikatorUpdate(BaseModel):
     p_target2029: Optional[str] = "-"
     p_target2030: Optional[str] = "-"
     p_target_akhir: Optional[str] = "-"
+    realisasi2025: Optional[str] = "-"
+    realisasi2026: Optional[str] = "-"
+    realisasi2027: Optional[str] = "-"
+    realisasi2028: Optional[str] = "-"
+    realisasi2029: Optional[str] = "-"
+    realisasi2030: Optional[str] = "-"
     no_urut: Optional[int] = None
 
 
@@ -106,6 +118,12 @@ class IndikatorKegiatanCreate(BaseModel):
     p_target2029: Optional[str] = "-"
     p_target2030: Optional[str] = "-"
     p_target_akhir: Optional[str] = "-"
+    realisasi2025: Optional[str] = "-"
+    realisasi2026: Optional[str] = "-"
+    realisasi2027: Optional[str] = "-"
+    realisasi2028: Optional[str] = "-"
+    realisasi2029: Optional[str] = "-"
+    realisasi2030: Optional[str] = "-"
     pagu1: Optional[float] = 0.0
     pagu2: Optional[float] = 0.0
     pagu3: Optional[float] = 0.0
@@ -133,6 +151,12 @@ class IndikatorKegiatanUpdate(BaseModel):
     p_target2029: Optional[str] = None
     p_target2030: Optional[str] = None
     p_target_akhir: Optional[str] = None
+    realisasi2025: Optional[str] = None
+    realisasi2026: Optional[str] = None
+    realisasi2027: Optional[str] = None
+    realisasi2028: Optional[str] = None
+    realisasi2029: Optional[str] = None
+    realisasi2030: Optional[str] = None
     pagu1: Optional[float] = None
     pagu2: Optional[float] = None
     pagu3: Optional[float] = None
@@ -151,6 +175,7 @@ class IndikatorProgramUpdate(BaseModel):
     satuan: Optional[str] = None
     status: Optional[str] = None
     perubahan_status: Optional[str] = None
+    definisi_operasional: Optional[str] = None
     p_target2025: Optional[str] = None
     p_target2026: Optional[str] = None
     p_target2027: Optional[str] = None
@@ -158,6 +183,12 @@ class IndikatorProgramUpdate(BaseModel):
     p_target2029: Optional[str] = None
     p_target2030: Optional[str] = None
     p_target_akhir: Optional[str] = None
+    realisasi2025: Optional[str] = None
+    realisasi2026: Optional[str] = None
+    realisasi2027: Optional[str] = None
+    realisasi2028: Optional[str] = None
+    realisasi2029: Optional[str] = None
+    realisasi2030: Optional[str] = None
 
 
 # === PROGRAM ===
@@ -169,6 +200,7 @@ class ProgramCreate(BaseModel):
     uraiprogram: str
     kinerja: Optional[str] = None
     no: Optional[int] = 1
+    sasaran_ids: Optional[List[str]] = None
 
 
 class ProgramUpdate(BaseModel):
@@ -176,6 +208,7 @@ class ProgramUpdate(BaseModel):
     uraiprogram: Optional[str] = None
     kinerja: Optional[str] = None
     no: Optional[int] = None
+    sasaran_ids: Optional[List[str]] = None
 
 
 # === KEGIATAN ===
@@ -223,6 +256,12 @@ class SubkegiatanCreate(BaseModel):
     p_volume_4: Optional[str] = "-"
     p_volume_5: Optional[str] = "-"
     p_volume_akhir: Optional[str] = "-"
+    realisasi2025: Optional[str] = "-"
+    realisasi2026: Optional[str] = "-"
+    realisasi2027: Optional[str] = "-"
+    realisasi2028: Optional[str] = "-"
+    realisasi2029: Optional[str] = "-"
+    realisasi2030: Optional[str] = "-"
     perubahan_status: Optional[str] = "tetap"
     pagu1: Optional[float] = 0.0
     pagu2: Optional[float] = 0.0
@@ -259,6 +298,12 @@ class SubkegiatanUpdate(BaseModel):
     p_volume_4: Optional[str] = None
     p_volume_5: Optional[str] = None
     p_volume_akhir: Optional[str] = None
+    realisasi2025: Optional[str] = None
+    realisasi2026: Optional[str] = None
+    realisasi2027: Optional[str] = None
+    realisasi2028: Optional[str] = None
+    realisasi2029: Optional[str] = None
+    realisasi2030: Optional[str] = None
     perubahan_status: Optional[str] = None
     pagu1: Optional[float] = None
     pagu2: Optional[float] = None
@@ -270,5 +315,6 @@ class SubkegiatanUpdate(BaseModel):
     p_pagu3: Optional[float] = None
     p_pagu4: Optional[float] = None
     p_pagu5: Optional[float] = None
+    definisi_operasional: Optional[str] = None
     no: Optional[int] = None
 

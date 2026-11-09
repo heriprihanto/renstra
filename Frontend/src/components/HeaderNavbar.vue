@@ -100,9 +100,14 @@
                 </div>
               </div>
 
-              <!-- 3. Rencana Program, Kegiatan, Sub Kegiatan dan Pendanaan (Coming soon) -->
-              <div class="dropdown-item-link disabled-item">
-                <div class="dropdown-item-icon">
+              <!-- 3. Rencana Program, Kegiatan, Sub Kegiatan dan Pendanaan -->
+              <router-link
+                to="/laporan/program-kegiatan"
+                class="dropdown-item-link"
+                :class="{ active: route.path.startsWith('/laporan/program-kegiatan') }"
+                @click="closeDropdown"
+              >
+                <div class="dropdown-item-icon active-icon">
                   <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <line x1="12" y1="1" x2="12" y2="23"/>
                     <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
@@ -110,12 +115,12 @@
                 </div>
                 <div class="dropdown-item-content">
                   <div class="dropdown-item-title-row">
-                    <span class="dropdown-item-title">3. Rencana Program, Kegiatan & Pendanaan</span>
-                    <span class="badge-soon">Segera</span>
+                    <span class="dropdown-item-title">3. Program, Kegiatan & Pendanaan</span>
+                    <span class="badge-active">Tersedia</span>
                   </div>
-                  <div class="dropdown-item-desc">Matriks belanja subkegiatan dan pagu pendanaan</div>
+                  <div class="dropdown-item-desc">Tabel 4.1 Matriks target, subkegiatan dan pagu indikatif (Export Excel)</div>
                 </div>
-              </div>
+              </router-link>
 
               <!-- 4. Indikator Kinerja Utama -->
               <router-link
@@ -136,6 +141,31 @@
                     <span class="badge-active">Tersedia</span>
                   </div>
                   <div class="dropdown-item-desc">Daftar ukuran keberhasilan strategis perangkat daerah</div>
+                </div>
+              </router-link>
+
+              <!-- 5. Evaluasi Hasil Renstra -->
+              <router-link
+                to="/laporan/evaluasi-renstra"
+                class="dropdown-item-link"
+                :class="{ active: route.path.startsWith('/laporan/evaluasi-renstra') }"
+                @click="closeDropdown"
+              >
+                <div class="dropdown-item-icon active-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                    <polyline points="10 9 9 9 8 9"/>
+                  </svg>
+                </div>
+                <div class="dropdown-item-content">
+                  <div class="dropdown-item-title-row">
+                    <span class="dropdown-item-title">5. Evaluasi Hasil Renstra</span>
+                    <span class="badge-active">Tersedia</span>
+                  </div>
+                  <div class="dropdown-item-desc">Formulir evaluasi capaian kinerja & anggaran Renstra (Export Excel)</div>
                 </div>
               </router-link>
             </div>

@@ -418,6 +418,45 @@
                 </div>
               </div>
             </div>
+
+            <!-- Realisasi Capaian Tahunan Grid -->
+            <div style="margin-top: 1.25rem;">
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+                <label class="form-label" style="font-weight: 700; color: #047857; margin-bottom: 0; display: flex; align-items: center; gap: 0.45rem;">
+                  <span class="badge-realisasi">Realisasi</span>
+                  Realisasi Capaian Tahunan (2025 - 2030)
+                </label>
+                <span style="font-size: 0.75rem; color: #059669; font-weight: 600;">
+                  * Masukkan angka atau capaian realisasi tahunan
+                </span>
+              </div>
+              <div class="targets-form-grid targets-realisasi-grid" style="grid-template-columns: repeat(6, 1fr);">
+                <div class="form-group">
+                  <label class="form-label sub r-label">2025</label>
+                  <input type="text" class="form-input mono r-input" v-model="formData.realisasi2025" placeholder="-" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label sub r-label">2026</label>
+                  <input type="text" class="form-input mono r-input" v-model="formData.realisasi2026" placeholder="-" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label sub r-label">2027</label>
+                  <input type="text" class="form-input mono r-input" v-model="formData.realisasi2027" placeholder="-" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label sub r-label">2028</label>
+                  <input type="text" class="form-input mono r-input" v-model="formData.realisasi2028" placeholder="-" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label sub r-label">2029</label>
+                  <input type="text" class="form-input mono r-input" v-model="formData.realisasi2029" placeholder="-" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label sub r-label">2030</label>
+                  <input type="text" class="form-input mono r-input" v-model="formData.realisasi2030" placeholder="-" />
+                </div>
+              </div>
+            </div>
           </form>
         </div>
 
@@ -481,6 +520,58 @@
                 placeholder="Rumusan kinerja/outcome program, misal: Meningkatnya Tata Kelola Organisasi Pemerintah Daerah..."
               ></textarea>
             </div>
+
+            <!-- Tagging Keterkaitan dengan Sasaran RENSTRA -->
+            <div class="sasaran-tagger-card" style="margin-top: 1rem;">
+              <div class="sasaran-tagger-header">
+                <div class="sasaran-tagger-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="6" r="1"/>
+                    <circle cx="12" cy="12" r="2"/>
+                  </svg>
+                  <span>Keterkaitan dengan Sasaran RENSTRA (Tagging Sasaran)</span>
+                </div>
+                <span v-if="loadingRefSasaran" class="ref-loading-badge">Memuat sasaran...</span>
+                <span v-else class="sasaran-tagger-count">
+                  {{ selectedSasaranIds.length }} dari {{ refSasaranList.length }} Sasaran dipilih
+                </span>
+              </div>
+              <p class="sasaran-tagger-desc">
+                Pilih satu atau lebih Sasaran RENSTRA yang didukung oleh program ini (satu program dapat mendukung lebih dari satu sasaran).
+              </p>
+
+              <div v-if="loadingRefSasaran" style="padding: 0.85rem; text-align: center; color: #64748b; font-size: 0.85rem;">
+                Memuat daftar sasaran...
+              </div>
+              <div v-else-if="!refSasaranList.length" style="padding: 0.85rem; color: #64748b; font-size: 0.82rem; font-style: italic;">
+                Belum ada data Sasaran yang terdaftar pada Perangkat Daerah ini.
+              </div>
+              <div v-else class="sasaran-checkbox-list">
+                <label
+                  v-for="s in refSasaranList"
+                  :key="s.idsasaran"
+                  class="sasaran-checkbox-item"
+                  :class="{ 'selected': selectedSasaranIds.includes(s.idsasaran) }"
+                >
+                  <input
+                    type="checkbox"
+                    :value="s.idsasaran"
+                    v-model="selectedSasaranIds"
+                    class="sasaran-checkbox-input"
+                  />
+                  <div class="sasaran-checkbox-content">
+                    <div class="sasaran-checkbox-main">
+                      <span class="sasaran-number-badge">Sasaran {{ s.no }}</span>
+                      <span class="sasaran-uraian-text">{{ s.uraisasaran }}</span>
+                    </div>
+                    <div v-if="s.uraitujuan && s.uraitujuan !== '-'" class="sasaran-tujuan-text">
+                      🎯 Tujuan: {{ s.uraitujuan }}
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
           </form>
         </div>
 
@@ -515,6 +606,41 @@
           />
 
           <form @submit.prevent="handleSubmit">
+            <!-- Ref Picker Kegiatan -->
+            <div class="ref-picker-card">
+              <div class="ref-picker-header">
+                <div class="ref-picker-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  <span>Referensi Kegiatan (SIPD-RI / Permendagri)</span>
+                </div>
+                <span v-if="loadingRefKegiatan" class="ref-loading-badge">Memuat referensi...</span>
+                <span v-else-if="refKegiatanList.length" class="ref-count-badge">{{ refKegiatanList.length }} referensi</span>
+              </div>
+              <div class="ref-picker-body">
+                <select
+                  v-model="selectedRefKegiatan"
+                  class="ref-select"
+                  @change="onSelectRefKegiatan"
+                  :disabled="loadingRefKegiatan"
+                >
+                  <option value="">-- Pilih dari Referensi SIPD-RI (Otomatis Isi) --</option>
+                  <option
+                    v-for="item in refKegiatanList"
+                    :key="item.kodekegiatan"
+                    :value="item.kodekegiatan"
+                  >
+                    {{ item.kodekegiatan }} - {{ item.uraikegiatan }}
+                  </option>
+                </select>
+                <div class="ref-hint" v-if="refKegiatanList.length">
+                  💡 Memilih referensi akan otomatis mengisi Kode dan Nama Kegiatan.
+                </div>
+                <div class="ref-hint" v-else-if="!loadingRefKegiatan">
+                  ℹ️ Tidak ada referensi khusus untuk program ini, silakan isi formulir secara manual.
+                </div>
+              </div>
+            </div>
+
             <div class="form-group">
               <label class="form-label">Kode Kegiatan <span style="color: #ef4444;">*</span></label>
               <input
@@ -550,6 +676,41 @@
         <!-- Modal Body: FORM (SUBKEGIATAN) -->
         <div v-else-if="isSubkegiatanForm" class="crud-modal-body">
           <form @submit.prevent="handleSubmit">
+            <!-- Ref Picker Subkegiatan -->
+            <div class="ref-picker-card">
+              <div class="ref-picker-header">
+                <div class="ref-picker-title">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+                  <span>Referensi Sub Kegiatan (SIPD-RI / Permendagri)</span>
+                </div>
+                <span v-if="loadingRefSubkegiatan" class="ref-loading-badge">Memuat referensi...</span>
+                <span v-else-if="refSubkegiatanList.length" class="ref-count-badge">{{ refSubkegiatanList.length }} referensi</span>
+              </div>
+              <div class="ref-picker-body">
+                <select
+                  v-model="selectedRefSubkegiatan"
+                  class="ref-select"
+                  @change="onSelectRefSubkegiatan"
+                  :disabled="loadingRefSubkegiatan"
+                >
+                  <option value="">-- Pilih dari Referensi SIPD-RI (Otomatis Isi) --</option>
+                  <option
+                    v-for="item in refSubkegiatanList"
+                    :key="item.kodesubkegiatan"
+                    :value="item.kodesubkegiatan"
+                  >
+                    {{ item.kodesubkegiatan }} - {{ item.uraisubkegiatan }}
+                  </option>
+                </select>
+                <div class="ref-hint" v-if="refSubkegiatanList.length">
+                  💡 Memilih referensi akan otomatis mengisi Kode, Uraian, Kinerja, Indikator, dan Satuan.
+                </div>
+                <div class="ref-hint" v-else-if="!loadingRefSubkegiatan">
+                  ℹ️ Tidak ada referensi khusus untuk kegiatan ini, silakan isi formulir secara manual.
+                </div>
+              </div>
+            </div>
+
             <div class="form-group">
               <label class="form-label">Kode Subkegiatan <span style="color: #ef4444;">*</span></label>
               <input
@@ -707,6 +868,40 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Grid Realisasi Volume Subkegiatan -->
+              <div style="margin-top: 0.85rem;">
+                <label class="form-label" style="font-weight: 600; color: #047857; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem;">
+                  <span class="badge-realisasi">Realisasi</span>
+                  Realisasi Capaian Tahunan (2025 - 2030)
+                </label>
+                <div class="targets-form-grid targets-realisasi-grid" style="grid-template-columns: repeat(6, 1fr);">
+                  <div class="form-group">
+                    <label class="form-label sub r-label">2025</label>
+                    <input type="text" class="form-input mono r-input" v-model="formData.realisasi2025" placeholder="-" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub r-label">2026</label>
+                    <input type="text" class="form-input mono r-input" v-model="formData.realisasi2026" placeholder="-" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub r-label">2027</label>
+                    <input type="text" class="form-input mono r-input" v-model="formData.realisasi2027" placeholder="-" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub r-label">2028</label>
+                    <input type="text" class="form-input mono r-input" v-model="formData.realisasi2028" placeholder="-" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub r-label">2029</label>
+                    <input type="text" class="form-input mono r-input" v-model="formData.realisasi2029" placeholder="-" />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub r-label">2030</label>
+                    <input type="text" class="form-input mono r-input" v-model="formData.realisasi2030" placeholder="-" />
+                  </div>
+                </div>
+              </div>
             </div>
           </form>
         </div>
@@ -768,6 +963,20 @@ const emit = defineEmits(['close', 'saved', 'deleted']);
 
 const submitting = ref(false);
 const showAiPanel = ref(false);
+
+// SIPD-RI Database References for Kegiatan & Subkegiatan
+const refKegiatanList = ref([]);
+const loadingRefKegiatan = ref(false);
+const selectedRefKegiatan = ref('');
+
+const refSubkegiatanList = ref([]);
+const loadingRefSubkegiatan = ref(false);
+const selectedRefSubkegiatan = ref('');
+
+// Referensi Sasaran untuk Tagging Program
+const refSasaranList = ref([]);
+const loadingRefSasaran = ref(false);
+const selectedSasaranIds = ref([]);
 
 const aiContextLevel = computed(() => {
   if (props.mode.includes('ind_tujuan')) return 'tujuan';
@@ -884,6 +1093,12 @@ const formData = ref({
   p_target2029: '-',
   p_target2030: '-',
   p_target_akhir: '-',
+  realisasi2025: '-',
+  realisasi2026: '-',
+  realisasi2027: '-',
+  realisasi2028: '-',
+  realisasi2029: '-',
+  realisasi2030: '-',
 
   // Program, Kegiatan, Subkegiatan fields
   kodeprogram: '',
@@ -1017,12 +1232,110 @@ const detectedChanges = computed(() => {
   return years;
 });
 
+async function fetchRefKegiatan(kodeprogram) {
+  if (!kodeprogram) {
+    refKegiatanList.value = [];
+    return;
+  }
+  loadingRefKegiatan.value = true;
+  try {
+    const res = await api.getRefKegiatan(String(kodeprogram).trim());
+    const list = Array.isArray(res) ? res : (res?.data || []);
+    refKegiatanList.value = list;
+    if (formData.value.kodekegiatan) {
+      const match = list.find(k => k.kodekegiatan === formData.value.kodekegiatan);
+      if (match) {
+        selectedRefKegiatan.value = formData.value.kodekegiatan;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load ref kegiatan:', err);
+    refKegiatanList.value = [];
+  } finally {
+    loadingRefKegiatan.value = false;
+  }
+}
+
+async function fetchRefSubkegiatan(kodekegiatan) {
+  if (!kodekegiatan) {
+    refSubkegiatanList.value = [];
+    return;
+  }
+  loadingRefSubkegiatan.value = true;
+  try {
+    const res = await api.getRefSubkegiatan(String(kodekegiatan).trim());
+    const list = Array.isArray(res) ? res : (res?.data || []);
+    refSubkegiatanList.value = list;
+    if (formData.value.kodesubkegiatan) {
+      const match = list.find(s => s.kodesubkegiatan === formData.value.kodesubkegiatan);
+      if (match) {
+        selectedRefSubkegiatan.value = formData.value.kodesubkegiatan;
+      }
+    }
+  } catch (err) {
+    console.error('Failed to load ref subkegiatan:', err);
+    refSubkegiatanList.value = [];
+  } finally {
+    loadingRefSubkegiatan.value = false;
+  }
+}
+
+function onSelectRefKegiatan() {
+  if (!selectedRefKegiatan.value) return;
+  const match = refKegiatanList.value.find(k => k.kodekegiatan === selectedRefKegiatan.value);
+  if (match) {
+    formData.value.kodekegiatan = match.kodekegiatan;
+    formData.value.uraikegiatan = match.uraikegiatan;
+  }
+}
+
+function onSelectRefSubkegiatan() {
+  if (!selectedRefSubkegiatan.value) return;
+  const match = refSubkegiatanList.value.find(s => s.kodesubkegiatan === selectedRefSubkegiatan.value);
+  if (match) {
+    formData.value.kodesubkegiatan = match.kodesubkegiatan;
+    formData.value.uraisubkegiatan = match.uraisubkegiatan;
+    if (match.kinerja && match.kinerja !== '-') {
+      formData.value.kinerja = match.kinerja;
+    }
+    if (match.indikator && match.indikator !== '-') {
+      formData.value.uraisubkegiatan_indikator = match.indikator;
+    }
+    if (match.satuan && match.satuan !== '-') {
+      formData.value.satuan = match.satuan;
+    }
+  }
+}
+
+async function fetchRefSasaran(kodeskpd, id_skpd, id_sub_skpd) {
+  loadingRefSasaran.value = true;
+  try {
+    const res = await api.getRefSasaran({
+      kodeskpd: kodeskpd || '',
+      id_skpd: id_skpd || '',
+      id_sub_skpd: id_sub_skpd || '',
+    });
+    refSasaranList.value = Array.isArray(res) ? res : (res?.data || []);
+  } catch (err) {
+    console.error('Failed to load ref sasaran:', err);
+    refSasaranList.value = [];
+  } finally {
+    loadingRefSasaran.value = false;
+  }
+}
+
 // Initialize form values when modal opens or itemData changes
 watch(
   () => [props.isOpen, props.mode, props.itemData],
   ([open]) => {
     if (open) {
       showAiPanel.value = false;
+      selectedRefKegiatan.value = '';
+      selectedRefSubkegiatan.value = '';
+      refKegiatanList.value = [];
+      refSubkegiatanList.value = [];
+      selectedSasaranIds.value = [];
+      refSasaranList.value = [];
       if (props.mode.startsWith('edit_') && props.itemData) {
         formData.value = {
           uraian: props.itemData.uraian || props.itemData.uraitujuan || props.itemData.uraisasaran || '',
@@ -1046,6 +1359,12 @@ watch(
           p_target2029: props.itemData.p_target2029 || '-',
           p_target2030: props.itemData.p_target2030 || '-',
           p_target_akhir: props.itemData.p_target_akhir || '-',
+          realisasi2025: props.itemData.indikator?.realisasi2025 || props.itemData.realisasi2025 || '-',
+          realisasi2026: props.itemData.indikator?.realisasi2026 || props.itemData.realisasi2026 || '-',
+          realisasi2027: props.itemData.indikator?.realisasi2027 || props.itemData.realisasi2027 || '-',
+          realisasi2028: props.itemData.indikator?.realisasi2028 || props.itemData.realisasi2028 || '-',
+          realisasi2029: props.itemData.indikator?.realisasi2029 || props.itemData.realisasi2029 || '-',
+          realisasi2030: props.itemData.indikator?.realisasi2030 || props.itemData.realisasi2030 || '-',
 
           // Program, Kegiatan, Subkegiatan fields
           kodeprogram: props.itemData.kodeprogram || '',
@@ -1105,6 +1424,12 @@ watch(
           p_target2029: '-',
           p_target2030: '-',
           p_target_akhir: '-',
+          realisasi2025: '-',
+          realisasi2026: '-',
+          realisasi2027: '-',
+          realisasi2028: '-',
+          realisasi2029: '-',
+          realisasi2030: '-',
 
           // Program, Kegiatan, Subkegiatan fields
           kodeprogram: props.itemData?.kodeprogram || '',
@@ -1141,9 +1466,54 @@ watch(
           p_pagu5: 0,
         };
       }
+
+      // Fetch references from database if applicable
+      if (isProgramForm.value) {
+        const rawSasaran = [
+          ...(props.itemData?.sasaran_ids || []),
+          ...(props.itemData?.renstra_sasaran || []),
+        ];
+        selectedSasaranIds.value = [...new Set(rawSasaran.map(id => {
+          const s = String(id).trim();
+          return s.length > 36 ? s.slice(-36) : s;
+        }))];
+
+        const kpd = props.itemData?.kodeskpd || formData.value.kodeskpd;
+        const idSkpd = props.itemData?.id_skpd || props.idSkpd;
+        const idSubSkpd = props.itemData?.id_sub_skpd;
+        fetchRefSasaran(kpd, idSkpd, idSubSkpd);
+      }
+
+      if (isKegiatanForm.value) {
+        let kodeProg = props.itemData?.kodeprogram || formData.value.kodeprogram;
+        if (!kodeProg && (props.itemData?.kodekegiatan || formData.value.kodekegiatan)) {
+          const rawKeg = props.itemData?.kodekegiatan || formData.value.kodekegiatan;
+          const parts = String(rawKeg).split('.');
+          if (parts.length >= 3) {
+            kodeProg = parts.slice(0, 3).join('.');
+          }
+        }
+        if (kodeProg) {
+          fetchRefKegiatan(kodeProg);
+        }
+      }
+
+      if (isSubkegiatanForm.value) {
+        let kodeKeg = props.itemData?.kodekegiatan || formData.value.kodekegiatan;
+        if (!kodeKeg && (props.itemData?.kodesubkegiatan || formData.value.kodesubkegiatan)) {
+          const rawSub = props.itemData?.kodesubkegiatan || formData.value.kodesubkegiatan;
+          const parts = String(rawSub).split('.');
+          if (parts.length >= 5) {
+            kodeKeg = parts.slice(0, 5).join('.');
+          }
+        }
+        if (kodeKeg) {
+          fetchRefSubkegiatan(kodeKeg);
+        }
+      }
     }
   },
-  { immediate: true }
+  { immediate: true, deep: true }
 );
 
 function closeModal() {
@@ -1231,6 +1601,12 @@ async function handleSubmit() {
         p_target2029: formData.value.p_target2029,
         p_target2030: formData.value.p_target2030,
         p_target_akhir: formData.value.p_target_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
         no_urut: formData.value.no_urut,
       });
     } else if (props.mode === 'edit_ind_tujuan') {
@@ -1255,6 +1631,12 @@ async function handleSubmit() {
         p_target2029: formData.value.p_target2029,
         p_target2030: formData.value.p_target2030,
         p_target_akhir: formData.value.p_target_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
         no_urut: formData.value.no_urut,
       });
     } else if (props.mode === 'create_ind_sasaran') {
@@ -1280,6 +1662,12 @@ async function handleSubmit() {
         p_target2029: formData.value.p_target2029,
         p_target2030: formData.value.p_target2030,
         p_target_akhir: formData.value.p_target_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
         no_urut: formData.value.no_urut,
       });
     } else if (props.mode === 'edit_ind_sasaran') {
@@ -1304,6 +1692,12 @@ async function handleSubmit() {
         p_target2029: formData.value.p_target2029,
         p_target2030: formData.value.p_target2030,
         p_target_akhir: formData.value.p_target_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
         no_urut: formData.value.no_urut,
       });
     } else if (props.mode === 'edit_ind_program') {
@@ -1318,6 +1712,12 @@ async function handleSubmit() {
         p_target2029: formData.value.p_target2029,
         p_target2030: formData.value.p_target2030,
         p_target_akhir: formData.value.p_target_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
       });
     } else if (props.mode === 'create_ind_kegiatan') {
       await api.createIndikatorKegiatan({
@@ -1345,6 +1745,12 @@ async function handleSubmit() {
         p_target2029: formData.value.p_target2029,
         p_target2030: formData.value.p_target2030,
         p_target_akhir: formData.value.p_target_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
         no_urut: formData.value.no_urut,
       });
     } else if (props.mode === 'edit_ind_kegiatan') {
@@ -1369,6 +1775,12 @@ async function handleSubmit() {
         p_target2029: formData.value.p_target2029,
         p_target2030: formData.value.p_target2030,
         p_target_akhir: formData.value.p_target_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
         no_urut: formData.value.no_urut,
       });
     } else if (props.mode === 'create_program') {
@@ -1378,12 +1790,14 @@ async function handleSubmit() {
         kodeprogram: formData.value.kodeprogram,
         uraiprogram: formData.value.uraiprogram,
         kinerja: formData.value.kinerja,
+        sasaran_ids: selectedSasaranIds.value,
       });
     } else if (props.mode === 'edit_program') {
       await api.updateProgram(props.itemData.id, {
         kodeprogram: formData.value.kodeprogram,
         uraiprogram: formData.value.uraiprogram,
         kinerja: formData.value.kinerja,
+        sasaran_ids: selectedSasaranIds.value,
       });
     } else if (props.mode === 'create_kegiatan') {
       await api.createKegiatan({
@@ -1425,6 +1839,12 @@ async function handleSubmit() {
         p_volume_4: formData.value.p_volume_4,
         p_volume_5: formData.value.p_volume_5,
         p_volume_akhir: formData.value.p_volume_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
       });
     } else if (props.mode === 'edit_subkegiatan') {
       await api.updateSubkegiatan(props.itemData.id, {
@@ -1447,6 +1867,12 @@ async function handleSubmit() {
         p_volume_4: formData.value.p_volume_4,
         p_volume_5: formData.value.p_volume_5,
         p_volume_akhir: formData.value.p_volume_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
       });
     }
 
@@ -1668,6 +2094,32 @@ async function handleDeleteConfirm() {
   box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15) !important;
 }
 
+.badge-realisasi {
+  background: #d1fae5;
+  color: #065f46;
+  border: 1px solid #a7f3d0;
+  padding: 0.12rem 0.45rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.targets-realisasi-grid {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.r-label {
+  color: #065f46 !important;
+}
+
+.r-input:focus {
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.15) !important;
+}
+
 .crud-modal-footer {
   padding: 1rem 1.5rem;
   background: #f8fafc;
@@ -1727,5 +2179,192 @@ async function handleDeleteConfirm() {
   color: #64748b;
   margin-top: 0.35rem;
   font-style: italic;
+}
+
+/* Reference Picker Card */
+.ref-picker-card {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 8px;
+  padding: 0.85rem;
+  margin-bottom: 1rem;
+}
+
+.ref-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.ref-picker-title {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-weight: 700;
+  font-size: 0.84rem;
+  color: #166534;
+}
+
+.ref-count-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #15803d;
+  background: #dcfce7;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid #86efac;
+}
+
+.ref-loading-badge {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #0369a1;
+  background: #e0f2fe;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  border: 1px solid #7dd3fc;
+}
+
+.ref-select {
+  width: 100%;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.84rem;
+  border: 1px solid #86efac;
+  border-radius: 6px;
+  background-color: #ffffff;
+  color: #14532d;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.ref-select:focus {
+  outline: none;
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15);
+}
+
+.ref-hint {
+  font-size: 0.75rem;
+  color: #15803d;
+  margin-top: 0.35rem;
+  line-height: 1.4;
+}
+
+/* Sasaran Tagger Card */
+.sasaran-tagger-card {
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.9rem;
+}
+
+.sasaran-tagger-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+}
+
+.sasaran-tagger-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: #1e293b;
+}
+
+.sasaran-tagger-count {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #2563eb;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 0.15rem 0.55rem;
+  border-radius: 9999px;
+}
+
+.sasaran-tagger-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-bottom: 0.75rem;
+  line-height: 1.4;
+}
+
+.sasaran-checkbox-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 220px;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+
+.sasaran-checkbox-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 0.6rem 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.sasaran-checkbox-item:hover {
+  border-color: #93c5fd;
+  background: #f0f7ff;
+}
+
+.sasaran-checkbox-item.selected {
+  border-color: #3b82f6;
+  background: #eff6ff;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.1);
+}
+
+.sasaran-checkbox-input {
+  margin-top: 0.25rem;
+  cursor: pointer;
+  accent-color: #2563eb;
+  width: 16px;
+  height: 16px;
+}
+
+.sasaran-checkbox-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.sasaran-checkbox-main {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+}
+
+.sasaran-number-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #1e40af;
+  background: #dbeafe;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  white-space: nowrap;
+}
+
+.sasaran-uraian-text {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #1e293b;
+  line-height: 1.35;
+}
+
+.sasaran-tujuan-text {
+  font-size: 0.73rem;
+  color: #64748b;
+  line-height: 1.3;
 }
 </style>

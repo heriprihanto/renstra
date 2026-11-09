@@ -1,5 +1,7 @@
-from typing import Optional
+from typing import Any, List, Optional
 from uuid import UUID, uuid4
+from sqlalchemy import Column
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field, SQLModel
 
 
@@ -44,6 +46,12 @@ class RenstraIndikatorTujuan(SQLModel, table=True):
     p_target3: Optional[str] = None
     p_target4: Optional[str] = None
     p_target5: Optional[str] = None
+    realisasi0: Optional[str] = "-"
+    realisasi1: Optional[str] = "-"
+    realisasi2: Optional[str] = "-"
+    realisasi3: Optional[str] = "-"
+    realisasi4: Optional[str] = "-"
+    realisasi5: Optional[str] = "-"
 
 
 class RenstraSasaran(SQLModel, table=True):
@@ -90,6 +98,12 @@ class RenstraIndikatorSasaran(SQLModel, table=True):
     p_target3: Optional[str] = None
     p_target4: Optional[str] = None
     p_target5: Optional[str] = None
+    realisasi0: Optional[str] = "-"
+    realisasi1: Optional[str] = "-"
+    realisasi2: Optional[str] = "-"
+    realisasi3: Optional[str] = "-"
+    realisasi4: Optional[str] = "-"
+    realisasi5: Optional[str] = "-"
 
 
 class RenstraProgram(SQLModel, table=True):
@@ -107,6 +121,11 @@ class RenstraProgram(SQLModel, table=True):
     kinerja: Optional[str] = None
     no: Optional[int] = None
     idx: Optional[int] = None
+    renstra_sasaran: Optional[List[Any]] = Field(default=None, sa_column=Column(JSONB))
+
+    @property
+    def kode_bidang(self) -> Optional[str]:
+        return self.kodebidang
 
 
 class RenstraIndikatorProgram(SQLModel, table=True):
@@ -136,7 +155,14 @@ class RenstraIndikatorProgram(SQLModel, table=True):
     p_target4: Optional[str] = "-"
     p_target5: Optional[str] = "-"
     p_target_akhir: Optional[str] = "-"
+    realisasi0: Optional[str] = "-"
+    realisasi1: Optional[str] = "-"
+    realisasi2: Optional[str] = "-"
+    realisasi3: Optional[str] = "-"
+    realisasi4: Optional[str] = "-"
+    realisasi5: Optional[str] = "-"
     perubahan_status: Optional[str] = "tetap"
+    definisi_operasional: Optional[str] = None
     urut: Optional[int] = None
     no: Optional[int] = None
 
@@ -207,6 +233,12 @@ class RenstraIndikatorKegiatan(SQLModel, table=True):
     p_target4: Optional[str] = "-"
     p_target5: Optional[str] = "-"
     p_target_akhir: Optional[str] = "-"
+    realisasi0: Optional[str] = "-"
+    realisasi1: Optional[str] = "-"
+    realisasi2: Optional[str] = "-"
+    realisasi3: Optional[str] = "-"
+    realisasi4: Optional[str] = "-"
+    realisasi5: Optional[str] = "-"
     pagu1: Optional[float] = 0.0
     pagu2: Optional[float] = 0.0
     pagu3: Optional[float] = 0.0
@@ -255,6 +287,12 @@ class RenstraSubkegiatan(SQLModel, table=True):
     p_volume_4: Optional[str] = "-"
     p_volume_5: Optional[str] = "-"
     p_volume_akhir: Optional[str] = "-"
+    realisasi0: Optional[str] = "-"
+    realisasi1: Optional[str] = "-"
+    realisasi2: Optional[str] = "-"
+    realisasi3: Optional[str] = "-"
+    realisasi4: Optional[str] = "-"
+    realisasi5: Optional[str] = "-"
     perubahan_status: Optional[str] = "tetap"
     pagu1: Optional[float] = None
     pagu2: Optional[float] = None
@@ -266,6 +304,7 @@ class RenstraSubkegiatan(SQLModel, table=True):
     p_pagu3: Optional[float] = None
     p_pagu4: Optional[float] = None
     p_pagu5: Optional[float] = None
+    definisi_operasional: Optional[str] = None
     no: Optional[int] = None
 
 

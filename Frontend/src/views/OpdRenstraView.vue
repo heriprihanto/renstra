@@ -194,6 +194,15 @@
                 >
                   Perubahan
                 </button>
+                <button
+                  type="button"
+                  class="target-toggle-btn realisasi-toggle"
+                  :class="{ active: targetViewFilter === 'realisasi' }"
+                  @click="targetViewFilter = 'realisasi'"
+                  title="Tampilkan Realisasi Capaian Saja"
+                >
+                  Realisasi
+                </button>
               </div>
 
               <!-- Tombol Tambah Tujuan Baru -->
@@ -282,6 +291,14 @@
                       <span>TARGET PERUBAHAN</span>
                     </div>
                   </th>
+
+                  <!-- Header Realisasi Group -->
+                  <th v-if="showTargetRealisasi" colspan="6" class="th-target-group realisasi">
+                    <div style="display: flex; align-items: center; justify-content: center; gap: 0.45rem;">
+                      <span class="badge-group-realisasi">Realisasi</span>
+                      <span>REALISASI CAPAIAN</span>
+                    </div>
+                  </th>
                 </tr>
                 <tr>
                   <!-- Sub-header Target Murni (7 Cols) -->
@@ -311,6 +328,16 @@
                     <th class="th-sub-target th-sub-final-p" style="width: 85px; text-align: center;">
                       <div>AKHIR (P)</div>
                     </th>
+                  </template>
+
+                  <!-- Sub-header Realisasi (6 Cols) -->
+                  <template v-if="showTargetRealisasi">
+                    <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2025</th>
+                    <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2026</th>
+                    <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2027</th>
+                    <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2028</th>
+                    <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2029</th>
+                    <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2030</th>
                   </template>
                 </tr>
               </thead>
@@ -503,6 +530,16 @@
                         <span v-if="indTujuan.changed_targets?.includes('akhir')" class="target-diff-tag">berubah</span>
                       </td>
                     </template>
+
+                    <!-- Realisasi Values -->
+                    <template v-if="showTargetRealisasi">
+                      <td class="col-target col-target-r">{{ indTujuan.realisasi2025 || '-' }}</td>
+                      <td class="col-target col-target-r">{{ indTujuan.realisasi2026 || '-' }}</td>
+                      <td class="col-target col-target-r">{{ indTujuan.realisasi2027 || '-' }}</td>
+                      <td class="col-target col-target-r">{{ indTujuan.realisasi2028 || '-' }}</td>
+                      <td class="col-target col-target-r">{{ indTujuan.realisasi2029 || '-' }}</td>
+                      <td class="col-target col-target-r">{{ indTujuan.realisasi2030 || '-' }}</td>
+                    </template>
                   </tr>
 
                   <!-- 2. SASARAN (Di bawah Tujuan) -->
@@ -694,6 +731,16 @@
                           {{ indSasaran.p_target_akhir }}
                           <span v-if="indSasaran.changed_targets?.includes('akhir')" class="target-diff-tag">berubah</span>
                         </td>
+                      </template>
+
+                      <!-- Realisasi Values -->
+                      <template v-if="showTargetRealisasi">
+                        <td class="col-target col-target-r">{{ indSasaran.realisasi2025 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indSasaran.realisasi2026 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indSasaran.realisasi2027 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indSasaran.realisasi2028 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indSasaran.realisasi2029 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indSasaran.realisasi2030 || '-' }}</td>
                       </template>
                     </tr>
                   </template>
@@ -896,6 +943,15 @@
                   >
                     Perubahan
                   </button>
+                  <button
+                    type="button"
+                    class="target-toggle-btn realisasi-toggle"
+                    :class="{ active: subTargetViewFilter === 'realisasi' }"
+                    @click="subTargetViewFilter = 'realisasi'"
+                    title="Tampilkan Realisasi Capaian Saja"
+                  >
+                    Realisasi
+                  </button>
                 </div>
 
                 <!-- Tambah Program Button -->
@@ -991,6 +1047,14 @@
                       </div>
                     </th>
 
+                    <!-- Header Realisasi Group -->
+                    <th v-if="showSubRealisasi" colspan="6" class="th-target-group realisasi" style="text-align: center; border-left: 2px solid #059669;">
+                      <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
+                        <span class="badge-group-realisasi">Realisasi</span>
+                        <span>REALISASI CAPAIAN</span>
+                      </div>
+                    </th>
+
                     <!-- Header Pagu Murni Group -->
                     <th v-if="showSubMurni" colspan="6" class="th-target-group murni" style="text-align: center; border-left: 2px solid #334155;">
                       <div style="display: flex; align-items: center; justify-content: center; gap: 0.4rem;">
@@ -1028,6 +1092,16 @@
                       <th class="th-sub-target th-p" style="width: 75px; text-align: center;">2029</th>
                       <th class="th-sub-target th-p" style="width: 75px; text-align: center;">2030</th>
                       <th class="th-sub-target th-sub-final-p" style="width: 85px; text-align: center;">AKHIR (P)</th>
+                    </template>
+
+                    <!-- Sub-header Realisasi (6 Cols) -->
+                    <template v-if="showSubRealisasi">
+                      <th class="th-sub-target th-r" style="width: 75px; text-align: center; border-left: 2px solid #059669;">2025</th>
+                      <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2026</th>
+                      <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2027</th>
+                      <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2028</th>
+                      <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2029</th>
+                      <th class="th-sub-target th-r" style="width: 75px; text-align: center;">2030</th>
                     </template>
 
                     <!-- Sub-header Pagu Murni (6 Cols) -->
@@ -1089,9 +1163,26 @@
                         <span class="badge-hirarki program">PROGRAM</span>
                       </td>
                       <td>
-                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                           <span class="code-badge-mono">{{ prog.kodeprogram }}</span>
-                          <span>{{ prog.uraiprogram }}</span>
+                          <span style="font-weight: 600;">{{ prog.uraiprogram }}</span>
+                        </div>
+                        <!-- Tagged Sasaran Badges -->
+                        <div v-if="prog.sasaran_list && prog.sasaran_list.length" class="prog-sasaran-tags-container">
+                          <span
+                            v-for="s in prog.sasaran_list"
+                            :key="s.idsasaran"
+                            class="prog-sasaran-tag-pill"
+                            :title="'Sasaran ' + s.no + ': ' + s.uraisasaran + (s.uraitujuan ? ' \n(Tujuan: ' + s.uraitujuan + ')' : '')"
+                          >
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="2"/></svg>
+                            <span>Sasaran {{ s.no }}: {{ s.uraisasaran }}</span>
+                          </span>
+                        </div>
+                        <div v-else style="margin-top: 0.3rem;">
+                          <span class="prog-sasaran-tag-pill empty" title="Program ini belum ditagging ke Sasaran RENSTRA">
+                            ⚠️ Belum ditagging ke Sasaran
+                          </span>
                         </div>
                       </td>
                       <td style="color: #1e3a8a; font-weight: 500; font-size: 0.83rem;">
@@ -1189,6 +1280,15 @@
                         <td class="col-target col-target-p" :class="{ 'col-target-diff': indProg.changed_targets?.includes('2029') }">{{ indProg.p_target2029 || '-' }}</td>
                         <td class="col-target col-target-p" :class="{ 'col-target-diff': indProg.changed_targets?.includes('2030') }">{{ indProg.p_target2030 || '-' }}</td>
                         <td class="col-target final-p">{{ indProg.p_target_akhir || '-' }}</td>
+                      </template>
+                      <!-- Realisasi Program -->
+                      <template v-if="showSubRealisasi">
+                        <td class="col-target col-target-r" style="border-left: 2px solid #a7f3d0;">{{ indProg.realisasi2025 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indProg.realisasi2026 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indProg.realisasi2027 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indProg.realisasi2028 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indProg.realisasi2029 || '-' }}</td>
+                        <td class="col-target col-target-r">{{ indProg.realisasi2030 || '-' }}</td>
                       </template>
                       <!-- Pagu Murni (strip) -->
                       <template v-if="showSubMurni">
@@ -1365,6 +1465,15 @@
                           <td class="col-target col-target-p" :class="{ 'col-target-diff': indKeg.changed_targets?.includes('2030') }">{{ indKeg.p_target2030 || '-' }}</td>
                           <td class="col-target final-p">{{ indKeg.p_target_akhir || '-' }}</td>
                         </template>
+                        <!-- Realisasi Kegiatan -->
+                        <template v-if="showSubRealisasi">
+                          <td class="col-target col-target-r" style="border-left: 2px solid #a7f3d0;">{{ indKeg.realisasi2025 || '-' }}</td>
+                          <td class="col-target col-target-r">{{ indKeg.realisasi2026 || '-' }}</td>
+                          <td class="col-target col-target-r">{{ indKeg.realisasi2027 || '-' }}</td>
+                          <td class="col-target col-target-r">{{ indKeg.realisasi2028 || '-' }}</td>
+                          <td class="col-target col-target-r">{{ indKeg.realisasi2029 || '-' }}</td>
+                          <td class="col-target col-target-r">{{ indKeg.realisasi2030 || '-' }}</td>
+                        </template>
                         <!-- Pagu Murni -->
                         <template v-if="showSubMurni">
                           <td class="col-pagu" style="border-left: 2px solid #cbd5e1;">{{ indKeg.pagu1 ? formatRupiah(indKeg.pagu1) : '-' }}</td>
@@ -1522,6 +1631,15 @@
                             <td class="col-target col-target-p" :class="{ 'col-target-diff': subkeg.indikator.changed_targets?.includes('2030') }">{{ subkeg.indikator.p_volume_5 || '-' }}</td>
                             <td class="col-target final-p">{{ subkeg.indikator.p_volume_akhir || '-' }}</td>
                           </template>
+                          <!-- Realisasi Subkegiatan -->
+                          <template v-if="showSubRealisasi">
+                            <td class="col-target col-target-r" style="border-left: 2px solid #a7f3d0;">{{ subkeg.indikator.realisasi2025 || '-' }}</td>
+                            <td class="col-target col-target-r">{{ subkeg.indikator.realisasi2026 || '-' }}</td>
+                            <td class="col-target col-target-r">{{ subkeg.indikator.realisasi2027 || '-' }}</td>
+                            <td class="col-target col-target-r">{{ subkeg.indikator.realisasi2028 || '-' }}</td>
+                            <td class="col-target col-target-r">{{ subkeg.indikator.realisasi2029 || '-' }}</td>
+                            <td class="col-target col-target-r">{{ subkeg.indikator.realisasi2030 || '-' }}</td>
+                          </template>
                           <!-- Pagu Murni -->
                           <template v-if="showSubMurni">
                             <td class="col-pagu" style="border-left: 2px solid #cbd5e1;">{{ formatRupiah(subkeg.indikator.pagu1) }}</td>
@@ -1604,23 +1722,26 @@ const searchProgramCascading = ref('');
 // Filter Status Perubahan / Data Baru
 const changeFilter = ref('all'); // 'all' | 'perubahan' | 'baru'
 
-// Target View Filter (All, Murni, Perubahan)
+// Target View Filter (All, Murni, Perubahan, Realisasi)
 const targetViewFilter = ref('all');
 const showTargetMurni = computed(() => targetViewFilter.value === 'all' || targetViewFilter.value === 'murni');
 const showTargetPerubahan = computed(() => targetViewFilter.value === 'all' || targetViewFilter.value === 'perubahan');
+const showTargetRealisasi = computed(() => targetViewFilter.value === 'all' || targetViewFilter.value === 'realisasi');
 const totalTargetColumns = computed(() => {
   let count = 0;
   if (showTargetMurni.value) count += 7;
   if (showTargetPerubahan.value) count += 7;
+  if (showTargetRealisasi.value) count += 6;
   return count;
 });
 const tujuanSasaranColspan = computed(() => 3 + totalTargetColumns.value);
 
-// Target & Pagu View Filter for Sub SKPD Cascading (All, Murni, Perubahan)
+// Target & Pagu View Filter for Sub SKPD Cascading (All, Murni, Perubahan, Realisasi)
 const subTargetViewFilter = ref('all');
 const showSubMurni = computed(() => subTargetViewFilter.value === 'all' || subTargetViewFilter.value === 'murni');
 const showSubPerubahan = computed(() => subTargetViewFilter.value === 'all' || subTargetViewFilter.value === 'perubahan');
-const subTargetColspan = computed(() => 2 + (showSubMurni.value ? 7 : 0) + (showSubPerubahan.value ? 7 : 0));
+const showSubRealisasi = computed(() => subTargetViewFilter.value === 'all' || subTargetViewFilter.value === 'realisasi');
+const subTargetColspan = computed(() => 2 + (showSubMurni.value ? 7 : 0) + (showSubPerubahan.value ? 7 : 0) + (showSubRealisasi.value ? 6 : 0));
 
 // Dropdown State
 const activeDropdown = ref(null);
@@ -1974,6 +2095,8 @@ function openCreateProgram() {
   crudModalMode.value = 'create_program';
   crudModalItem.value = {
     kodeskpd: selectedSubSkpd.value?.kode_sub_skpd,
+    id_skpd: selectedSubSkpd.value?.id_skpd || opdIdNumber.value,
+    id_sub_skpd: selectedSubSkpd.value?.id_sub_skpd,
     opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
   };
   isCrudModalOpen.value = true;
@@ -1984,9 +2107,13 @@ function openEditProgram(prog) {
   crudModalMode.value = 'edit_program';
   crudModalItem.value = {
     id: prog.id,
+    kodeskpd: selectedSubSkpd.value?.kode_sub_skpd,
+    id_skpd: selectedSubSkpd.value?.id_skpd || opdIdNumber.value,
+    id_sub_skpd: selectedSubSkpd.value?.id_sub_skpd,
     kodeprogram: prog.kodeprogram,
     uraiprogram: prog.uraiprogram,
     kinerja: prog.kinerja,
+    sasaran_ids: prog.sasaran_list ? prog.sasaran_list.map(s => s.idsasaran) : (prog.renstra_sasaran || []),
     opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
   };
   isCrudModalOpen.value = true;

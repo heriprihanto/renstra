@@ -1662,6 +1662,13 @@ body {
   border-left: 2px solid #b45309 !important;
 }
 
+.th-target-group.realisasi {
+  background: #064e3b !important;
+  color: #d1fae5 !important;
+  border-bottom: 1px solid #047857 !important;
+  border-left: 2px solid #059669 !important;
+}
+
 .badge-group-murni {
   background: #334155;
   color: #93c5fd;
@@ -1676,6 +1683,17 @@ body {
   background: #92400e;
   color: #fde68a;
   border: 1px solid #b45309;
+  padding: 0.12rem 0.45rem;
+  border-radius: 3px;
+  font-size: 0.64rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.badge-group-realisasi {
+  background: #065f46;
+  color: #a7f3d0;
+  border: 1px solid #059669;
   padding: 0.12rem 0.45rem;
   border-radius: 3px;
   font-size: 0.64rem;
@@ -1708,11 +1726,25 @@ body {
   color: #fef08a !important;
 }
 
+.th-sub-target.th-r {
+  background: #064e3b !important;
+  color: #a7f3d0 !important;
+  border-color: #047857 !important;
+}
+
 /* Col Target Perubahan */
 .col-target-p {
   background: #fffdf5 !important;
   color: #92400e !important;
   border-left: 1px solid #fef3c7 !important;
+}
+
+/* Col Realisasi */
+.col-target-r {
+  background: #f0fdf4 !important;
+  color: #065f46 !important;
+  border-left: 1px solid #dcfce7 !important;
+  font-weight: 600;
 }
 
 .col-target.final-p {
@@ -1761,6 +1793,11 @@ body {
 .target-toggle-btn.perubahan-toggle.active {
   background: #fef3c7;
   color: #92400e;
+}
+
+.target-toggle-btn.realisasi-toggle.active {
+  background: #d1fae5;
+  color: #065f46;
 }
 
 /* =========================================================
@@ -1947,6 +1984,42 @@ body {
   color: var(--text-muted);
   font-size: 0.8rem;
   text-align: center;
+}
+
+/* Program Sasaran Tagging Badges in Cascading Table */
+.prog-sasaran-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.35rem;
+}
+
+.prog-sasaran-tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #1e40af;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  line-height: 1.25;
+  transition: all 0.15s ease;
+}
+
+.prog-sasaran-tag-pill:hover {
+  background: #dbeafe;
+  border-color: #93c5fd;
+}
+
+.prog-sasaran-tag-pill.empty {
+  color: #92400e;
+  background: #fffbeb;
+  border-color: #fde68a;
+  font-style: italic;
+  font-weight: 500;
 }
 
 /* Responsive queries */

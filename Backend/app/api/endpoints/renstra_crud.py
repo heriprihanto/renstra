@@ -1,11 +1,11 @@
 import uuid
-from typing import Any, Dict
+from typing import Any, Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import select, text
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.db import get_session
-from app.models.opd import TaOpd
+from app.models.opd import TaOpd, TaSubPd
 from app.models.renstra import (
     RenstraIndikatorKegiatan,
     RenstraIndikatorProgram,
@@ -36,6 +36,134 @@ from app.schemas.renstra_crud import (
 )
 
 router = APIRouter(prefix="/renstra", tags=["RENSTRA CRUD"])
+
+
+# =====================================================================
+# 0. REFERENSI KEGIATAN & SUBKEGIATAN DARI REF_SUBKEGIATAN
+# =====================================================================
+
+@router.get("/ref/kegiatan")
+async def get_ref_kegiatan(kode_program: str, session: AsyncSession = Depends(get_session)):
+    """
+    Mengambil daftar referensi Kegiatan dari ref_subkegiatan berdasarkan kode_program.
+    Mendukung Program Penunjang (X.XX.01 / *.01).
+    """
+    kp = kode_program.strip()
+    is_penunjang = kp.endswith(".01") or kp == "X.XX.01"
+    search_prog = "X.XX.01" if is_penunjang else kp
+
+    sql = text("""
+        SELECT DISTINCT kodekegiatan, uraikegiatan 
+        FROM ref_subkegiatan 
+        WHERE kodeprogram = :kp OR kodeprogram = :sp
+        ORDER BY kodekegiatan ASC
+    """)
+    res = await session.execute(sql, {"kp": kp, "sp": search_prog})
+    rows = res.fetchall()
+
+    results = []
+    for r in rows:
+        kk = r.kodekegiatan or ""
+        if is_penunjang and kk.startswith("X.XX.01"):
+            kk = kp + kk[7:]
+        results.append({
+            "kodekegiatan": kk,
+            "uraikegiatan": r.uraikegiatan or "",
+        })
+    return results
+
+
+@router.get("/ref/subkegiatan")
+async def get_ref_subkegiatan(kode_kegiatan: str, session: AsyncSession = Depends(get_session)):
+    """
+    Mengambil daftar referensi Subkegiatan dari ref_subkegiatan berdasarkan kode_kegiatan.
+    Mendukung Kegiatan Penunjang (*.01.*).
+    """
+    kk = kode_kegiatan.strip()
+    parts = kk.split(".")
+    is_penunjang = len(parts) >= 3 and parts[2] == "01"
+    search_keg = "X.XX.01." + ".".join(parts[3:]) if is_penunjang else kk
+
+    sql = text("""
+        SELECT kodesubkegiatan, uraisubkegiatan, kinerja, indikator, satuan 
+        FROM ref_subkegiatan 
+        WHERE kodekegiatan = :kk OR kodekegiatan = :sk
+        ORDER BY kodesubkegiatan ASC
+    """)
+    res = await session.execute(sql, {"kk": kk, "sk": search_keg})
+    rows = res.fetchall()
+
+    results = []
+    for r in rows:
+        ksk = r.kodesubkegiatan or ""
+        if is_penunjang and ksk.startswith("X.XX.01"):
+            ksk = ".".join(parts[:3]) + ksk[7:]
+        results.append({
+            "kodesubkegiatan": ksk,
+            "uraisubkegiatan": r.uraisubkegiatan or "",
+            "kinerja": r.kinerja or "",
+            "indikator": r.indikator or "",
+            "satuan": r.satuan or "-",
+        })
+    return results
+
+
+@router.get("/ref/sasaran")
+async def get_ref_sasaran(
+    kodeskpd: Optional[str] = None,
+    id_skpd: Optional[int] = None,
+    id_sub_skpd: Optional[int] = None,
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Mengambil daftar referensi Sasaran RENSTRA untuk OPD / Sub SKPD terkait,
+    digunakan untuk tagging keterkaitan Program dengan Sasaran.
+    """
+    target_kodeskpd = (kodeskpd or "").strip()
+
+    if id_sub_skpd:
+        sub = await session.get(TaSubPd, id_sub_skpd)
+        if sub:
+            target_kodeskpd = sub.kode_sub_skpd or target_kodeskpd
+            if sub.id_skpd and not id_skpd:
+                id_skpd = sub.id_skpd
+
+    parent_kodeskpd = target_kodeskpd
+    if id_skpd:
+        opd = await session.get(TaOpd, id_skpd)
+        if opd and opd.kode_skpd:
+            parent_kodeskpd = opd.kode_skpd
+
+    if not parent_kodeskpd or parent_kodeskpd == target_kodeskpd:
+        if len(target_kodeskpd) >= 22:
+            parent_kodeskpd = target_kodeskpd[:-4] + "0000"
+
+    stmt = (
+        select(RenstraSasaran, RenstraTujuan)
+        .outerjoin(RenstraTujuan, RenstraTujuan.idtujuan == RenstraSasaran.idtujuan)
+        .where(
+            (RenstraSasaran.kodeskpd == target_kodeskpd) |
+            (RenstraSasaran.kodeskpd == parent_kodeskpd)
+        )
+        .order_by(RenstraSasaran.urut.asc(), RenstraSasaran.no.asc())
+    )
+    rows = (await session.exec(stmt)).all()
+
+    result = []
+    seen = set()
+    for s, t in rows:
+        s_id = str(s.idsasaran)
+        if s_id in seen:
+            continue
+        seen.add(s_id)
+        result.append({
+            "idsasaran": s_id,
+            "no": s.no or s.urut or 1,
+            "uraisasaran": s.uraisasaran or "-",
+            "uraitujuan": t.uraitujuan if t else "-",
+            "idtujuan": str(t.idtujuan) if t else None,
+        })
+    return result
 
 
 # =====================================================================
@@ -140,6 +268,12 @@ async def create_indikator_tujuan(data: IndikatorCreate, session: AsyncSession =
         p_target3=data.p_target2028 or "-",
         p_target4=p_target_2029_val,
         p_target5=data.p_target2030 or "-",
+        realisasi0=data.realisasi2025 or "-",
+        realisasi1=data.realisasi2026 or "-",
+        realisasi2=data.realisasi2027 or "-",
+        realisasi3=data.realisasi2028 or "-",
+        realisasi4=data.realisasi2029 or "-",
+        realisasi5=data.realisasi2030 or "-",
         no_urut=data.no_urut or 1,
         urut=data.no_urut or 1,
     )
@@ -196,9 +330,23 @@ async def update_indikator_tujuan(id: str, data: IndikatorUpdate, session: Async
     if data.p_target2030 is not None:
         ind.p_target5 = data.p_target2030 or "-"
 
+    # Realisasi Capaian
+    if data.realisasi2025 is not None:
+        ind.realisasi0 = data.realisasi2025 or "-"
+    if data.realisasi2026 is not None:
+        ind.realisasi1 = data.realisasi2026 or "-"
+    if data.realisasi2027 is not None:
+        ind.realisasi2 = data.realisasi2027 or "-"
+    if data.realisasi2028 is not None:
+        ind.realisasi3 = data.realisasi2028 or "-"
+    if data.realisasi2029 is not None:
+        ind.realisasi4 = data.realisasi2029 or "-"
+    if data.realisasi2030 is not None:
+        ind.realisasi5 = data.realisasi2030 or "-"
+
     session.add(ind)
     await session.commit()
-    return {"success": True, "message": "Metadata dan Target Perubahan Indikator Tujuan berhasil diperbarui"}
+    return {"success": True, "message": "Metadata, Target Perubahan, dan Realisasi Indikator Tujuan berhasil diperbarui"}
 
 
 @router.delete("/indikator-tujuan/{id}", response_model=Dict[str, Any])
@@ -319,6 +467,12 @@ async def create_indikator_sasaran(data: IndikatorCreate, session: AsyncSession 
         p_target3=data.p_target2028 or "-",
         p_target4=p_target_2029_val,
         p_target5=data.p_target2030 or "-",
+        realisasi0=data.realisasi2025 or "-",
+        realisasi1=data.realisasi2026 or "-",
+        realisasi2=data.realisasi2027 or "-",
+        realisasi3=data.realisasi2028 or "-",
+        realisasi4=data.realisasi2029 or "-",
+        realisasi5=data.realisasi2030 or "-",
         no=data.no_urut or 1,
         urut=data.no_urut or 1,
     )
@@ -375,9 +529,23 @@ async def update_indikator_sasaran(id: str, data: IndikatorUpdate, session: Asyn
     if data.p_target2030 is not None:
         ind.p_target5 = data.p_target2030 or "-"
 
+    # Realisasi Capaian
+    if data.realisasi2025 is not None:
+        ind.realisasi0 = data.realisasi2025 or "-"
+    if data.realisasi2026 is not None:
+        ind.realisasi1 = data.realisasi2026 or "-"
+    if data.realisasi2027 is not None:
+        ind.realisasi2 = data.realisasi2027 or "-"
+    if data.realisasi2028 is not None:
+        ind.realisasi3 = data.realisasi2028 or "-"
+    if data.realisasi2029 is not None:
+        ind.realisasi4 = data.realisasi2029 or "-"
+    if data.realisasi2030 is not None:
+        ind.realisasi5 = data.realisasi2030 or "-"
+
     session.add(ind)
     await session.commit()
-    return {"success": True, "message": "Metadata dan Target Perubahan Indikator Sasaran berhasil diperbarui"}
+    return {"success": True, "message": "Metadata, Target Perubahan, dan Realisasi Indikator Sasaran berhasil diperbarui"}
 
 
 @router.delete("/indikator-sasaran/{id}", response_model=Dict[str, Any])
@@ -440,6 +608,12 @@ async def create_indikator_kegiatan(data: IndikatorKegiatanCreate, session: Asyn
         p_target4=p_target_2029_val,
         p_target5=data.p_target2030 or "-",
         p_target_akhir=data.p_target_akhir or p_target_2029_val,
+        realisasi0=data.realisasi2025 or "-",
+        realisasi1=data.realisasi2026 or "-",
+        realisasi2=data.realisasi2027 or "-",
+        realisasi3=data.realisasi2028 or "-",
+        realisasi4=data.realisasi2029 or "-",
+        realisasi5=data.realisasi2030 or "-",
         pagu1=data.pagu1 or 0.0,
         pagu2=data.pagu2 or 0.0,
         pagu3=data.pagu3 or 0.0,
@@ -495,6 +669,20 @@ async def update_indikator_kegiatan(id: int, data: IndikatorKegiatanUpdate, sess
     if data.p_target2030 is not None:
         ind.p_target5 = data.p_target2030 or "-"
 
+    # Realisasi Capaian
+    if data.realisasi2025 is not None:
+        ind.realisasi0 = data.realisasi2025 or "-"
+    if data.realisasi2026 is not None:
+        ind.realisasi1 = data.realisasi2026 or "-"
+    if data.realisasi2027 is not None:
+        ind.realisasi2 = data.realisasi2027 or "-"
+    if data.realisasi2028 is not None:
+        ind.realisasi3 = data.realisasi2028 or "-"
+    if data.realisasi2029 is not None:
+        ind.realisasi4 = data.realisasi2029 or "-"
+    if data.realisasi2030 is not None:
+        ind.realisasi5 = data.realisasi2030 or "-"
+
     # Pagu jika diupdate
     if data.pagu1 is not None:
         ind.pagu1 = data.pagu1
@@ -536,6 +724,8 @@ async def update_indikator_program(id: int, data: IndikatorProgramUpdate, sessio
         ind.status = data.status.strip()
     if data.perubahan_status is not None:
         ind.perubahan_status = data.perubahan_status.strip()
+    if data.definisi_operasional is not None:
+        ind.definisi_operasional = data.definisi_operasional.strip()
 
     if data.p_target2025 is not None:
         ind.p_target0 = data.p_target2025 or "-"
@@ -552,9 +742,23 @@ async def update_indikator_program(id: int, data: IndikatorProgramUpdate, sessio
     if data.p_target2030 is not None:
         ind.p_target5 = data.p_target2030 or "-"
 
+    # Realisasi Capaian
+    if data.realisasi2025 is not None:
+        ind.realisasi0 = data.realisasi2025 or "-"
+    if data.realisasi2026 is not None:
+        ind.realisasi1 = data.realisasi2026 or "-"
+    if data.realisasi2027 is not None:
+        ind.realisasi2 = data.realisasi2027 or "-"
+    if data.realisasi2028 is not None:
+        ind.realisasi3 = data.realisasi2028 or "-"
+    if data.realisasi2029 is not None:
+        ind.realisasi4 = data.realisasi2029 or "-"
+    if data.realisasi2030 is not None:
+        ind.realisasi5 = data.realisasi2030 or "-"
+
     session.add(ind)
     await session.commit()
-    return {"success": True, "message": "Metadata dan Target Perubahan Indikator Program berhasil diperbarui"}
+    return {"success": True, "message": "Metadata, Target Perubahan, dan Realisasi Indikator Program berhasil diperbarui"}
 
 
 @router.delete("/indikator-kegiatan/{id}", response_model=Dict[str, Any])
@@ -573,6 +777,18 @@ async def delete_indikator_kegiatan(id: int, session: AsyncSession = Depends(get
 async def create_program(data: ProgramCreate, session: AsyncSession = Depends(get_session)):
     new_id = uuid.uuid4()
     next_idx = (await session.execute(text("SELECT nextval('renstra_program_idx_seq')"))).scalar()
+
+    target_kodeskpd = data.kodeskpd.strip()
+    parent_kodeskpd = target_kodeskpd[:-4] + "0000" if len(target_kodeskpd) >= 22 else target_kodeskpd
+    sasaran_tags = []
+    if data.sasaran_ids:
+        for sid in data.sasaran_ids:
+            clean_id = str(sid).strip()
+            if len(clean_id) == 36:
+                sasaran_tags.append(f"{parent_kodeskpd}{clean_id}")
+            else:
+                sasaran_tags.append(clean_id)
+
     program = RenstraProgram(
         id=new_id,
         idx=next_idx,
@@ -586,6 +802,7 @@ async def create_program(data: ProgramCreate, session: AsyncSession = Depends(ge
         urai=data.kinerja.strip() if data.kinerja else None,
         kinerja=data.kinerja.strip() if data.kinerja else None,
         no=data.no or 1,
+        renstra_sasaran=sasaran_tags if sasaran_tags else None,
     )
     session.add(program)
     await session.commit()
@@ -598,6 +815,7 @@ async def create_program(data: ProgramCreate, session: AsyncSession = Depends(ge
             "kodeprogram": program.kodeprogram,
             "uraiprogram": program.uraiprogram,
             "kinerja": program.kinerja,
+            "renstra_sasaran": program.renstra_sasaran,
         },
     }
 
@@ -623,6 +841,18 @@ async def update_program(id: str, data: ProgramUpdate, session: AsyncSession = D
     if data.no is not None:
         program.no = data.no
 
+    if data.sasaran_ids is not None:
+        target_kodeskpd = (program.kodeskpd or "").strip()
+        parent_kodeskpd = target_kodeskpd[:-4] + "0000" if len(target_kodeskpd) >= 22 else target_kodeskpd
+        sasaran_tags = []
+        for sid in data.sasaran_ids:
+            clean_id = str(sid).strip()
+            if len(clean_id) == 36:
+                sasaran_tags.append(f"{parent_kodeskpd}{clean_id}")
+            else:
+                sasaran_tags.append(clean_id)
+        program.renstra_sasaran = sasaran_tags
+
     session.add(program)
     await session.commit()
     await session.refresh(program)
@@ -634,6 +864,7 @@ async def update_program(id: str, data: ProgramUpdate, session: AsyncSession = D
             "kodeprogram": program.kodeprogram,
             "uraiprogram": program.uraiprogram,
             "kinerja": program.kinerja,
+            "renstra_sasaran": program.renstra_sasaran,
         },
     }
 
@@ -810,6 +1041,12 @@ async def create_subkegiatan(data: SubkegiatanCreate, session: AsyncSession = De
         p_volume_4=data.p_volume_4 or "-",
         p_volume_5=data.p_volume_5 or "-",
         p_volume_akhir=data.p_volume_akhir or data.p_volume_4 or "-",
+        realisasi0=data.realisasi2025 or "-",
+        realisasi1=data.realisasi2026 or "-",
+        realisasi2=data.realisasi2027 or "-",
+        realisasi3=data.realisasi2028 or "-",
+        realisasi4=data.realisasi2029 or "-",
+        realisasi5=data.realisasi2030 or "-",
         perubahan_status=data.perubahan_status or "tetap",
         pagu1=data.pagu1 or 0.0,
         pagu2=data.pagu2 or 0.0,
@@ -887,8 +1124,22 @@ async def update_subkegiatan(id: int, data: SubkegiatanUpdate, session: AsyncSes
         subkeg.p_volume_5 = data.p_volume_5
     if data.p_volume_akhir is not None:
         subkeg.p_volume_akhir = data.p_volume_akhir
+    if data.realisasi2025 is not None:
+        subkeg.realisasi0 = data.realisasi2025
+    if data.realisasi2026 is not None:
+        subkeg.realisasi1 = data.realisasi2026
+    if data.realisasi2027 is not None:
+        subkeg.realisasi2 = data.realisasi2027
+    if data.realisasi2028 is not None:
+        subkeg.realisasi3 = data.realisasi2028
+    if data.realisasi2029 is not None:
+        subkeg.realisasi4 = data.realisasi2029
+    if data.realisasi2030 is not None:
+        subkeg.realisasi5 = data.realisasi2030
     if data.perubahan_status is not None:
         subkeg.perubahan_status = data.perubahan_status
+    if data.definisi_operasional is not None:
+        subkeg.definisi_operasional = data.definisi_operasional.strip()
     if data.pagu1 is not None:
         subkeg.pagu1 = data.pagu1
     if data.pagu2 is not None:

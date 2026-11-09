@@ -209,3 +209,9 @@ Indikator Kinerja Utama
 Nama Perangkat Daerah
 No  | Tujuan /Sasaran | Indikator | Satuan  |  Target Tahun                               | 
                                             | 2025  | 2026  | 2027  | 2028 | 2029 | 2030 |
+
+
+Pada entri Kegiatan, referensi dari database tabel ref_subkegiatan berdasasrkan kode_program diatasnya
+Pada entri Sub Kegiatan, referensi dari database tabel ref_subkegiatan berdasasrkan kode_kegiatan diatasnya
+
+

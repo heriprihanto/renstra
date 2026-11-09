@@ -271,6 +271,22 @@ export const api = {
     });
   },
 
+  // Referensi dari ref_subkegiatan & Sasaran OPD
+  async getRefKegiatan(kodeProgram) {
+    return fetchJson(`${API_BASE_URL}/renstra/ref/kegiatan?kode_program=${encodeURIComponent(kodeProgram || '')}`);
+  },
+  async getRefSubkegiatan(kodeKegiatan) {
+    return fetchJson(`${API_BASE_URL}/renstra/ref/subkegiatan?kode_kegiatan=${encodeURIComponent(kodeKegiatan || '')}`);
+  },
+  async getRefSasaran(params = {}) {
+    const query = new URLSearchParams();
+    if (params.kodeskpd) query.append('kodeskpd', params.kodeskpd);
+    if (params.id_skpd) query.append('id_skpd', params.id_skpd);
+    if (params.id_sub_skpd) query.append('id_sub_skpd', params.id_sub_skpd);
+    const qs = query.toString();
+    return fetchJson(`${API_BASE_URL}/renstra/ref/sasaran${qs ? `?${qs}` : ''}`);
+  },
+
   // AI Assistant SMART Indicator Recommendations
   async getSmartIndicatorRecommendations(payload) {
     return fetchJson(`${API_BASE_URL}/ai/smart-indicator-recommendation`, {
@@ -328,6 +344,77 @@ export const api = {
     const blob = await res.blob();
     const disposition = res.headers.get('content-disposition');
     let filename = `IKU_OPD_${idSkpd}.xlsx`;
+    if (disposition && disposition.includes('filename=')) {
+      const match = disposition.match(/filename=["']?([^"']+)["']?/);
+      if (match && match[1]) filename = match[1];
+    }
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  },
+  // Laporan Tabel 4.1: Program, Kegiatan, Sub Kegiatan & Pendanaan
+  async getLaporanProgramKegiatan(idSkpd, params = {}) {
+    const { idSubSkpd = null, tipe = 'murni' } = params;
+    let url = `${API_BASE_URL}/laporan/program-kegiatan/${idSkpd}?tipe=${encodeURIComponent(tipe)}`;
+    if (idSubSkpd) url += `&id_sub_skpd=${encodeURIComponent(idSubSkpd)}`;
+    return fetchJson(url);
+  },
+  getLaporanProgramKegiatanExcelUrl(idSkpd, params = {}) {
+    const { idSubSkpd = null, tipe = 'murni' } = params;
+    let url = `${API_BASE_URL}/laporan/program-kegiatan/${idSkpd}/export-excel?tipe=${encodeURIComponent(tipe)}`;
+    if (idSubSkpd) url += `&id_sub_skpd=${encodeURIComponent(idSubSkpd)}`;
+    return url;
+  },
+  async downloadLaporanProgramKegiatanExcel(idSkpd, params = {}) {
+    const url = this.getLaporanProgramKegiatanExcelUrl(idSkpd, params);
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Gagal mengunduh Excel Program Kegiatan: HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get('content-disposition');
+    let filename = `Tabel_4.1_Program_Kegiatan_OPD_${idSkpd}.xlsx`;
+    if (disposition && disposition.includes('filename=')) {
+      const match = disposition.match(/filename=["']?([^"']+)["']?/);
+      if (match && match[1]) filename = match[1];
+    }
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  },
+
+  // Laporan Evaluasi Hasil Renstra (Permendagri 86/2017)
+  async getLaporanEvaluasiRenstra(idSkpd, params = {}) {
+    const { idSubSkpd = null, tipe = 'murni' } = params;
+    let url = `${API_BASE_URL}/laporan/evaluasi-renstra/${idSkpd}?tipe=${encodeURIComponent(tipe)}`;
+    if (idSubSkpd) url += `&id_sub_skpd=${encodeURIComponent(idSubSkpd)}`;
+    return fetchJson(url);
+  },
+  getLaporanEvaluasiRenstraExcelUrl(idSkpd, params = {}) {
+    const { idSubSkpd = null, tipe = 'murni' } = params;
+    let url = `${API_BASE_URL}/laporan/evaluasi-renstra/${idSkpd}/export-excel?tipe=${encodeURIComponent(tipe)}`;
+    if (idSubSkpd) url += `&id_sub_skpd=${encodeURIComponent(idSubSkpd)}`;
+    return url;
+  },
+  async downloadLaporanEvaluasiRenstraExcel(idSkpd, params = {}) {
+    const url = this.getLaporanEvaluasiRenstraExcelUrl(idSkpd, params);
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Gagal mengunduh Excel Evaluasi Renstra: HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get('content-disposition');
+    let filename = `Evaluasi_Hasil_Renstra_OPD_${idSkpd}.xlsx`;
     if (disposition && disposition.includes('filename=')) {
       const match = disposition.match(/filename=["']?([^"']+)["']?/);
       if (match && match[1]) filename = match[1];

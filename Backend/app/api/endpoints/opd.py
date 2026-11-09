@@ -211,6 +211,7 @@ from app.schemas.renstra import (
     KegiatanCascadingItem,
     OpdRenstraCascadingResponse,
     ProgramCascadingItem,
+    ProgramSasaranTagItem,
     SasaranCascadingItem,
     SubkegiatanCascadingItem,
     SubSkpdCascadingResponse,
@@ -378,6 +379,12 @@ async def get_opd_renstra_cascading(id_skpd: int, session: AsyncSession = Depend
                     p_target2029=it.p_target4 or "-",
                     p_target2030=it.p_target5 or "-",
                     p_target_akhir=it.p_target4 or "-",
+                    realisasi2025=it.realisasi0 or "-",
+                    realisasi2026=it.realisasi1 or "-",
+                    realisasi2027=it.realisasi2 or "-",
+                    realisasi2028=it.realisasi3 or "-",
+                    realisasi2029=it.realisasi4 or "-",
+                    realisasi2030=it.realisasi5 or "-",
                 )
             )
 
@@ -454,6 +461,12 @@ async def get_opd_renstra_cascading(id_skpd: int, session: AsyncSession = Depend
                         p_target2029=isas.p_target4 or "-",
                         p_target2030=isas.p_target5 or "-",
                         p_target_akhir=isas.p_target4 or "-",
+                        realisasi2025=isas.realisasi0 or "-",
+                        realisasi2026=isas.realisasi1 or "-",
+                        realisasi2027=isas.realisasi2 or "-",
+                        realisasi2028=isas.realisasi3 or "-",
+                        realisasi2029=isas.realisasi4 or "-",
+                        realisasi2030=isas.realisasi5 or "-",
                     )
                 )
 
@@ -525,6 +538,22 @@ async def get_sub_skpd_cascading(id_sub_skpd: int, session: AsyncSession = Depen
         .order_by(RenstraProgram.no.asc(), RenstraProgram.kodeprogram.asc())
     )).all()
 
+    # Load all Sasaran for this OPD to resolve Program tagging
+    parent_kodeskpd = opd.kode_skpd if opd and opd.kode_skpd else (kode_sub[:-4] + "0000" if len(kode_sub) >= 22 else kode_sub)
+    sasaran_rows = (await session.exec(
+        select(RenstraSasaran, RenstraTujuan)
+        .outerjoin(RenstraTujuan, RenstraTujuan.idtujuan == RenstraSasaran.idtujuan)
+        .where(
+            (RenstraSasaran.kodeskpd == kode_sub) |
+            (RenstraSasaran.kodeskpd == parent_kodeskpd)
+        )
+        .order_by(RenstraSasaran.urut.asc(), RenstraSasaran.no.asc())
+    )).all()
+
+    sasaran_map = {}
+    for s_item, t_item in sasaran_rows:
+        sasaran_map[str(s_item.idsasaran)] = (s_item, t_item)
+
     total_kegiatan = 0
     total_subkegiatan = 0
     total_indikator_program = 0
@@ -534,6 +563,26 @@ async def get_sub_skpd_cascading(id_sub_skpd: int, session: AsyncSession = Depen
     program_items: List[ProgramCascadingItem] = []
 
     for p in programs:
+        # Resolve Sasaran Tagging
+        p_sasaran_list: List[ProgramSasaranTagItem] = []
+        raw_sasaran_tags = p.renstra_sasaran or []
+        resolved_sasaran_ids: List[str] = []
+        if isinstance(raw_sasaran_tags, list):
+            for tag in raw_sasaran_tags:
+                tag_str = str(tag).strip()
+                target_uuid = tag_str[-36:] if len(tag_str) >= 36 else tag_str
+                if target_uuid in sasaran_map:
+                    s_obj, t_obj = sasaran_map[target_uuid]
+                    resolved_sasaran_ids.append(target_uuid)
+                    p_sasaran_list.append(
+                        ProgramSasaranTagItem(
+                            idsasaran=str(s_obj.idsasaran),
+                            uraisasaran=s_obj.uraisasaran or "-",
+                            no=s_obj.no or s_obj.urut or 1,
+                            uraitujuan=t_obj.uraitujuan if t_obj else None,
+                        )
+                    )
+
         # 1. Indikator Program
         ind_prog_rows = (await session.exec(
             select(RenstraIndikatorProgram)
@@ -586,6 +635,12 @@ async def get_sub_skpd_cascading(id_sub_skpd: int, session: AsyncSession = Depen
                     p_target2029=ip.p_target4 or "-",
                     p_target2030=ip.p_target5 or "-",
                     p_target_akhir=ip.p_target_akhir or ip.p_target4 or "-",
+                    realisasi2025=ip.realisasi0 or "-",
+                    realisasi2026=ip.realisasi1 or "-",
+                    realisasi2027=ip.realisasi2 or "-",
+                    realisasi2028=ip.realisasi3 or "-",
+                    realisasi2029=ip.realisasi4 or "-",
+                    realisasi2030=ip.realisasi5 or "-",
                     perubahan_status=ip_status,
                     is_baru=ip_baru,
                     is_perubahan=ip_perubahan,
@@ -663,6 +718,12 @@ async def get_sub_skpd_cascading(id_sub_skpd: int, session: AsyncSession = Depen
                         p_target2029=ik.p_target4 or "-",
                         p_target2030=ik.p_target5 or "-",
                         p_target_akhir=ik.p_target_akhir or ik.p_target4 or "-",
+                        realisasi2025=ik.realisasi0 or "-",
+                        realisasi2026=ik.realisasi1 or "-",
+                        realisasi2027=ik.realisasi2 or "-",
+                        realisasi2028=ik.realisasi3 or "-",
+                        realisasi2029=ik.realisasi4 or "-",
+                        realisasi2030=ik.realisasi5 or "-",
                         pagu1=float(ik.pagu1 or 0),
                         pagu2=float(ik.pagu2 or 0),
                         pagu3=float(ik.pagu3 or 0),
@@ -740,6 +801,12 @@ async def get_sub_skpd_cascading(id_sub_skpd: int, session: AsyncSession = Depen
                         p_volume_4=sk.p_volume_4 or "-",
                         p_volume_5=sk.p_volume_5 or "-",
                         p_volume_akhir=sk.p_volume_akhir or sk.p_volume_4 or "-",
+                        realisasi2025=sk.realisasi0 or "-",
+                        realisasi2026=sk.realisasi1 or "-",
+                        realisasi2027=sk.realisasi2 or "-",
+                        realisasi2028=sk.realisasi3 or "-",
+                        realisasi2029=sk.realisasi4 or "-",
+                        realisasi2030=sk.realisasi5 or "-",
                         perubahan_status=sk_status,
                         is_baru=sk_baru,
                         is_perubahan=sk_perubahan,
@@ -860,6 +927,8 @@ async def get_sub_skpd_cascading(id_sub_skpd: int, session: AsyncSession = Depen
                 p_pagu3=p_p_pagu3,
                 p_pagu4=p_p_pagu4,
                 p_pagu5=p_p_pagu5,
+                renstra_sasaran=resolved_sasaran_ids,
+                sasaran_list=p_sasaran_list,
                 indikator_program=ind_prog_items,
                 kegiatan=keg_items,
             )
