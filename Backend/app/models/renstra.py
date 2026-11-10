@@ -131,7 +131,7 @@ class RenstraProgram(SQLModel, table=True):
 class RenstraIndikatorProgram(SQLModel, table=True):
     __tablename__ = "renstra_indikator_program"
 
-    id: int = Field(primary_key=True)
+    id: Optional[int] = Field(default=None, primary_key=True)
     kodepemda: Optional[str] = None
     kodeskpd: Optional[str] = Field(default=None, index=True)
     idperiode: Optional[str] = None

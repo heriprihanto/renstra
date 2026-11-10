@@ -95,27 +95,16 @@
 
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                <label class="form-label" style="margin-bottom: 0;">
-                  Uraian {{ isTujuan ? 'Tujuan' : 'Sasaran' }} <span v-if="!isEditMode" style="color: #ef4444;">*</span>
-                </label>
-                <span v-if="isEditMode" class="badge-locked" title="Rumusan kalimat terkunci sesuai ketentuan RENSTRA Perubahan">
-                  🔒 Kalimat Terkunci
-                </span>
-              </div>
+              <label class="form-label">
+                Uraian {{ isTujuan ? 'Tujuan' : 'Sasaran' }} <span style="color: #ef4444;">*</span>
+              </label>
               <textarea
                 class="form-textarea"
-                :class="{ 'readonly-locked': isEditMode }"
                 v-model="formData.uraian"
                 rows="3"
-                :required="!isEditMode"
-                :readonly="isEditMode"
-                :disabled="isEditMode"
+                required
                 :placeholder="`Masukkan rumusan uraian ${isTujuan ? 'Tujuan' : 'Sasaran'} RENSTRA...`"
               ></textarea>
-              <div v-if="isEditMode" class="form-helper-locked">
-                Kalimat rumusan tidak dapat diedit pada RENSTRA Perubahan. Anda hanya dapat menyesuaikan nomor urut dan status data.
-              </div>
             </div>
 
             <div style="display: flex; gap: 0.85rem; align-items: flex-start; margin-top: 0.75rem;">
@@ -175,27 +164,16 @@
 
           <form @submit.prevent="handleSubmit">
             <div class="form-group">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                <label class="form-label" style="margin-bottom: 0;">
-                  Uraian Indikator Kinerja <span v-if="!isEditMode" style="color: #ef4444;">*</span>
-                </label>
-                <span v-if="isEditMode" class="badge-locked" title="Rumusan kalimat indikator terkunci sesuai ketentuan RENSTRA Perubahan">
-                  🔒 Kalimat Terkunci
-                </span>
-              </div>
+              <label class="form-label">
+                Uraian Indikator Kinerja <span style="color: #ef4444;">*</span>
+              </label>
               <textarea
                 class="form-textarea"
-                :class="{ 'readonly-locked': isEditMode }"
                 v-model="formData.uraian"
                 rows="2"
-                :required="!isEditMode"
-                :readonly="isEditMode"
-                :disabled="isEditMode"
+                required
                 placeholder="Contoh: Rata-Rata Lama Sekolah, Indeks Kepuasan Masyarakat..."
               ></textarea>
-              <div v-if="isEditMode" class="form-helper-locked">
-                Rumusan kalimat indikator tidak dapat diubah pada RENSTRA Perubahan.
-              </div>
             </div>
 
             <div style="display: grid; grid-template-columns: 1.1fr 1.2fr 0.7fr; gap: 0.85rem; margin-top: 0.75rem;">
@@ -285,43 +263,32 @@
             <!-- Target Capaian Grid (Murni / Sebelum Perubahan) -->
             <div style="margin-top: 1.25rem;">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                  <label class="form-label" style="font-weight: 700; color: #1e3a8a; margin-bottom: 0;">
-                    Target Capaian Kinerja (Murni)
-                  </label>
-                  <span v-if="isEditMode" class="badge-locked" title="Target Murni adalah acuan penetapan awal dan tidak dapat diubah">
-                    🔒 Terkunci
-                  </span>
-                </div>
-                <span style="font-size: 0.75rem; color: #64748b; font-weight: 500;">
-                  * Target Murni adalah acuan awal (tidak dapat diubah)
-                </span>
+                <label class="form-label" style="font-weight: 700; color: #1e3a8a; margin-bottom: 0;">
+                  Target Capaian Kinerja (Murni)
+                </label>
               </div>
-              <div class="targets-form-grid" :class="{ 'grid-locked': isEditMode }">
+              <div class="targets-form-grid">
                 <div class="form-group">
                   <label class="form-label sub">Target Awal <span style="font-size: 0.72rem; opacity: 0.85;">(Baseline)</span></label>
-                  <input type="text" class="form-input mono" :class="{ 'readonly-locked': isEditMode }" :readonly="isEditMode" :disabled="isEditMode" v-model="formData.target_awal" placeholder="-" />
+                  <input type="text" class="form-input mono" v-model="formData.target_awal" placeholder="-" />
                 </div>
                 <div class="form-group">
                   <label class="form-label sub">Target 2026</label>
-                  <input type="text" class="form-input mono" :class="{ 'readonly-locked': isEditMode }" :readonly="isEditMode" :disabled="isEditMode" v-model="formData.target2026" placeholder="-" />
+                  <input type="text" class="form-input mono" v-model="formData.target2026" placeholder="-" />
                 </div>
                 <div class="form-group">
                   <label class="form-label sub">Target 2027</label>
-                  <input type="text" class="form-input mono" :class="{ 'readonly-locked': isEditMode }" :readonly="isEditMode" :disabled="isEditMode" v-model="formData.target2027" placeholder="-" />
+                  <input type="text" class="form-input mono" v-model="formData.target2027" placeholder="-" />
                 </div>
                 <div class="form-group">
                   <label class="form-label sub">Target 2028</label>
-                  <input type="text" class="form-input mono" :class="{ 'readonly-locked': isEditMode }" :readonly="isEditMode" :disabled="isEditMode" v-model="formData.target2028" placeholder="-" />
+                  <input type="text" class="form-input mono" v-model="formData.target2028" placeholder="-" />
                 </div>
                 <div class="form-group">
                   <label class="form-label sub">Target 2029</label>
                   <input
                     type="text"
                     class="form-input mono"
-                    :class="{ 'readonly-locked': isEditMode }"
-                    :readonly="isEditMode"
-                    :disabled="isEditMode"
                     v-model="formData.target2029"
                     @input="onTarget2029Input"
                     placeholder="-"
@@ -332,9 +299,6 @@
                   <input
                     type="text"
                     class="form-input mono"
-                    :class="{ 'readonly-locked': isEditMode }"
-                    :readonly="isEditMode"
-                    :disabled="isEditMode"
                     v-model="formData.target2030"
                     placeholder="-"
                   />
@@ -346,9 +310,6 @@
                   <input
                     type="text"
                     class="form-input mono"
-                    :class="{ 'readonly-locked': isEditMode }"
-                    :readonly="isEditMode"
-                    :disabled="isEditMode"
                     v-model="formData.target_akhir"
                     placeholder="-"
                     style="border-color: #a7f3d0;"
@@ -1153,6 +1114,7 @@ const deleteItemLabel = computed(() => {
     case 'sasaran': return 'Sasaran RENSTRA';
     case 'ind_tujuan': return 'Indikator Tujuan';
     case 'ind_sasaran': return 'Indikator Sasaran';
+    case 'ind_program': return 'Indikator Program';
     case 'ind_kegiatan': return 'Indikator Kegiatan';
     case 'program': return 'Program RENSTRA';
     case 'kegiatan': return 'Kegiatan RENSTRA';
@@ -1189,16 +1151,17 @@ const modalCategoryLabel = computed(() => {
 const modalTitle = computed(() => {
   switch (props.mode) {
     case 'create_tujuan': return 'Tambah Tujuan RENSTRA Baru';
-    case 'edit_tujuan': return 'Ubah Metadata Tujuan RENSTRA';
+    case 'edit_tujuan': return 'Ubah Tujuan RENSTRA';
     case 'create_sasaran': return 'Tambah Sasaran RENSTRA Baru';
-    case 'edit_sasaran': return 'Ubah Metadata Sasaran RENSTRA';
+    case 'edit_sasaran': return 'Ubah Sasaran RENSTRA';
     case 'create_ind_tujuan': return 'Tambah Indikator Tujuan';
-    case 'edit_ind_tujuan': return 'Ubah Metadata & Target Perubahan';
+    case 'edit_ind_tujuan': return 'Ubah Indikator Tujuan';
     case 'create_ind_sasaran': return 'Tambah Indikator Sasaran';
-    case 'edit_ind_sasaran': return 'Ubah Metadata & Target Perubahan';
-    case 'edit_ind_program': return 'Ubah Metadata & Target Perubahan Indikator Program';
+    case 'edit_ind_sasaran': return 'Ubah Indikator Sasaran';
+    case 'create_ind_program': return 'Tambah Indikator Program';
+    case 'edit_ind_program': return 'Ubah Indikator Program';
     case 'create_ind_kegiatan': return 'Tambah Indikator Kegiatan';
-    case 'edit_ind_kegiatan': return 'Ubah Metadata & Target Perubahan Indikator Kegiatan';
+    case 'edit_ind_kegiatan': return 'Ubah Indikator Kegiatan';
     case 'create_program': return 'Tambah Program RENSTRA Baru';
     case 'edit_program': return 'Ubah Data & Kinerja Program';
     case 'create_kegiatan': return 'Tambah Kegiatan RENSTRA Baru';
@@ -1700,11 +1663,24 @@ async function handleSubmit() {
         realisasi2030: formData.value.realisasi2030,
         no_urut: formData.value.no_urut,
       });
-    } else if (props.mode === 'edit_ind_program') {
-      await api.updateIndikatorProgram(props.itemData.id, {
+    } else if (props.mode === 'create_ind_program') {
+      await api.createIndikatorProgram({
+        kodeskpd: props.itemData.kodeskpd,
+        kodeprogram: props.itemData.kodeprogram,
+        uraiprogram: props.itemData.uraiprogram,
+        kodebidang: props.itemData.kodebidang,
+        uraian: formData.value.uraian,
         satuan: formData.value.satuan,
         status: formData.value.status,
-        perubahan_status: statusToSend,
+        perubahan_status: statusToSend || 'baru',
+        definisi_operasional: formData.value.definisi_operasional,
+        target_awal: formData.value.target_awal,
+        target2026: formData.value.target2026,
+        target2027: formData.value.target2027,
+        target2028: formData.value.target2028,
+        target2029: formData.value.target2029,
+        target2030: formData.value.target2030,
+        target_akhir: formData.value.target_akhir,
         p_target2025: formData.value.p_target2025,
         p_target2026: formData.value.p_target2026,
         p_target2027: formData.value.p_target2027,
@@ -1718,6 +1694,36 @@ async function handleSubmit() {
         realisasi2028: formData.value.realisasi2028,
         realisasi2029: formData.value.realisasi2029,
         realisasi2030: formData.value.realisasi2030,
+        no_urut: formData.value.no_urut,
+      });
+    } else if (props.mode === 'edit_ind_program') {
+      await api.updateIndikatorProgram(props.itemData.id, {
+        uraian: formData.value.uraian,
+        satuan: formData.value.satuan,
+        status: formData.value.status,
+        perubahan_status: statusToSend,
+        definisi_operasional: formData.value.definisi_operasional,
+        target_awal: formData.value.target_awal,
+        target2026: formData.value.target2026,
+        target2027: formData.value.target2027,
+        target2028: formData.value.target2028,
+        target2029: formData.value.target2029,
+        target2030: formData.value.target2030,
+        target_akhir: formData.value.target_akhir,
+        p_target2025: formData.value.p_target2025,
+        p_target2026: formData.value.p_target2026,
+        p_target2027: formData.value.p_target2027,
+        p_target2028: formData.value.p_target2028,
+        p_target2029: formData.value.p_target2029,
+        p_target2030: formData.value.p_target2030,
+        p_target_akhir: formData.value.p_target_akhir,
+        realisasi2025: formData.value.realisasi2025,
+        realisasi2026: formData.value.realisasi2026,
+        realisasi2027: formData.value.realisasi2027,
+        realisasi2028: formData.value.realisasi2028,
+        realisasi2029: formData.value.realisasi2029,
+        realisasi2030: formData.value.realisasi2030,
+        no_urut: formData.value.no_urut,
       });
     } else if (props.mode === 'create_ind_kegiatan') {
       await api.createIndikatorKegiatan({
@@ -1902,6 +1908,12 @@ async function handleDeleteConfirm() {
         break;
       case 'ind_sasaran':
         await api.deleteIndikatorSasaran(props.itemData.id);
+        break;
+      case 'ind_program':
+        await api.deleteIndikatorProgram(props.itemData.id);
+        break;
+      case 'ind_kegiatan':
+        await api.deleteIndikatorKegiatan(props.itemData.id);
         break;
       case 'program':
         await api.deleteProgram(props.itemData.id);

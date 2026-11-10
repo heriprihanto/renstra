@@ -21,6 +21,7 @@ from app.schemas.renstra_crud import (
     IndikatorCreate,
     IndikatorKegiatanCreate,
     IndikatorKegiatanUpdate,
+    IndikatorProgramCreate,
     IndikatorProgramUpdate,
     IndikatorUpdate,
     KegiatanCreate,
@@ -206,7 +207,8 @@ async def update_tujuan(idtujuan: str, data: TujuanUpdate, session: AsyncSession
     if not tujuan:
         raise HTTPException(status_code=404, detail="Tujuan tidak ditemukan")
 
-    # Kalimat Tujuan tidak dapat diedit pada RENSTRA Perubahan
+    if data.uraitujuan is not None:
+        tujuan.uraitujuan = data.uraitujuan.strip()
     if data.no_urut is not None:
         tujuan.no_urut = data.no_urut
     if data.perubahan_status is not None:
@@ -219,10 +221,38 @@ async def update_tujuan(idtujuan: str, data: TujuanUpdate, session: AsyncSession
 
 @router.delete("/tujuan/{idtujuan}", response_model=Dict[str, Any])
 async def delete_tujuan(idtujuan: str, session: AsyncSession = Depends(get_session)):
-    raise HTTPException(
-        status_code=403,
-        detail="Data Tujuan tidak dapat dihapus pada RENSTRA Perubahan",
-    )
+    try:
+        t_uuid = uuid.UUID(idtujuan)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Format ID Tujuan tidak valid")
+
+    tujuan = await session.get(RenstraTujuan, t_uuid)
+    if not tujuan:
+        raise HTTPException(status_code=404, detail="Tujuan tidak ditemukan")
+
+    # 1. Hapus indikator tujuan
+    ind_tujuans = (await session.exec(
+        select(RenstraIndikatorTujuan).where(RenstraIndikatorTujuan.idtujuan == t_uuid)
+    )).all()
+    for it in ind_tujuans:
+        await session.delete(it)
+
+    # 2. Hapus sasaran di bawah tujuan ini beserta indikator sasaran
+    sasarans = (await session.exec(
+        select(RenstraSasaran).where(RenstraSasaran.idtujuan == t_uuid)
+    )).all()
+    for s in sasarans:
+        ind_sasarans = (await session.exec(
+            select(RenstraIndikatorSasaran).where(RenstraIndikatorSasaran.idsasaran == s.idsasaran)
+        )).all()
+        for isas in ind_sasarans:
+            await session.delete(isas)
+        await session.delete(s)
+
+    # 3. Hapus tujuan
+    await session.delete(tujuan)
+    await session.commit()
+    return {"success": True, "message": "Tujuan dan seluruh turunannya berhasil dihapus"}
 
 
 # =====================================================================
@@ -297,9 +327,24 @@ async def update_indikator_tujuan(id: str, data: IndikatorUpdate, session: Async
     if not ind:
         raise HTTPException(status_code=404, detail="Indikator Tujuan tidak ditemukan")
 
-    # Kalimat uraian dan Target Murni tidak dapat diedit pada RENSTRA Perubahan
-    # Hanya metadata dan TARGET PERUBAHAN yang dapat diedit:
-    p_target_2029_val = data.p_target2029 if data.p_target2029 and data.p_target2029 != "-" else (data.p_target_akhir or ind.p_target4 or "-")
+    # Kalimat uraian indikator
+    if data.uraian is not None:
+        ind.uraitujuan_indikator = data.uraian.strip()
+
+    # Target Murni
+    if data.target_awal is not None:
+        ind.target_awal = data.target_awal or "-"
+    if data.target2026 is not None:
+        ind.target1 = data.target2026 or "-"
+    if data.target2027 is not None:
+        ind.target2 = data.target2027 or "-"
+    if data.target2028 is not None:
+        ind.target3 = data.target2028 or "-"
+    if data.target2029 is not None or data.target_akhir is not None:
+        target_2029_val = data.target2029 if data.target2029 and data.target2029 != "-" else (data.target_akhir or ind.target4 or "-")
+        ind.target4 = target_2029_val
+    if data.target2030 is not None:
+        ind.target5 = data.target2030 or "-"
 
     # Metadata
     if data.satuan is not None:
@@ -317,6 +362,7 @@ async def update_indikator_tujuan(id: str, data: IndikatorUpdate, session: Async
         ind.urut = data.no_urut
 
     # Target Perubahan
+    p_target_2029_val = data.p_target2029 if data.p_target2029 and data.p_target2029 != "-" else (data.p_target_akhir or ind.p_target4 or "-")
     if data.p_target2025 is not None:
         ind.p_target0 = data.p_target2025 or "-"
     if data.p_target2026 is not None:
@@ -346,15 +392,23 @@ async def update_indikator_tujuan(id: str, data: IndikatorUpdate, session: Async
 
     session.add(ind)
     await session.commit()
-    return {"success": True, "message": "Metadata, Target Perubahan, dan Realisasi Indikator Tujuan berhasil diperbarui"}
+    return {"success": True, "message": "Indikator Tujuan berhasil diperbarui"}
 
 
 @router.delete("/indikator-tujuan/{id}", response_model=Dict[str, Any])
 async def delete_indikator_tujuan(id: str, session: AsyncSession = Depends(get_session)):
-    raise HTTPException(
-        status_code=403,
-        detail="Data Indikator Tujuan tidak dapat dihapus pada RENSTRA Perubahan",
-    )
+    try:
+        ind_uuid = uuid.UUID(id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Format ID Indikator tidak valid")
+
+    ind = await session.get(RenstraIndikatorTujuan, ind_uuid)
+    if not ind:
+        raise HTTPException(status_code=404, detail="Indikator Tujuan tidak ditemukan")
+
+    await session.delete(ind)
+    await session.commit()
+    return {"success": True, "message": "Indikator Tujuan berhasil dihapus"}
 
 
 # =====================================================================
@@ -404,7 +458,8 @@ async def update_sasaran(idsasaran: str, data: SasaranUpdate, session: AsyncSess
     if not sasaran:
         raise HTTPException(status_code=404, detail="Sasaran tidak ditemukan")
 
-    # Kalimat Sasaran tidak dapat diedit pada RENSTRA Perubahan
+    if data.uraisasaran is not None:
+        sasaran.uraisasaran = data.uraisasaran.strip()
     if data.no_urut is not None:
         sasaran.urut = data.no_urut
         sasaran.no = data.no_urut
@@ -418,10 +473,25 @@ async def update_sasaran(idsasaran: str, data: SasaranUpdate, session: AsyncSess
 
 @router.delete("/sasaran/{idsasaran}", response_model=Dict[str, Any])
 async def delete_sasaran(idsasaran: str, session: AsyncSession = Depends(get_session)):
-    raise HTTPException(
-        status_code=403,
-        detail="Data Sasaran tidak dapat dihapus pada RENSTRA Perubahan",
-    )
+    try:
+        s_uuid = uuid.UUID(idsasaran)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Format ID Sasaran tidak valid")
+
+    sasaran = await session.get(RenstraSasaran, s_uuid)
+    if not sasaran:
+        raise HTTPException(status_code=404, detail="Sasaran tidak ditemukan")
+
+    # Hapus indikator sasaran
+    ind_sasarans = (await session.exec(
+        select(RenstraIndikatorSasaran).where(RenstraIndikatorSasaran.idsasaran == s_uuid)
+    )).all()
+    for isas in ind_sasarans:
+        await session.delete(isas)
+
+    await session.delete(sasaran)
+    await session.commit()
+    return {"success": True, "message": "Sasaran dan indikatornya berhasil dihapus"}
 
 
 # =====================================================================
@@ -496,9 +566,24 @@ async def update_indikator_sasaran(id: str, data: IndikatorUpdate, session: Asyn
     if not ind:
         raise HTTPException(status_code=404, detail="Indikator Sasaran tidak ditemukan")
 
-    # Kalimat uraian dan Target Murni tidak dapat diedit pada RENSTRA Perubahan
-    # Hanya metadata dan TARGET PERUBAHAN yang dapat diedit:
-    p_target_2029_val = data.p_target2029 if data.p_target2029 and data.p_target2029 != "-" else (data.p_target_akhir or ind.p_target4 or "-")
+    # Kalimat uraian indikator
+    if data.uraian is not None:
+        ind.uraisasaran_indikator = data.uraian.strip()
+
+    # Target Murni
+    if data.target_awal is not None:
+        ind.target_awal = data.target_awal or "-"
+    if data.target2026 is not None:
+        ind.target1 = data.target2026 or "-"
+    if data.target2027 is not None:
+        ind.target2 = data.target2027 or "-"
+    if data.target2028 is not None:
+        ind.target3 = data.target2028 or "-"
+    if data.target2029 is not None or data.target_akhir is not None:
+        target_2029_val = data.target2029 if data.target2029 and data.target2029 != "-" else (data.target_akhir or ind.target4 or "-")
+        ind.target4 = target_2029_val
+    if data.target2030 is not None:
+        ind.target5 = data.target2030 or "-"
 
     # Metadata
     if data.satuan is not None:
@@ -516,6 +601,7 @@ async def update_indikator_sasaran(id: str, data: IndikatorUpdate, session: Asyn
         ind.urut = data.no_urut
 
     # Target Perubahan
+    p_target_2029_val = data.p_target2029 if data.p_target2029 and data.p_target2029 != "-" else (data.p_target_akhir or ind.p_target4 or "-")
     if data.p_target2025 is not None:
         ind.p_target0 = data.p_target2025 or "-"
     if data.p_target2026 is not None:
@@ -545,15 +631,23 @@ async def update_indikator_sasaran(id: str, data: IndikatorUpdate, session: Asyn
 
     session.add(ind)
     await session.commit()
-    return {"success": True, "message": "Metadata, Target Perubahan, dan Realisasi Indikator Sasaran berhasil diperbarui"}
+    return {"success": True, "message": "Indikator Sasaran berhasil diperbarui"}
 
 
 @router.delete("/indikator-sasaran/{id}", response_model=Dict[str, Any])
 async def delete_indikator_sasaran(id: str, session: AsyncSession = Depends(get_session)):
-    raise HTTPException(
-        status_code=403,
-        detail="Data Indikator Sasaran tidak dapat dihapus pada RENSTRA Perubahan",
-    )
+    try:
+        ind_uuid = uuid.UUID(id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Format ID Indikator tidak valid")
+
+    ind = await session.get(RenstraIndikatorSasaran, ind_uuid)
+    if not ind:
+        raise HTTPException(status_code=404, detail="Indikator Sasaran tidak ditemukan")
+
+    await session.delete(ind)
+    await session.commit()
+    return {"success": True, "message": "Indikator Sasaran berhasil dihapus"}
 
 
 # =====================================================================
@@ -638,7 +732,24 @@ async def update_indikator_kegiatan(id: int, data: IndikatorKegiatanUpdate, sess
     if not ind:
         raise HTTPException(status_code=404, detail="Indikator Kegiatan tidak ditemukan")
 
-    p_target_2029_val = data.p_target2029 if data.p_target2029 and data.p_target2029 != "-" else (data.p_target_akhir or ind.p_target4 or "-")
+    if data.uraian is not None:
+        ind.uraiindikator = data.uraian.strip()
+
+    # Target Murni
+    if data.target_awal is not None:
+        ind.target_awal = data.target_awal or "-"
+    if data.target2026 is not None:
+        ind.target1 = data.target2026 or "-"
+    if data.target2027 is not None:
+        ind.target2 = data.target2027 or "-"
+    if data.target2028 is not None:
+        ind.target3 = data.target2028 or "-"
+    if data.target2029 is not None or data.target_akhir is not None:
+        target_2029_val = data.target2029 if data.target2029 and data.target2029 != "-" else (data.target_akhir or ind.target4 or "-")
+        ind.target4 = target_2029_val
+        ind.target_akhir = data.target_akhir or target_2029_val
+    if data.target2030 is not None:
+        ind.target5 = data.target2030 or "-"
 
     if data.satuan is not None:
         ind.satuan = data.satuan
@@ -655,6 +766,7 @@ async def update_indikator_kegiatan(id: int, data: IndikatorKegiatanUpdate, sess
         ind.urut = data.no_urut
 
     # Target Perubahan
+    p_target_2029_val = data.p_target2029 if data.p_target2029 and data.p_target2029 != "-" else (data.p_target_akhir or ind.p_target4 or "-")
     if data.p_target2025 is not None:
         ind.p_target0 = data.p_target2025 or "-"
     if data.p_target2026 is not None:
@@ -709,7 +821,84 @@ async def update_indikator_kegiatan(id: int, data: IndikatorKegiatanUpdate, sess
 
     session.add(ind)
     await session.commit()
-    return {"success": True, "message": "Metadata, Target & Pagu Perubahan Indikator Kegiatan berhasil diperbarui"}
+    return {"success": True, "message": "Indikator Kegiatan berhasil diperbarui"}
+
+
+@router.delete("/indikator-kegiatan/{id}", response_model=Dict[str, Any])
+async def delete_indikator_kegiatan(id: int, session: AsyncSession = Depends(get_session)):
+    ind = await session.get(RenstraIndikatorKegiatan, id)
+    if not ind:
+        raise HTTPException(status_code=404, detail="Indikator Kegiatan tidak ditemukan")
+
+    await session.delete(ind)
+    await session.commit()
+    return {"success": True, "message": "Indikator Kegiatan berhasil dihapus"}
+
+
+# =====================================================================
+# INDIKATOR PROGRAM CRUD
+# =====================================================================
+
+@router.post("/indikator-program", response_model=Dict[str, Any])
+async def create_indikator_program(data: IndikatorProgramCreate, session: AsyncSession = Depends(get_session)):
+    target_2029_val = data.target2029 if data.target2029 and data.target2029 != "-" else (data.target_akhir or "-")
+    p_target_2029_val = data.p_target2029 if data.p_target2029 and data.p_target2029 != "-" else (data.p_target_akhir or "-")
+
+    uraiprog = data.uraiprogram
+    if not uraiprog:
+        prog_row = (await session.exec(
+            select(RenstraProgram).where(
+                RenstraProgram.kodeskpd == data.kodeskpd,
+                RenstraProgram.kodeprogram == data.kodeprogram,
+            )
+        )).first()
+        if prog_row:
+            uraiprog = prog_row.uraiprogram
+
+    ind = RenstraIndikatorProgram(
+        kodepemda="3376",
+        idperiode="20252029",
+        kodeskpd=data.kodeskpd,
+        kodebidang=data.kodebidang,
+        kodeprogram=data.kodeprogram,
+        uraiprogram=uraiprog,
+        uraiindikator=data.uraian.strip(),
+        satuan=data.satuan or "-",
+        status=data.status or "positif",
+        formula=data.formula or "-",
+        target_awal=data.target_awal or "-",
+        target0=data.target_awal or "-",
+        target1=data.target2026 or "-",
+        target2=data.target2027 or "-",
+        target3=data.target2028 or "-",
+        target4=target_2029_val,
+        target5=data.target2030 or "-",
+        p_target0=data.p_target2025 or "-",
+        p_target1=data.p_target2026 or "-",
+        p_target2=data.p_target2027 or "-",
+        p_target3=data.p_target2028 or "-",
+        p_target4=p_target_2029_val,
+        p_target5=data.p_target2030 or "-",
+        p_target_akhir=data.p_target_akhir or p_target_2029_val,
+        realisasi0=data.realisasi2025 or "-",
+        realisasi1=data.realisasi2026 or "-",
+        realisasi2=data.realisasi2027 or "-",
+        realisasi3=data.realisasi2028 or "-",
+        realisasi4=data.realisasi2029 or "-",
+        realisasi5=data.realisasi2030 or "-",
+        definisi_operasional=data.definisi_operasional or "-",
+        perubahan_status=data.perubahan_status or "baru",
+        no=data.no_urut or 1,
+        urut=data.no_urut or 1,
+    )
+    session.add(ind)
+    await session.commit()
+    await session.refresh(ind)
+    return {
+        "success": True,
+        "id": ind.id,
+        "message": "Indikator Program berhasil ditambahkan",
+    }
 
 
 @router.put("/indikator-program/{id}", response_model=Dict[str, Any])
@@ -717,6 +906,26 @@ async def update_indikator_program(id: int, data: IndikatorProgramUpdate, sessio
     ind = await session.get(RenstraIndikatorProgram, id)
     if not ind:
         raise HTTPException(status_code=404, detail="Indikator Program tidak ditemukan")
+
+    if data.uraian is not None:
+        ind.uraiindikator = data.uraian.strip()
+    if data.formula is not None:
+        ind.formula = data.formula.strip()
+
+    if data.target_awal is not None:
+        ind.target_awal = data.target_awal or "-"
+        ind.target0 = data.target_awal or "-"
+    if data.target2026 is not None:
+        ind.target1 = data.target2026 or "-"
+    if data.target2027 is not None:
+        ind.target2 = data.target2027 or "-"
+    if data.target2028 is not None:
+        ind.target3 = data.target2028 or "-"
+    if data.target2029 is not None or data.target_akhir is not None:
+        target_2029_val = data.target2029 if data.target2029 and data.target2029 != "-" else (data.target_akhir or ind.target4 or "-")
+        ind.target4 = target_2029_val
+    if data.target2030 is not None:
+        ind.target5 = data.target2030 or "-"
 
     if data.satuan is not None:
         ind.satuan = data.satuan.strip()
@@ -726,6 +935,9 @@ async def update_indikator_program(id: int, data: IndikatorProgramUpdate, sessio
         ind.perubahan_status = data.perubahan_status.strip()
     if data.definisi_operasional is not None:
         ind.definisi_operasional = data.definisi_operasional.strip()
+    if data.no_urut is not None:
+        ind.no = data.no_urut
+        ind.urut = data.no_urut
 
     if data.p_target2025 is not None:
         ind.p_target0 = data.p_target2025 or "-"
@@ -735,8 +947,8 @@ async def update_indikator_program(id: int, data: IndikatorProgramUpdate, sessio
         ind.p_target2 = data.p_target2027 or "-"
     if data.p_target2028 is not None:
         ind.p_target3 = data.p_target2028 or "-"
-    if data.p_target2029 is not None:
-        p_target_2029_val = data.p_target2029 or "-"
+    if data.p_target2029 is not None or data.p_target_akhir is not None:
+        p_target_2029_val = data.p_target2029 or data.p_target_akhir or "-"
         ind.p_target4 = p_target_2029_val
         ind.p_target_akhir = data.p_target_akhir or p_target_2029_val
     if data.p_target2030 is not None:
@@ -758,15 +970,18 @@ async def update_indikator_program(id: int, data: IndikatorProgramUpdate, sessio
 
     session.add(ind)
     await session.commit()
-    return {"success": True, "message": "Metadata, Target Perubahan, dan Realisasi Indikator Program berhasil diperbarui"}
+    return {"success": True, "message": "Indikator Program berhasil diperbarui"}
 
 
-@router.delete("/indikator-kegiatan/{id}", response_model=Dict[str, Any])
-async def delete_indikator_kegiatan(id: int, session: AsyncSession = Depends(get_session)):
-    raise HTTPException(
-        status_code=403,
-        detail="Data Indikator Kegiatan tidak dapat dihapus pada RENSTRA Perubahan",
-    )
+@router.delete("/indikator-program/{id}", response_model=Dict[str, Any])
+async def delete_indikator_program(id: int, session: AsyncSession = Depends(get_session)):
+    ind = await session.get(RenstraIndikatorProgram, id)
+    if not ind:
+        raise HTTPException(status_code=404, detail="Indikator Program tidak ditemukan")
+
+    await session.delete(ind)
+    await session.commit()
+    return {"success": True, "message": "Indikator Program berhasil dihapus"}
 
 
 # =====================================================================

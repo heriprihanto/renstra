@@ -370,7 +370,11 @@
                           <div class="dropdown-menu-divider"></div>
                           <button class="dropdown-menu-item" @click="openEditTujuan(tujuan); closeDropdown();">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                            <span>Ubah Metadata Tujuan</span>
+                            <span>Ubah Tujuan</span>
+                          </button>
+                          <button class="dropdown-menu-item danger" @click="openDeleteTujuan(tujuan); closeDropdown();">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <span>Hapus Tujuan</span>
                           </button>
                         </div>
                       </div>
@@ -405,17 +409,30 @@
                   >
                     <!-- Aksi Indikator Tujuan -->
                     <td style="text-align: center;">
-                      <button
-                        class="btn-table-edit"
-                        @click="openEditIndikatorTujuan(indTujuan, tujuan)"
-                        title="Ubah Metadata & Target Perubahan"
-                      >
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                        </svg>
-                        <span>Ubah Target</span>
-                      </button>
+                      <div class="action-dropdown">
+                        <button
+                          class="btn-action-dropdown"
+                          :class="{ active: activeDropdown === 'ind_t_' + indTujuan.id }"
+                          @click.stop="toggleDropdown('ind_t_' + indTujuan.id, $event)"
+                          title="Menu Aksi Indikator Tujuan"
+                        >
+                          <span>Aksi</span>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <polyline points="6 9 12 15 18 9"/>
+                          </svg>
+                        </button>
+                        <div v-if="activeDropdown === 'ind_t_' + indTujuan.id" class="dropdown-menu-list">
+                          <button class="dropdown-menu-item" @click="openEditIndikatorTujuan(indTujuan, tujuan); closeDropdown();">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            <span>Ubah Indikator</span>
+                          </button>
+                          <div class="dropdown-menu-divider"></div>
+                          <button class="dropdown-menu-item danger" @click="openDeleteIndikatorTujuan(indTujuan); closeDropdown();">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                            <span>Hapus Indikator</span>
+                          </button>
+                        </div>
+                      </div>
                     </td>
                     <td style="text-align: center;">
                       <span class="badge-hirarki indikator">IND. TUJUAN</span>
@@ -567,7 +584,11 @@
                             <div class="dropdown-menu-divider"></div>
                             <button class="dropdown-menu-item" @click="openEditSasaran(sasaran); closeDropdown();">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-                              <span>Ubah Metadata Sasaran</span>
+                              <span>Ubah Sasaran</span>
+                            </button>
+                            <button class="dropdown-menu-item danger" @click="openDeleteSasaran(sasaran); closeDropdown();">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                              <span>Hapus Sasaran</span>
                             </button>
                           </div>
                         </div>
@@ -607,17 +628,30 @@
                     >
                       <!-- Aksi Indikator Sasaran -->
                       <td style="text-align: center;">
-                        <button
-                          class="btn-table-edit"
-                          @click="openEditIndikatorSasaran(indSasaran, sasaran)"
-                          title="Ubah Metadata & Target Perubahan"
-                        >
-                          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                          <span>Ubah Target</span>
-                        </button>
+                        <div class="action-dropdown">
+                          <button
+                            class="btn-action-dropdown"
+                            :class="{ active: activeDropdown === 'ind_s_' + indSasaran.id }"
+                            @click.stop="toggleDropdown('ind_s_' + indSasaran.id, $event)"
+                            title="Menu Aksi Indikator Sasaran"
+                          >
+                            <span>Aksi</span>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                          </button>
+                          <div v-if="activeDropdown === 'ind_s_' + indSasaran.id" class="dropdown-menu-list">
+                            <button class="dropdown-menu-item" @click="openEditIndikatorSasaran(indSasaran, sasaran); closeDropdown();">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                              <span>Ubah Indikator</span>
+                            </button>
+                            <div class="dropdown-menu-divider"></div>
+                            <button class="dropdown-menu-item danger" @click="openDeleteIndikatorSasaran(indSasaran); closeDropdown();">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                              <span>Hapus Indikator</span>
+                            </button>
+                          </div>
+                        </div>
                       </td>
                       <td style="text-align: center;">
                         <span class="badge-hirarki indikator">IND. SASARAN</span>
@@ -1143,16 +1177,20 @@
                             </svg>
                           </button>
                           <div v-if="activeDropdown === 'prog_' + pIdx" class="dropdown-menu-list">
-                            <button class="dropdown-menu-item" @click="openCreateKegiatan(prog)">
+                            <button class="dropdown-menu-item" @click="openCreateKegiatan(prog); closeDropdown();">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
                               <span>+ Kegiatan</span>
                             </button>
+                            <button class="dropdown-menu-item" @click="openCreateIndikatorProgram(prog); closeDropdown();">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+                              <span>+ Indikator Program</span>
+                            </button>
                             <div class="dropdown-menu-divider"></div>
-                            <button class="dropdown-menu-item" @click="openEditProgram(prog)">
+                            <button class="dropdown-menu-item" @click="openEditProgram(prog); closeDropdown();">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                               <span>Ubah Program</span>
                             </button>
-                            <button class="dropdown-menu-item danger" @click="openDeleteProgram(prog)">
+                            <button class="dropdown-menu-item danger" @click="openDeleteProgram(prog); closeDropdown();">
                               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                               <span>Hapus Program</span>
                             </button>
@@ -1223,17 +1261,30 @@
                       :class="{ 'has-perubahan': indProg.is_perubahan, 'is-baru': indProg.is_baru }"
                     >
                       <td style="text-align: center;">
-                        <button
-                          class="btn-table-edit"
-                          @click="openEditIndikatorProgram(prog, indProg)"
-                          title="Ubah Metadata & Target Perubahan Indikator Program"
-                        >
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                          </svg>
-                          <span>Ubah Target</span>
-                        </button>
+                        <div class="action-dropdown">
+                          <button
+                            class="btn-action-dropdown"
+                            :class="{ active: activeDropdown === 'ind_p_' + pIdx + '_' + ipIdx }"
+                            @click.stop="toggleDropdown('ind_p_' + pIdx + '_' + ipIdx, $event)"
+                            title="Menu Aksi Indikator Program"
+                          >
+                            <span>Aksi</span>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                              <polyline points="6 9 12 15 18 9"/>
+                            </svg>
+                          </button>
+                          <div v-if="activeDropdown === 'ind_p_' + pIdx + '_' + ipIdx" class="dropdown-menu-list">
+                            <button class="dropdown-menu-item" @click="openEditIndikatorProgram(prog, indProg); closeDropdown();">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                              <span>Ubah Indikator</span>
+                            </button>
+                            <div class="dropdown-menu-divider"></div>
+                            <button class="dropdown-menu-item danger" @click="openDeleteIndikatorProgram(prog, indProg); closeDropdown();">
+                              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                              <span>Hapus Indikator</span>
+                            </button>
+                          </div>
+                        </div>
                       </td>
                       <td style="text-align: center;">
                         <span class="badge-hirarki ind-program">IND. PROGRAM</span>
@@ -1393,19 +1444,32 @@
                         class="row-ind-kegiatan"
                         :class="{ 'has-perubahan': indKeg.is_perubahan, 'is-baru': indKeg.is_baru }"
                       >
-                        <!-- Aksi Ubah Target Indikator Kegiatan -->
+                        <!-- Aksi Indikator Kegiatan -->
                         <td style="text-align: center;">
-                          <button
-                            class="btn-table-edit"
-                            @click="openEditIndikatorKegiatan(prog, keg, indKeg)"
-                            title="Ubah Metadata & Target Perubahan Indikator Kegiatan"
-                          >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-                              <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                            <span>Ubah Target</span>
-                          </button>
+                          <div class="action-dropdown">
+                            <button
+                              class="btn-action-dropdown"
+                              :class="{ active: activeDropdown === 'ind_k_' + pIdx + '_' + kIdx + '_' + ikIdx }"
+                              @click.stop="toggleDropdown('ind_k_' + pIdx + '_' + kIdx + '_' + ikIdx, $event)"
+                              title="Menu Aksi Indikator Kegiatan"
+                            >
+                              <span>Aksi</span>
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                <polyline points="6 9 12 15 18 9"/>
+                              </svg>
+                            </button>
+                            <div v-if="activeDropdown === 'ind_k_' + pIdx + '_' + kIdx + '_' + ikIdx" class="dropdown-menu-list">
+                              <button class="dropdown-menu-item" @click="openEditIndikatorKegiatan(prog, keg, indKeg); closeDropdown();">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                <span>Ubah Indikator</span>
+                              </button>
+                              <div class="dropdown-menu-divider"></div>
+                              <button class="dropdown-menu-item danger" @click="openDeleteIndikatorKegiatan(prog, keg, indKeg); closeDropdown();">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                                <span>Hapus Indikator</span>
+                              </button>
+                            </div>
+                          </div>
                         </td>
                         <td style="text-align: center;">
                           <span class="badge-hirarki ind-kegiatan">IND. KEGIATAN</span>
@@ -2059,12 +2123,37 @@ function openEditIndikatorKegiatan(prog, keg, indKeg) {
   isCrudModalOpen.value = true;
 }
 
+function openDeleteIndikatorKegiatan(prog, keg, indKeg) {
+  crudModalMode.value = 'delete';
+  crudModalItem.value = {
+    type: 'ind_kegiatan',
+    id: indKeg.id,
+    uraian: indKeg.uraian,
+  };
+  isCrudModalOpen.value = true;
+}
+
+function openCreateIndikatorProgram(prog) {
+  crudModalMode.value = 'create_ind_program';
+  crudModalItem.value = {
+    kodeskpd: selectedSubSkpd.value?.kode_sub_skpd,
+    kodeprogram: prog.kodeprogram,
+    uraiprogram: prog.uraiprogram,
+    kodebidang: prog.kodebidang,
+    parent_uraian: prog.uraiprogram,
+    opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
+    suggested_no: (prog.indikator_program?.length || 0) + 1,
+  };
+  isCrudModalOpen.value = true;
+}
+
 function openEditIndikatorProgram(prog, indProg) {
   crudModalMode.value = 'edit_ind_program';
   crudModalItem.value = {
     id: indProg.id,
     kodeprogram: prog.kodeprogram,
     uraiprogram: prog.uraiprogram,
+    kodebidang: prog.kodebidang,
     kinerja: prog.kinerja,
     parent_uraian: prog.uraiprogram,
     opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
@@ -2072,6 +2161,7 @@ function openEditIndikatorProgram(prog, indProg) {
     satuan: indProg.satuan,
     status: indProg.status,
     perubahan_status: indProg.perubahan_status || 'otomatis',
+    definisi_operasional: indProg.definisi_operasional,
     target_awal: indProg.target_awal,
     target2026: indProg.target2026,
     target2027: indProg.target2027,
@@ -2086,6 +2176,16 @@ function openEditIndikatorProgram(prog, indProg) {
     p_target2029: indProg.p_target2029,
     p_target2030: indProg.p_target2030,
     p_target_akhir: indProg.p_target_akhir,
+  };
+  isCrudModalOpen.value = true;
+}
+
+function openDeleteIndikatorProgram(prog, indProg) {
+  crudModalMode.value = 'delete';
+  crudModalItem.value = {
+    type: 'ind_program',
+    id: indProg.id,
+    uraian: indProg.uraian,
   };
   isCrudModalOpen.value = true;
 }

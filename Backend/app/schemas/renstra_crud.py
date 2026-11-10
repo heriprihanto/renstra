@@ -11,7 +11,7 @@ class TujuanCreate(BaseModel):
 
 
 class TujuanUpdate(BaseModel):
-    uraitujuan: str
+    uraitujuan: Optional[str] = None
     no_urut: Optional[int] = None
     perubahan_status: Optional[str] = None
 
@@ -25,7 +25,7 @@ class SasaranCreate(BaseModel):
 
 
 class SasaranUpdate(BaseModel):
-    uraisasaran: str
+    uraisasaran: Optional[str] = None
     no_urut: Optional[int] = None
     perubahan_status: Optional[str] = None
 
@@ -63,7 +63,7 @@ class IndikatorCreate(BaseModel):
 
 
 class IndikatorUpdate(BaseModel):
-    uraian: str
+    uraian: Optional[str] = None
     satuan: Optional[str] = "-"
     status: Optional[str] = "positif"
     iku: Optional[str] = None
@@ -144,6 +144,13 @@ class IndikatorKegiatanUpdate(BaseModel):
     iku: Optional[str] = None
     perubahan_status: Optional[str] = None
     definisi_operasional: Optional[str] = None
+    target_awal: Optional[str] = None
+    target2026: Optional[str] = None
+    target2027: Optional[str] = None
+    target2028: Optional[str] = None
+    target2029: Optional[str] = None
+    target2030: Optional[str] = None
+    target_akhir: Optional[str] = None
     p_target2025: Optional[str] = None
     p_target2026: Optional[str] = None
     p_target2027: Optional[str] = None
@@ -170,12 +177,54 @@ class IndikatorKegiatanUpdate(BaseModel):
     no_urut: Optional[int] = None
 
 
+class IndikatorProgramCreate(BaseModel):
+    kodeskpd: str
+    kodeprogram: str
+    uraiprogram: Optional[str] = None
+    kodebidang: Optional[str] = None
+    uraian: str
+    satuan: Optional[str] = "-"
+    status: Optional[str] = "positif"
+    formula: Optional[str] = "-"
+    perubahan_status: Optional[str] = "baru"
+    definisi_operasional: Optional[str] = "-"
+    target_awal: Optional[str] = "-"
+    target2026: Optional[str] = "-"
+    target2027: Optional[str] = "-"
+    target2028: Optional[str] = "-"
+    target2029: Optional[str] = "-"
+    target2030: Optional[str] = "-"
+    target_akhir: Optional[str] = "-"
+    p_target2025: Optional[str] = "-"
+    p_target2026: Optional[str] = "-"
+    p_target2027: Optional[str] = "-"
+    p_target2028: Optional[str] = "-"
+    p_target2029: Optional[str] = "-"
+    p_target2030: Optional[str] = "-"
+    p_target_akhir: Optional[str] = "-"
+    realisasi2025: Optional[str] = "-"
+    realisasi2026: Optional[str] = "-"
+    realisasi2027: Optional[str] = "-"
+    realisasi2028: Optional[str] = "-"
+    realisasi2029: Optional[str] = "-"
+    realisasi2030: Optional[str] = "-"
+    no_urut: Optional[int] = 1
+
+
 class IndikatorProgramUpdate(BaseModel):
     uraian: Optional[str] = None
     satuan: Optional[str] = None
     status: Optional[str] = None
+    formula: Optional[str] = None
     perubahan_status: Optional[str] = None
     definisi_operasional: Optional[str] = None
+    target_awal: Optional[str] = None
+    target2026: Optional[str] = None
+    target2027: Optional[str] = None
+    target2028: Optional[str] = None
+    target2029: Optional[str] = None
+    target2030: Optional[str] = None
+    target_akhir: Optional[str] = None
     p_target2025: Optional[str] = None
     p_target2026: Optional[str] = None
     p_target2027: Optional[str] = None
@@ -189,6 +238,7 @@ class IndikatorProgramUpdate(BaseModel):
     realisasi2028: Optional[str] = None
     realisasi2029: Optional[str] = None
     realisasi2030: Optional[str] = None
+    no_urut: Optional[int] = None
 
 
 # === PROGRAM ===

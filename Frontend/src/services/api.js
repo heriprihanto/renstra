@@ -207,10 +207,21 @@ export const api = {
   },
 
   // Indikator Program
+  async createIndikatorProgram(payload) {
+    return fetchJson(`${API_BASE_URL}/renstra/indikator-program`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
   async updateIndikatorProgram(id, payload) {
     return fetchJson(`${API_BASE_URL}/renstra/indikator-program/${id}`, {
       method: 'PUT',
       body: JSON.stringify(payload),
+    });
+  },
+  async deleteIndikatorProgram(id) {
+    return fetchJson(`${API_BASE_URL}/renstra/indikator-program/${id}`, {
+      method: 'DELETE',
     });
   },
 

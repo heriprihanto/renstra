@@ -90,21 +90,28 @@ Tandai jika data ada perubahan, atau ada data baru:
 - [x] Frontend Modal Form: Pilihan penandaan status perubahan (Otomatis/Perubahan/Baru/Tetap) dan live banner deteksi tahun target yang berubah.
 
 
-Data Tujuan, Sasaran, Indikator tidak bisa dihapus atau edit kalimatnya, yang bisa diedit hanya metadata dan TARGET PERUBAHAN:
-- [x] Larangan Penghapusan (Delete Protection):
-  - Backend API: Endpoint DELETE `/renstra/tujuan/{id}`, `/renstra/sasaran/{id}`, `/renstra/indikator-tujuan/{id}`, dan `/renstra/indikator-sasaran/{id}` diblokir secara mutlak dan mengembalikan status HTTP 403 Forbidden.
-  - Frontend UI: Semua opsi dan tombol aksi "Hapus" (Hapus Tujuan, Hapus Sasaran, Hapus Indikator) dihapus sepenuhnya dari tabel cascading.
-- [x] Perlindungan Kalimat Rumusan (Sentence Immutability):
-  - Backend API: Pada operasi PUT (update), field uraian kalimat (`uraitujuan`, `uraisasaran`, `uraitujuan_indikator`, `uraisasaran_indikator`) tidak ditimpa/dipertahankan dari database.
-  - Frontend UI: Textarea uraian kalimat pada form edit ditandai terkunci (`readonly`, `disabled`), dilengkapi badge `🔒 Kalimat Terkunci` dan pesan penjelasan bahwa rumusan kalimat tidak dapat diubah pada RENSTRA Perubahan.
-- [x] Perlindungan Target Murni (Target Murni Immutability):
-  - Backend API: Target capaian murni (`target_awal`, `target1` s/d `target5`) terkunci dan tidak dapat diubah melalui endpoint update.
-  - Frontend UI: Seluruh input Target Murni pada modal edit ditandai terkunci (`readonly`, `disabled`) dengan badge `🔒 Terkunci`.
-- [x] Hak Edit Terbuka (Metadata & Target Perubahan):
-  - Yang dapat diedit secara penuh:
-    - Metadata: Satuan, Status (positif/negatif/akumulatif), IKU (Indikator Kinerja Utama checkbox), Definisi Operasional / Metadata, Nomor Urut, dan Penandaan Status Perubahan.
-    - Target Perubahan: Tahun 2025, 2026, 2027, 2028, 2029, 2030, dan Target Akhir Perubahan.
-  - Tombol aksi indikator pada tabel cascading diubah menjadi tombol langsung yang ringkas: `Ubah Target` (membuka form penyesuaian target perubahan & metadata).
+Revisi: Bisa Tambah, Edit, dan Hapus SEMUA Data (Full CRUD):
+- [x] Pencabutan Pembatasan Hapus (Delete Unlocked):
+  - Backend API: Membuka kembali endpoint DELETE untuk semua entitas:
+    - `DELETE /renstra/tujuan/{id}` (dengan cascade delete child indikator tujuan, sasaran, & indikator sasaran).
+    - `DELETE /renstra/sasaran/{id}` (dengan cascade delete child indikator sasaran).
+    - `DELETE /renstra/indikator-tujuan/{id}`.
+    - `DELETE /renstra/indikator-sasaran/{id}`.
+    - `DELETE /renstra/program/{id}` (dengan cascade delete child kegiatan, subkegiatan, & indikator).
+    - `DELETE /renstra/indikator-program/{id}` (endpoint baru).
+    - `DELETE /renstra/kegiatan/{id}` (dengan cascade delete child subkegiatan & indikator kegiatan).
+    - `DELETE /renstra/indikator-kegiatan/{id}`.
+    - `DELETE /renstra/subkegiatan/{id}`.
+  - Frontend UI: Menambahkan tombol aksi dropdown 'Hapus' lengkap dengan dialog konfirmasi hapus aman untuk semua entitas di Tab 1 & Tab 2.
+- [x] Hak Edit Penuh Kalimat Rumusan (Sentence Edit Unlocked):
+  - Backend API: Pada operasi PUT (update), semua field uraian kalimat (`uraitujuan`, `uraisasaran`, `uraitujuan_indikator`, `uraisasaran_indikator`, `uraiprogram`, `uraiindikator` program & kegiatan, `uraikegiatan`, `uraisubkegiatan`) dapat diubah dan disimpan ke database.
+  - Frontend UI: Membuka kunci textarea uraian kalimat (menghapus status `readonly`, `disabled`, badge `🔒 Kalimat Terkunci`, dan pesan helper terkunci) sehingga pengguna dapat mengedit kalimat dengan leluasa.
+- [x] Hak Edit Penuh Target Murni & Target Perubahan:
+  - Backend API: Target capaian murni (`target_awal`, `target1` s/d `target5`, `target_akhir`) serta target perubahan dan pagu dapat diedit secara penuh melalui endpoint update.
+  - Frontend UI: Membuka kunci semua input Target Murni pada modal form (menghapus status `readonly` dan `disabled`).
+- [x] Penambahan Entitas Baru (Create Full Support):
+  - Backend API: Menambahkan endpoint `POST /renstra/indikator-program` untuk melengkapi entri baru Indikator Program.
+  - Frontend UI: Menambahkan opsi `+ Indikator Program` pada dropdown aksi Program dan mendukung form tambah indikator program.
 
 Pindah Kolom Aksi ke Kolom Pertama:
 - [x] Header Tabel: Memindahkan kolom `AKSI` dari posisi paling kanan ke kolom urutan pertama (`th rowspan="2"` di awal `<thead>`).
@@ -213,5 +220,17 @@ No  | Tujuan /Sasaran | Indikator | Satuan  |  Target Tahun                     
 
 Pada entri Kegiatan, referensi dari database tabel ref_subkegiatan berdasasrkan kode_program diatasnya
 Pada entri Sub Kegiatan, referensi dari database tabel ref_subkegiatan berdasasrkan kode_kegiatan diatasnya
+
+Anda adalah pejabat pembuat komitmen pada pekerjaan pengembangan aplikasi SImlaba, rapikan dokumen KAK ini, lengkapi narasi yang belum lengkap,  sistematika sebagai berikut : A. RENCANA PENGEMBANGAN
+B. METODE KERJA
+C. LINGKUP KEGIATAN
+D. KELUARAN KEGIATAN
+E. KEBUTUHAN PERSONIL DAN PERALATAN
+F. SUMBER PENDANAAN
+G. PELAPORAN
+M. JANGKA WAKTU PELAKSANAAN PEKERJAAN
+N. P E N U T U P
+
+output adalah file ms word docx
 
 

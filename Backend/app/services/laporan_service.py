@@ -759,20 +759,46 @@ async def get_program_kegiatan_report_data(
             for y in ["2026", "2027", "2028", "2029", "2030"]:
                 prog_pagu[y] += keg_pagu[y]
 
+            raw_keg_nama = (k.uraikegiatan or "-").strip()
+            display_keg_nama = raw_keg_nama if raw_keg_nama.lower().startswith("kegiatan") else f"Kegiatan {raw_keg_nama}"
+
+            keg_sasaran = k.kinerja or getattr(k, "urai", None)
+            if not keg_sasaran or keg_sasaran.strip() in ("", "-"):
+                keg_sasaran = f"Terlaksananya {raw_keg_nama}"
+
+            # If no indicators are explicitly registered for this kegiatan, generate standard default matching Renstra format
+            if not k_indicators:
+                k_indicators = [{
+                    "uraian": f"Presentase {raw_keg_nama.lower()} tercapai",
+                    "satuan": "%",
+                    "baseline": "100",
+                    "targets": {
+                        y: "100" if keg_pagu[y] > 0 else "-"
+                        for y in ["2026", "2027", "2028", "2029", "2030"]
+                    },
+                    "ket": "-",
+                }]
+
             p_kegiatans.append({
                 "kodekegiatan": k.kodekegiatan,
-                "uraikegiatan": k.uraikegiatan or "-",
-                "kinerja": k.kinerja or getattr(k, "urai", None) or (k_subkegiatans[0]["kinerja"] if k_subkegiatans else "-"),
+                "uraikegiatan": display_keg_nama,
+                "kinerja": keg_sasaran,
                 "indicators": k_indicators,
                 "pagu": keg_pagu,
                 "subkegiatans": k_subkegiatans,
             })
 
+        raw_prog_nama = (p.uraiprogram or "-").strip()
+        display_prog_nama = raw_prog_nama if raw_prog_nama.lower().startswith("program") else f"Program {raw_prog_nama}"
+        prog_sasaran = p.kinerja or p.urai
+        if not prog_sasaran or prog_sasaran.strip() in ("", "-"):
+            prog_sasaran = f"Meningkatnya {raw_prog_nama}"
+
         return {
             "kodeprogram": p.kodeprogram,
             "kodeskpd": p.kodeskpd,
-            "uraiprogram": p.uraiprogram or "-",
-            "kinerja": p.kinerja or p.urai or "-",
+            "uraiprogram": display_prog_nama,
+            "kinerja": prog_sasaran,
             "indicators": p_indicators,
             "pagu": prog_pagu,
             "kegiatans": p_kegiatans,
