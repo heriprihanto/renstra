@@ -266,6 +266,18 @@
                 <label class="form-label" style="font-weight: 700; color: #1e3a8a; margin-bottom: 0;">
                   Target Capaian Kinerja (Murni)
                 </label>
+                <button
+                  type="button"
+                  class="btn-copy-target"
+                  style="background: #eff6ff; color: #1d4ed8; border-color: #bfdbfe;"
+                  @click="copyMurniToPerubahan"
+                  title="Salin semua nilai Target Capaian Kinerja (Murni) ke Target Perubahan"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                  <span>Salin ke Target Perubahan</span>
+                </button>
               </div>
               <div class="targets-form-grid">
                 <div class="form-group">
@@ -320,14 +332,34 @@
 
             <!-- Target Perubahan Grid -->
             <div style="margin-top: 1.25rem;">
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.6rem; flex-wrap: wrap; gap: 0.5rem;">
                 <label class="form-label" style="font-weight: 700; color: #b45309; margin-bottom: 0; display: flex; align-items: center; gap: 0.45rem;">
                   <span class="badge-perubahan">Perubahan</span>
                   Target Perubahan (Dapat Disesuaikan)
                 </label>
-                <span style="font-size: 0.75rem; color: #d97706; font-weight: 600;">
-                  * Target Akhir setelah perubahan memakai tahun 2029 perubahan
-                </span>
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                  <transition name="fade">
+                    <span v-if="copiedSuccess" class="copy-success-badge">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      Target Murni Berhasil Disalin!
+                    </span>
+                  </transition>
+                  <button
+                    type="button"
+                    class="btn-copy-target"
+                    @click="copyMurniToPerubahan"
+                    title="Salin nilai dari Target Capaian Kinerja (Murni) ke Target Perubahan jika tidak ada perubahan"
+                  >
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span>Salin dari Target Murni</span>
+                  </button>
+                </div>
+              </div>
+              <div style="margin-bottom: 0.55rem; font-size: 0.75rem; color: #d97706; font-weight: 600;">
+                * Target Akhir setelah perubahan memakai tahun 2029 perubahan
               </div>
               <div class="targets-form-grid targets-perubahan-grid">
                 <div class="form-group">
@@ -794,10 +826,31 @@
 
               <!-- Grid Target Volume Perubahan -->
               <div style="margin-top: 0.85rem;">
-                <label class="form-label" style="font-weight: 600; color: #b45309; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem;">
-                  <span class="badge-perubahan">Perubahan</span>
-                  Target Perubahan
-                </label>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.5rem;">
+                  <label class="form-label" style="font-weight: 600; color: #b45309; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0;">
+                    <span class="badge-perubahan">Perubahan</span>
+                    Target Volume Perubahan
+                  </label>
+                  <div style="display: flex; align-items: center; gap: 0.4rem;">
+                    <span v-if="copiedSubSuccess" class="copy-success-badge" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                      Tersalin!
+                    </span>
+                    <button
+                      type="button"
+                      class="btn-copy-target"
+                      style="padding: 0.22rem 0.6rem; font-size: 0.74rem;"
+                      @click="copySubkegiatanMurniToPerubahan"
+                      title="Salin nilai Target Volume Murni ke Target Volume Perubahan"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                      </svg>
+                      <span>Salin Volume Murni</span>
+                    </button>
+                  </div>
+                </div>
                 <div class="targets-form-grid targets-perubahan-grid" style="grid-template-columns: repeat(7, 1fr);">
                   <div class="form-group">
                     <label class="form-label sub p-label">2025</label>
@@ -1489,6 +1542,57 @@ function onTarget2029Input() {
 
 function onTarget2029PerubahanInput() {
   formData.value.p_target_akhir = formData.value.p_target2029;
+}
+
+const copiedSuccess = ref(false);
+const copiedSubSuccess = ref(false);
+
+function copyMurniToPerubahan() {
+  formData.value.p_target2025 = formData.value.target_awal || '-';
+  formData.value.p_target2026 = formData.value.target2026 || '-';
+  formData.value.p_target2027 = formData.value.target2027 || '-';
+  formData.value.p_target2028 = formData.value.target2028 || '-';
+  formData.value.p_target2029 = formData.value.target2029 || '-';
+  formData.value.p_target2030 = formData.value.target2030 || '-';
+  formData.value.p_target_akhir = formData.value.target_akhir || formData.value.target2029 || '-';
+
+  formData.value.perubahan_status = 'tetap';
+
+  copiedSuccess.value = true;
+  setTimeout(() => {
+    copiedSuccess.value = false;
+  }, 2500);
+}
+
+function copySubkegiatanMurniToPerubahan() {
+  formData.value.p_volume_0 = formData.value.volume_0 || formData.value.volume_awal || '-';
+  formData.value.p_volume_1 = formData.value.volume_1 || '-';
+  formData.value.p_volume_2 = formData.value.volume_2 || '-';
+  formData.value.p_volume_3 = formData.value.volume_3 || '-';
+  formData.value.p_volume_4 = formData.value.volume_4 || '-';
+  formData.value.p_volume_5 = formData.value.volume_5 || '-';
+  formData.value.p_volume_akhir = formData.value.volume_4 || formData.value.volume_5 || '-';
+
+  if (formData.value.pagu1 && (!formData.value.p_pagu1 || formData.value.p_pagu1 === 0)) {
+    formData.value.p_pagu1 = formData.value.pagu1;
+  }
+  if (formData.value.pagu2 && (!formData.value.p_pagu2 || formData.value.p_pagu2 === 0)) {
+    formData.value.p_pagu2 = formData.value.pagu2;
+  }
+  if (formData.value.pagu3 && (!formData.value.p_pagu3 || formData.value.p_pagu3 === 0)) {
+    formData.value.p_pagu3 = formData.value.pagu3;
+  }
+  if (formData.value.pagu4 && (!formData.value.p_pagu4 || formData.value.p_pagu4 === 0)) {
+    formData.value.p_pagu4 = formData.value.pagu4;
+  }
+  if (formData.value.pagu5 && (!formData.value.p_pagu5 || formData.value.p_pagu5 === 0)) {
+    formData.value.p_pagu5 = formData.value.pagu5;
+  }
+
+  copiedSubSuccess.value = true;
+  setTimeout(() => {
+    copiedSubSuccess.value = false;
+  }, 2500);
 }
 
 async function handleSubmit() {
@@ -2378,5 +2482,59 @@ async function handleDeleteConfirm() {
   font-size: 0.73rem;
   color: #64748b;
   line-height: 1.3;
+}
+
+/* Copy Target Button & Success Badge */
+.btn-copy-target {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+  padding: 0.32rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  line-height: 1.2;
+}
+
+.btn-copy-target:hover {
+  background: #fde68a;
+  color: #78350f;
+  border-color: #f59e0b;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(217, 119, 6, 0.2);
+}
+
+.btn-copy-target:active {
+  transform: translateY(0);
+}
+
+.copy-success-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  border-radius: 9999px;
+  animation: fadeIn 0.2s ease;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(-3px);
 }
 </style>

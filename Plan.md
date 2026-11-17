@@ -253,3 +253,12 @@ tabel dokumen_perencanaan where id_ref_dokumen 64,65,66
 
 Revisi kolom DOKUMEN PERENCANAAN
 link nya ke https://monevrkpd.tegalkota.go.id/dokren/{link_gd}
+
+Fitur Form Ubah Indikator (Copy Target Murni ke Target Perubahan)
+- [x] Frontend: Tambah tombol `Salin dari Target Murni` pada section **Target Perubahan** di form indikator (`RenstraCrudModal.vue`).
+- [x] Frontend: Tambah tombol `Salin ke Target Perubahan` pada section **Target Capaian Kinerja (Murni)** untuk kemudahan akses langsung.
+- [x] Frontend: Otomatis memetakan nilai `target_awal` -> `p_target2025`, `target2026..target2030` -> `p_target2026..p_target2030`, dan `target_akhir` -> `p_target_akhir`.
+- [x] Frontend: Menyetel status penandaan menjadi `Tetap (Tidak Ada Perubahan)` (`perubahan_status = 'tetap'`).
+- [x] Frontend: Ditambahkan juga pada form Subkegiatan untuk tombol `Salin Volume Murni` ke Target Volume Perubahan.
+- [x] Frontend: Terdapat indikator visual animasi sukses (*Target Murni Berhasil Disalin!*).
+- [x] Verifikasi build frontend berhasil tanpa error.
