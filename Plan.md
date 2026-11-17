@@ -234,3 +234,22 @@ N. P E N U T U P
 output adalah file ms word docx
 
 
+Pada Halaman Daftar Perangkat Daerah, tambahkan kolom Dokumen Perencanaan
+tabel dokumen_perencanaan where id_ref_dokumen 64,65,66 
+
+
+- [x] Backend: Model `DokumenPerencanaan` (`Backend/app/models/dokumen.py`) mapping ke tabel `dokumen_perencanaan`.
+- [x] Backend: Schema `DokumenItem` dan penambahan list `dokumen` pada `OpdListItem` (`Backend/app/schemas/opd.py`).
+- [x] Backend: Endpoint `GET /api/opd` memuat dokumen dengan `id_ref_dokumen IN (64, 65, 66)` dikelompokkan per OPD (relasi via `id_sub_pd` -> `ta_sub_pd.id_skpd` / `ta_opd.id_skpd`).
+- [x] Backend: Endpoint streaming `GET /api/opd/dokumen/{doc_id}/download` untuk streaming/unduh berkas langsung dari server penyimpanan.
+- [x] Link Dokumen disesuaikan langsung mengarah ke `https://monevrkpd.tegalkota.go.id/dokren/{link_gd}`.
+- [x] Frontend: Kolom baru **DOKUMEN PERENCANAAN** pada tabel Daftar Perangkat Daerah (`Frontend/src/components/OpdTable.vue`).
+- [x] Frontend: Badge interaktif per tahap:
+  - **Penetapan** (id_ref_dokumen = 66, warna Emerald)
+  - **Rankir** (id_ref_dokumen = 65, warna Biru/Indigo)
+  - **Rancangan** (id_ref_dokumen = 64, warna Amber)
+- [x] Frontend: Filter tombol baru "Ada Dokumen" pada toolbar pencarian.
+- [x] Verifikasi build frontend & live test API.
+
+Revisi kolom DOKUMEN PERENCANAAN
+link nya ke https://monevrkpd.tegalkota.go.id/dokren/{link_gd}

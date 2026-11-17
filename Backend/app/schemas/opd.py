@@ -1,5 +1,19 @@
+from datetime import datetime
 from typing import List, Optional
 from pydantic import BaseModel
+
+
+class DokumenItem(BaseModel):
+    id: int
+    id_ref_dokumen: int
+    tahap: str  # "Rancangan", "Rancangan Akhir", "Penetapan"
+    nama_file: str
+    link_gd: Optional[str] = None
+    file_url: Optional[str] = None
+    uploaded_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
 
 
 class SubPdItem(BaseModel):
@@ -28,6 +42,7 @@ class OpdListItem(BaseModel):
     kode_skpd: Optional[str] = None
     nama_skpd: Optional[str] = None
     sub_count: int = 0
+    dokumen: List[DokumenItem] = []
 
     class Config:
         from_attributes = True

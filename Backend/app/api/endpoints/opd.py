@@ -1,13 +1,16 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import StreamingResponse
+import httpx
 from sqlalchemy import func
 from sqlmodel import select
 from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
 from app.core.db import get_session
+from app.models.dokumen import DokumenPerencanaan
 from app.models.opd import TaOpd, TaSubPd
-from app.schemas.opd import DashboardStats, OpdDetail, OpdListItem, SubPdDetail, SubPdItem
+from app.schemas.opd import DashboardStats, DokumenItem, OpdDetail, OpdListItem, SubPdDetail, SubPdItem
 
 router = APIRouter(prefix="/opd", tags=["Perangkat Daerah"])
 
@@ -19,7 +22,7 @@ async def list_opd(
     session: AsyncSession = Depends(get_session),
 ):
     """
-    Mengambil daftar seluruh Perangkat Daerah (ta_opd) beserta jumlah Sub SKPD.
+    Mengambil daftar seluruh Perangkat Daerah (ta_opd) beserta jumlah Sub SKPD dan Dokumen Perencanaan (id_ref_dokumen 64, 65, 66).
     """
     # Query OPD with count of sub units via LEFT OUTER JOIN
     query = (
@@ -47,6 +50,44 @@ async def list_opd(
 
     results = (await session.exec(query)).all()
 
+    # Preload all documents from dokumen_perencanaan where id_ref_dokumen in (64, 65, 66)
+    doc_query = (
+        select(DokumenPerencanaan)
+        .where(DokumenPerencanaan.id_ref_dokumen.in_([64, 65, 66]))
+        .order_by(DokumenPerencanaan.id_ref_dokumen.asc(), DokumenPerencanaan.uploaded_at.desc())
+    )
+    all_docs = (await session.exec(doc_query)).all()
+
+    # Preload sub_pd mapping: id_sub_skpd -> id_skpd
+    all_subs = (await session.exec(select(TaSubPd.id_sub_skpd, TaSubPd.id_skpd))).all()
+    sub_to_opd = {s[0]: s[1] for s in all_subs if s[0]}
+
+    tahap_map = {
+        64: "Rancangan",
+        65: "Rancangan Akhir",
+        66: "Penetapan",
+    }
+
+    opd_docs_map: Dict[int, List[DokumenItem]] = {}
+    for d in all_docs:
+        target_opd_id = sub_to_opd.get(d.id_sub_pd, d.id_sub_pd)
+        raw_link = (d.link_gd or "").strip()
+        if raw_link.startswith("/"):
+            file_url = f"https://monevrkpd.tegalkota.go.id/dokren{raw_link}"
+        else:
+            file_url = f"https://monevrkpd.tegalkota.go.id/dokren/{raw_link}"
+        opd_docs_map.setdefault(target_opd_id, []).append(
+            DokumenItem(
+                id=d.id,
+                id_ref_dokumen=d.id_ref_dokumen,
+                tahap=tahap_map.get(d.id_ref_dokumen, f"Tahap {d.id_ref_dokumen}"),
+                nama_file=d.nama_file,
+                link_gd=d.link_gd,
+                file_url=file_url,
+                uploaded_at=d.uploaded_at,
+            )
+        )
+
     items: List[OpdListItem] = []
     for row in results:
         items.append(
@@ -55,9 +96,63 @@ async def list_opd(
                 kode_skpd=row.kode_skpd,
                 nama_skpd=row.nama_skpd,
                 sub_count=row.sub_count,
+                dokumen=opd_docs_map.get(row.id_skpd, []),
             )
         )
     return items
+
+
+@router.api_route("/dokumen/{doc_id}/download", methods=["GET", "HEAD"])
+async def download_dokumen_perencanaan(
+    doc_id: int,
+    session: AsyncSession = Depends(get_session),
+):
+    """
+    Download/Stream dokumen perencanaan dari storage host (192.168.50.75:8285).
+    """
+    doc = await session.get(DokumenPerencanaan, doc_id)
+    if not doc or not doc.link_gd:
+        raise HTTPException(status_code=404, detail="Dokumen perencanaan tidak ditemukan")
+
+    file_host = "http://192.168.50.75:8285"
+    remote_url = f"{file_host}{doc.link_gd}"
+
+    client = httpx.AsyncClient(timeout=30.0)
+    try:
+        req = client.build_request("GET", remote_url)
+        res = await client.send(req, stream=True)
+        if res.status_code != 200:
+            await res.aclose()
+            await client.aclose()
+            raise HTTPException(
+                status_code=res.status_code,
+                detail="Gagal mengunduh berkas dari server penyimpanan",
+            )
+
+        async def stream_content():
+            try:
+                async for chunk in res.aiter_bytes():
+                    yield chunk
+            finally:
+                await res.aclose()
+                await client.aclose()
+
+        content_type = res.headers.get("content-type", "application/octet-stream")
+        safe_filename = (doc.nama_file or "dokumen.pdf").replace('"', '')
+        headers = {
+            "Content-Disposition": f'inline; filename="{safe_filename}"',
+        }
+        if "content-length" in res.headers:
+            headers["Content-Length"] = res.headers["content-length"]
+
+        return StreamingResponse(
+            stream_content(),
+            media_type=content_type,
+            headers=headers,
+        )
+    except httpx.RequestError as e:
+        await client.aclose()
+        raise HTTPException(status_code=502, detail=f"Koneksi ke storage dokumen gagal: {str(e)}")
 
 
 @router.get("/stats", response_model=DashboardStats)
