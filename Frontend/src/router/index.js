@@ -8,6 +8,7 @@ import TujuanSasaranReportView from '../views/TujuanSasaranReportView.vue';
 import IkuReportView from '../views/IkuReportView.vue';
 import ProgramKegiatanReportView from '../views/ProgramKegiatanReportView.vue';
 import EvaluasiRenstraReportView from '../views/EvaluasiRenstraReportView.vue';
+import DaftarIkuReportView from '../views/DaftarIkuReportView.vue';
 import { useAuth, waitForAuthInit } from '../services/auth';
 
 const routes = [
@@ -64,6 +65,12 @@ const routes = [
     component: EvaluasiRenstraReportView,
     props: true,
     meta: { title: 'Laporan Evaluasi Hasil Renstra - Pemerintah Kota Tegal' }
+  },
+  {
+    path: '/laporan/daftar-iku',
+    name: 'LaporanDaftarIku',
+    component: DaftarIkuReportView,
+    meta: { title: '6. Daftar IKU Perangkat Daerah - RENSTRA Kota Tegal' }
   },
   {
     path: '/:pathMatch(.*)*',

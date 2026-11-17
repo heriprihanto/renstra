@@ -1,7 +1,7 @@
 import io
 import re
 from typing import Any, Dict, List, Optional
-from sqlmodel import select
+from sqlmodel import select, text
 from sqlmodel.ext.asyncio.session import AsyncSession
 import openpyxl
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
@@ -2483,3 +2483,402 @@ def generate_evaluasi_renstra_excel(report_data: Dict[str, Any]) -> io.BytesIO:
     wb.save(output)
     output.seek(0)
     return output
+
+
+# =====================================================================
+# LAPORAN 6: DAFTAR IKU PERANGKAT DAERAH
+# =====================================================================
+
+async def get_daftar_iku_report_data(
+    session: AsyncSession, id_skpd: Optional[int] = None
+) -> Dict[str, Any]:
+    """Fetch all Indikator Kinerja Utama (IKU) across all OPDs or for a specific OPD."""
+    opd_clause = "WHERE o.id_skpd = :id_skpd" if id_skpd else ""
+
+    q = f"""
+    SELECT 
+        o.id_skpd, o.kode_skpd, o.nama_skpd,
+        'Tujuan' as level,
+        t.idtujuan as id_tujuan_sasaran,
+        t.uraitujuan as tujuan_sasaran,
+        it.idtujuan_indikator as id_indikator,
+        it.uraitujuan_indikator as indikator,
+        it.satuan,
+        it.definisi_operasional,
+        it.target_awal, it.target0, it.target1, it.target2, it.target3, it.target4, it.target5,
+        it.p_target0, it.p_target1, it.p_target2, it.p_target3, it.p_target4, it.p_target5,
+        it.perubahan_status,
+        it.no_urut, it.urut
+    FROM ta_opd o
+    JOIN renstra_tujuan t ON t.kodeskpd = o.kode_skpd
+    JOIN renstra_indikator_tujuan it ON it.idtujuan = t.idtujuan AND it.iku = '1'
+    {opd_clause}
+    UNION ALL
+    SELECT 
+        o.id_skpd, o.kode_skpd, o.nama_skpd,
+        'Sasaran' as level,
+        s.idsasaran as id_tujuan_sasaran,
+        s.uraisasaran as tujuan_sasaran,
+        isas.idsasaran_indikator as id_indikator,
+        isas.uraisasaran_indikator as indikator,
+        isas.satuan,
+        isas.definisi_operasional,
+        isas.target_awal, isas.target0, isas.target1, isas.target2, isas.target3, isas.target4, isas.target5,
+        isas.p_target0, isas.p_target1, isas.p_target2, isas.p_target3, isas.p_target4, isas.p_target5,
+        isas.perubahan_status,
+        isas.no as no_urut, isas.urut
+    FROM ta_opd o
+    JOIN renstra_tujuan t ON t.kodeskpd = o.kode_skpd
+    JOIN renstra_sasaran s ON s.idtujuan = t.idtujuan
+    JOIN renstra_indikator_sasaran isas ON isas.idsasaran = s.idsasaran AND isas.iku = '1'
+    {opd_clause}
+    ORDER BY nama_skpd, level DESC, no_urut, urut, tujuan_sasaran, indikator
+    """
+    params = {"id_skpd": id_skpd} if id_skpd else {}
+    res = await session.execute(text(q), params)
+    rows = res.fetchall()
+
+    opd_map: Dict[int, Dict[str, Any]] = {}
+    all_indicators = []
+
+    for r in rows:
+        target_murni = {
+            "awal": format_target_val(r[10] or "-"),
+            "t2025": format_target_val(r[11] or "-"),
+            "t2026": format_target_val(r[12] or "-"),
+            "t2027": format_target_val(r[13] or "-"),
+            "t2028": format_target_val(r[14] or "-"),
+            "t2029": format_target_val(r[15] or "-"),
+            "t2030": format_target_val(r[16] or "-"),
+            "akhir": format_target_val(r[15] or r[16] or "-"),
+        }
+        target_perubahan = {
+            "t2025": format_target_val(r[17] if r[17] is not None else (r[11] or "-")),
+            "t2026": format_target_val(r[18] if r[18] is not None else (r[12] or "-")),
+            "t2027": format_target_val(r[19] if r[19] is not None else (r[13] or "-")),
+            "t2028": format_target_val(r[20] if r[20] is not None else (r[14] or "-")),
+            "t2029": format_target_val(r[21] if r[21] is not None else (r[15] or "-")),
+            "t2030": format_target_val(r[22] if r[22] is not None else (r[16] or "-")),
+            "akhir": format_target_val(
+                r[21] if r[21] is not None else (r[22] if r[22] is not None else (r[15] or r[16] or "-"))
+            ),
+            "status": r[23] or "tetap",
+        }
+
+        item = {
+            "id_skpd": r[0],
+            "kode_skpd": r[1],
+            "nama_skpd": r[2],
+            "level": r[3],
+            "id_tujuan_sasaran": str(r[4]) if r[4] else None,
+            "tujuan_sasaran": r[5] or "-",
+            "id_indikator": str(r[6]) if r[6] else None,
+            "indikator": r[7] or "-",
+            "satuan": r[8] or "-",
+            "definisi_operasional": r[9] or "",
+            "target_murni": target_murni,
+            "target_perubahan": target_perubahan,
+        }
+        all_indicators.append(item)
+
+        skpd_id = r[0]
+        if skpd_id not in opd_map:
+            opd_map[skpd_id] = {
+                "id_skpd": skpd_id,
+                "kode_skpd": r[1],
+                "nama_skpd": r[2],
+                "indicators": [],
+            }
+        opd_map[skpd_id]["indicators"].append(item)
+
+    opd_groups = list(opd_map.values())
+    for g in opd_groups:
+        g["total_iku"] = len(g["indicators"])
+
+    return {
+        "tahun_anggaran": 2026,
+        "periode": "2025 - 2030",
+        "total_opd": len(opd_groups),
+        "total_iku": len(all_indicators),
+        "opd_groups": opd_groups,
+        "all_indicators": all_indicators,
+    }
+
+
+def generate_daftar_iku_excel(report_data: Dict[str, Any], tahun_filter: Optional[str] = None) -> io.BytesIO:
+    """Generate Excel (.xlsx) file for 6. Daftar IKU Perangkat Daerah."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Daftar_IKU"
+    ws.views.sheetView[0].showGridLines = True
+
+    COLOR_TITLE          = "1E3A8A"   # Deep Navy Blue
+    COLOR_PRIMARY_HEADER = "2563EB"   # Royal Blue
+    COLOR_MURNI_HEADER   = "1E40AF"   # Darker Navy for Murni
+    COLOR_PERUB_HEADER   = "047857"   # Emerald Green for Perubahan
+    COLOR_NUM_HEADER     = "475569"   # Slate 600
+    COLOR_NO_COL         = "F1F5F9"   # Light Slate
+    COLOR_WHITE          = "FFFFFF"
+    COLOR_BORDER         = "CBD5E1"
+    COLOR_ZEBRA          = "F8FAFC"
+
+    font_title_main = Font(name="Calibri", size=13, bold=True, color=COLOR_TITLE)
+    font_title_sub  = Font(name="Calibri", size=10, bold=True, color="334155")
+    font_header_grp = Font(name="Calibri", size=10, bold=True, color=COLOR_WHITE)
+    font_header_sub = Font(name="Calibri", size=9, bold=True, color=COLOR_WHITE)
+    font_num_hdr    = Font(name="Calibri", size=8, bold=True, color=COLOR_WHITE)
+    font_data       = Font(name="Calibri", size=9)
+    font_data_bold  = Font(name="Calibri", size=9, bold=True)
+
+    fill_primary = PatternFill(start_color=COLOR_PRIMARY_HEADER, end_color=COLOR_PRIMARY_HEADER, fill_type="solid")
+    fill_murni   = PatternFill(start_color=COLOR_MURNI_HEADER, end_color=COLOR_MURNI_HEADER, fill_type="solid")
+    fill_perub   = PatternFill(start_color=COLOR_PERUB_HEADER, end_color=COLOR_PERUB_HEADER, fill_type="solid")
+    fill_num     = PatternFill(start_color=COLOR_NUM_HEADER, end_color=COLOR_NUM_HEADER, fill_type="solid")
+    fill_no      = PatternFill(start_color=COLOR_NO_COL, end_color=COLOR_NO_COL, fill_type="solid")
+    fill_zebra   = PatternFill(start_color=COLOR_ZEBRA, end_color=COLOR_ZEBRA, fill_type="solid")
+
+    thin_border_side = Side(border_style="thin", color=COLOR_BORDER)
+    border_cell = Border(
+        left=thin_border_side,
+        right=thin_border_side,
+        top=thin_border_side,
+        bottom=thin_border_side,
+    )
+
+    align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    align_left   = Alignment(horizontal="left", vertical="center", wrap_text=True)
+
+    # 1. Title Block (Rows 2 - 4)
+    ws.merge_cells("A2:T2")
+    ws["A2"] = "DAFTAR INDIKATOR KINERJA UTAMA (IKU) PERANGKAT DAERAH"
+    ws["A2"].font = font_title_main
+    ws["A2"].alignment = align_center
+
+    ws.merge_cells("A3:T3")
+    ws["A3"] = "PEMERINTAH KOTA TEGAL"
+    ws["A3"].font = font_title_sub
+    ws["A3"].alignment = align_center
+
+    ws.merge_cells("A4:T4")
+    total_iku = report_data.get("total_iku", 0)
+    total_opd = report_data.get("total_opd", 0)
+    ws["A4"] = f"Rencana Strategis (RENSTRA) Tahun 2025 - 2030 • Total {total_iku} IKU dari {total_opd} Perangkat Daerah"
+    ws["A4"].font = font_title_sub
+    ws["A4"].alignment = align_center
+
+    # 2. Table Headers (Rows 6 & 7)
+    # Col A: No
+    ws.merge_cells("A6:A7")
+    ws["A6"] = "No"
+    # Col B: Perangkat Daerah
+    ws.merge_cells("B6:B7")
+    ws["B6"] = "Perangkat Daerah"
+    # Col C: Tujuan / Sasaran
+    ws.merge_cells("C6:C7")
+    ws["C6"] = "Tujuan / Sasaran"
+    # Col D: INDIKATOR
+    ws.merge_cells("D6:D7")
+    ws["D6"] = "Indikator Kinerja Utama (IKU)"
+    # Col E: Satuan
+    ws.merge_cells("E6:E7")
+    ws["E6"] = "Satuan"
+
+    # Cols F-L (6-12): Target Murni
+    ws.merge_cells("F6:L6")
+    ws["F6"] = "TARGET MURNI"
+    ws["F7"] = "2025"
+    ws["G7"] = "2026"
+    ws["H7"] = "2027"
+    ws["I7"] = "2028"
+    ws["J7"] = "2029"
+    ws["K7"] = "2030"
+    ws["L7"] = "Akhir"
+
+    # Cols M-S (13-19): Target Perubahan
+    ws.merge_cells("M6:S6")
+    ws["M6"] = "TARGET PERUBAHAN"
+    ws["M7"] = "2025"
+    ws["N7"] = "2026"
+    ws["O7"] = "2027"
+    ws["P7"] = "2028"
+    ws["Q7"] = "2029"
+    ws["R7"] = "2030"
+    ws["S7"] = "Akhir"
+
+    # Col T (20): Keterangan
+    ws.merge_cells("T6:T7")
+    ws["T6"] = "Keterangan / Status"
+
+    # Style Header Rows 6 & 7
+    for c in range(1, 21):
+        for r in [6, 7]:
+            cell = ws.cell(row=r, column=c)
+            cell.border = border_cell
+            cell.alignment = align_center
+            if c in range(1, 6) or c == 20:
+                cell.fill = fill_primary
+                cell.font = font_header_grp
+            elif c in range(6, 13):
+                cell.fill = fill_murni
+                cell.font = font_header_grp if r == 6 else font_header_sub
+            else:
+                cell.fill = fill_perub
+                cell.font = font_header_grp if r == 6 else font_header_sub
+
+    # Header Row 8: Column Numbering [1] .. [20]
+    ws.row_dimensions[8].height = 18
+    for c in range(1, 21):
+        cell = ws.cell(row=8, column=c, value=f"({c})")
+        cell.fill = fill_num
+        cell.font = font_num_hdr
+        cell.alignment = align_center
+        cell.border = border_cell
+
+    # 3. Data Rows (Row 9+)
+    current_row = 9
+    global_idx = 1
+
+    opd_groups = report_data.get("opd_groups", [])
+
+    for g in opd_groups:
+        nama_opd = g.get("nama_skpd", "-")
+        indicators = g.get("indicators", [])
+        num_inds = len(indicators)
+        if num_inds == 0:
+            continue
+
+        start_opd_row = current_row
+        end_opd_row = current_row + num_inds - 1
+
+        for ind_idx, item in enumerate(indicators):
+            row = current_row
+            ws.row_dimensions[row].height = 24
+            is_even = (global_idx % 2 == 0)
+            row_fill = fill_zebra if is_even else None
+
+            # Col 1: No
+            cell_no = ws.cell(row=row, column=1, value=global_idx)
+            cell_no.font = font_data_bold
+            cell_no.alignment = align_center
+            cell_no.border = border_cell
+            cell_no.fill = fill_no
+
+            # Col 2: Perangkat Daerah
+            cell_opd = ws.cell(row=row, column=2, value=nama_opd)
+            cell_opd.font = font_data_bold
+            cell_opd.alignment = align_left
+            cell_opd.border = border_cell
+            if row_fill:
+                cell_opd.fill = row_fill
+
+            # Col 3: Tujuan / Sasaran
+            lvl = item.get("level", "Tujuan")
+            tujuan_sas = f"[{lvl}] {item.get('tujuan_sasaran', '-')}"
+            cell_ts = ws.cell(row=row, column=3, value=tujuan_sas)
+            cell_ts.font = font_data
+            cell_ts.alignment = align_left
+            cell_ts.border = border_cell
+            if row_fill:
+                cell_ts.fill = row_fill
+
+            # Col 4: Indikator
+            cell_ind = ws.cell(row=row, column=4, value=item.get("indikator", "-"))
+            cell_ind.font = font_data
+            cell_ind.alignment = align_left
+            cell_ind.border = border_cell
+            if row_fill:
+                cell_ind.fill = row_fill
+
+            # Col 5: Satuan
+            cell_sat = ws.cell(row=row, column=5, value=item.get("satuan", "-"))
+            cell_sat.font = font_data
+            cell_sat.alignment = align_center
+            cell_sat.border = border_cell
+            if row_fill:
+                cell_sat.fill = row_fill
+
+            # Target Murni (Cols 6 - 12: 2025, 2026, 2027, 2028, 2029, 2030, Akhir)
+            tm = item.get("target_murni", {})
+            murni_vals = [
+                tm.get("t2025", "-"),
+                tm.get("t2026", "-"),
+                tm.get("t2027", "-"),
+                tm.get("t2028", "-"),
+                tm.get("t2029", "-"),
+                tm.get("t2030", "-"),
+                tm.get("akhir", "-"),
+            ]
+            for col_offset, val in enumerate(murni_vals):
+                col_c = 6 + col_offset
+                cell_m = ws.cell(row=row, column=col_c, value=val)
+                cell_m.font = font_data
+                cell_m.alignment = align_center
+                cell_m.border = border_cell
+                if row_fill:
+                    cell_m.fill = row_fill
+
+            # Target Perubahan (Cols 13 - 19: 2025, 2026, 2027, 2028, 2029, 2030, Akhir)
+            tp = item.get("target_perubahan", {})
+            perub_vals = [
+                tp.get("t2025", "-"),
+                tp.get("t2026", "-"),
+                tp.get("t2027", "-"),
+                tp.get("t2028", "-"),
+                tp.get("t2029", "-"),
+                tp.get("t2030", "-"),
+                tp.get("akhir", "-"),
+            ]
+            for col_offset, val in enumerate(perub_vals):
+                col_c = 13 + col_offset
+                cell_p = ws.cell(row=row, column=col_c, value=val)
+                cell_p.font = font_data
+                cell_p.alignment = align_center
+                cell_p.border = border_cell
+                if row_fill:
+                    cell_p.fill = row_fill
+
+            # Col 20: Status Perubahan
+            status_txt = tp.get("status", "tetap")
+            if status_txt == "tetap":
+                status_label = "Tetap"
+            elif status_txt == "bertambah":
+                status_label = "Target Bertambah"
+            elif status_txt == "berkurang":
+                status_label = "Target Berkurang"
+            else:
+                status_label = status_txt.capitalize()
+
+            cell_st = ws.cell(row=row, column=20, value=status_label)
+            cell_st.font = font_data
+            cell_st.alignment = align_center
+            cell_st.border = border_cell
+            if row_fill:
+                cell_st.fill = row_fill
+
+            global_idx += 1
+            current_row += 1
+
+        # Merge OPD cells across its indicators if multiple
+        if num_inds > 1:
+            ws.merge_cells(start_row=start_opd_row, start_column=2, end_row=end_opd_row, end_column=2)
+
+    # Auto set column widths for 20 columns
+    col_widths = {
+        1: 6,    # No
+        2: 32,   # Perangkat Daerah
+        3: 36,   # Tujuan / Sasaran
+        4: 42,   # Indikator
+        5: 12,   # Satuan
+        6: 11, 7: 11, 8: 11, 9: 11, 10: 11, 11: 11, 12: 12, # Murni 2025-2030, Akhir
+        13: 11, 14: 11, 15: 11, 16: 11, 17: 11, 18: 11, 19: 12, # Perubahan 2025-2030, Akhir
+        20: 18,  # Keterangan / Status
+    }
+    for col_idx, width in col_widths.items():
+        col_letter = openpyxl.utils.get_column_letter(col_idx)
+        ws.column_dimensions[col_letter].width = width
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output
+

@@ -7,10 +7,12 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.core.db import get_session
 from app.models.opd import TaOpd
 from app.services.laporan_service import (
+    generate_daftar_iku_excel,
     generate_evaluasi_renstra_excel,
     generate_iku_excel,
     generate_program_kegiatan_excel,
     generate_tujuan_sasaran_excel,
+    get_daftar_iku_report_data,
     get_evaluasi_renstra_report_data,
     get_iku_report_data,
     get_program_kegiatan_report_data,
@@ -226,5 +228,49 @@ async def export_evaluasi_renstra_excel(
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal generate Excel Evaluasi Renstra: {str(e)}")
+
+
+@router.get("/daftar-iku", response_model=Dict[str, Any])
+async def get_daftar_iku_preview(
+    id_skpd: Optional[int] = Query(default=None, description="Optional filter Perangkat Daerah ID"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Get 6. Daftar IKU Perangkat Daerah structured report data."""
+    try:
+        data = await get_daftar_iku_report_data(session, id_skpd=id_skpd)
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal memuat data Daftar IKU: {str(e)}")
+
+
+@router.get("/daftar-iku/export-excel")
+async def export_daftar_iku_excel(
+    id_skpd: Optional[int] = Query(default=None, description="Optional filter Perangkat Daerah ID"),
+    tahun: Optional[str] = Query(default=None, description="Optional filter tahun"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Download 6. Daftar IKU Perangkat Daerah formatted Excel file."""
+    try:
+        data = await get_daftar_iku_report_data(session, id_skpd=id_skpd)
+        excel_buf = generate_daftar_iku_excel(data, tahun_filter=tahun)
+
+        if id_skpd and data.get("opd_groups"):
+            nama_opd = data["opd_groups"][0].get("nama_skpd", f"OPD_{id_skpd}")
+            clean_nama = re.sub(r"[^\w\s-]", "", nama_opd).strip().replace(" ", "_")
+            filename = f"Daftar_IKU_{clean_nama}.xlsx"
+        else:
+            filename = "Daftar_IKU_Perangkat_Daerah_Kota_Tegal.xlsx"
+
+        return Response(
+            content=excel_buf.getvalue(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Access-Control-Expose-Headers": "Content-Disposition",
+            },
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal generate Excel Daftar IKU: {str(e)}")
+
 
 

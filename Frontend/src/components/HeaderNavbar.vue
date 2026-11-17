@@ -168,6 +168,30 @@
                   <div class="dropdown-item-desc">Formulir evaluasi capaian kinerja & anggaran Renstra (Export Excel)</div>
                 </div>
               </router-link>
+
+              <!-- 6. Daftar IKU Perangkat Daerah -->
+              <router-link
+                to="/laporan/daftar-iku"
+                class="dropdown-item-link"
+                :class="{ active: route.path.startsWith('/laporan/daftar-iku') }"
+                @click="closeDropdown"
+              >
+                <div class="dropdown-item-icon active-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M22 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                  </svg>
+                </div>
+                <div class="dropdown-item-content">
+                  <div class="dropdown-item-title-row">
+                    <span class="dropdown-item-title">6. Daftar IKU Perangkat Daerah</span>
+                    <span class="badge-active">Tersedia</span>
+                  </div>
+                  <div class="dropdown-item-desc">Matriks komparasi Target Murni & Target Perubahan IKU se-Kota Tegal (Export Excel)</div>
+                </div>
+              </router-link>
             </div>
           </div>
         </nav>

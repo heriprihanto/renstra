@@ -439,6 +439,43 @@ export const api = {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(downloadUrl);
   },
+
+  // Laporan 6: Daftar IKU Perangkat Daerah
+  async getLaporanDaftarIku(idSkpd = null) {
+    let url = `${API_BASE_URL}/laporan/daftar-iku`;
+    if (idSkpd) url += `?id_skpd=${encodeURIComponent(idSkpd)}`;
+    return fetchJson(url);
+  },
+  getLaporanDaftarIkuExcelUrl(idSkpd = null, tahun = null) {
+    let url = `${API_BASE_URL}/laporan/daftar-iku/export-excel`;
+    const params = [];
+    if (idSkpd) params.push(`id_skpd=${encodeURIComponent(idSkpd)}`);
+    if (tahun) params.push(`tahun=${encodeURIComponent(tahun)}`);
+    if (params.length > 0) url += `?${params.join('&')}`;
+    return url;
+  },
+  async downloadLaporanDaftarIkuExcel(idSkpd = null, tahun = null) {
+    const url = this.getLaporanDaftarIkuExcelUrl(idSkpd, tahun);
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Gagal mengunduh Excel Daftar IKU: HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get('content-disposition');
+    let filename = `Daftar_IKU_Perangkat_Daerah_Kota_Tegal.xlsx`;
+    if (disposition && disposition.includes('filename=')) {
+      const match = disposition.match(/filename=["']?([^"']+)["']?/);
+      if (match && match[1]) filename = match[1];
+    }
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  },
 };
 
 export default api;

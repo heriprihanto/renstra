@@ -311,3 +311,29 @@ Revisi Halaman Login,hanya login dengan google saja, hapus form login
 - [x] Modal Autentikasi ([AuthModal.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/components/AuthModal.vue)):
   - Disesuaikan sehingga saat belum login, modal hanya menampilkan tombol **"Masuk dengan Akun Google"** tanpa form email/password.
 - [x] Pengujian build frontend Vite berhasil 100% tanpa error.
+
+Buat Laporan :
+  6. Daftar IKU Perangkat Daerah
+  Perangkat Daerah | Tujuan / Sasaran |  INDIKATOR | Target Murni | Target Perubahan
+
+- [x] Backend Service: Menambahkan fungsi `get_daftar_iku_report_data` dan `generate_daftar_iku_excel` pada `Backend/app/services/laporan_service.py`:
+  - Query union seluruh Indikator Tujuan dan Indikator Sasaran bertanda `iku = '1'` (Total 92 IKU dari 29 Perangkat Daerah se-Kota Tegal).
+  - Format Target Murni (2025 s.d. 2030 & Target Akhir) dan Target Perubahan (2025 s.d. 2030 & Target Akhir).
+  - Generator Excel openpyxl dengan format styling dinas (Title block, merge header, zebra rows, border sel, auto-width kolom).
+- [x] Backend Endpoints: Menambahkan route `GET /api/laporan/daftar-iku` dan `GET /api/laporan/daftar-iku/export-excel` pada `Backend/app/api/endpoints/laporan.py`.
+- [x] Frontend API: Menambahkan fungsi `getLaporanDaftarIku`, `getLaporanDaftarIkuExcelUrl`, dan `downloadLaporanDaftarIkuExcel` pada `Frontend/src/services/api.js`.
+- [x] Frontend View ([DaftarIkuReportView.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/views/DaftarIkuReportView.vue)):
+  - Halaman laporan interaktif dengan struktur kolom resmi:
+    `No | Perangkat Daerah | Tujuan / Sasaran | INDIKATOR (IKU) | Satuan | Target Murni | Target Perubahan | Status`
+  - Grouping dan merge Perangkat Daerah rapi untuk seluruh indikator di bawah OPD terkait.
+  - Mode Tampilan Fleksibel:
+    - Mode **Semua Tahun (2025 - 2030)**: Menampilkan sub-kolom tahun 2025 s.d. 2030 & Akhir untuk Target Murni dan Target Perubahan.
+    - Mode **Fokus 1 Tahun (misal: Tahun Berjalan 2026)**: Tampilan ringkas 1 kolom Target Murni dan 1 kolom Target Perubahan untuk tahun terpilih.
+  - Fitur Filter Perangkat Daerah (Semua OPD atau pilih OPD tertentu).
+  - Fitur Pencarian Cepat (*Live Search*) lintas OPD, Tujuan/Sasaran, atau nama Indikator.
+  - Kartu statistik jumlah OPD, total IKU (92 Indikator), rincian IKU Tujuan & IKU Sasaran.
+  - Tombol **Export Excel (.xlsx)** dengan indikator proses unduh.
+- [x] Frontend Router & Navigasi:
+  - Mendaftarkan rute `/laporan/daftar-iku` pada [router/index.js](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/router/index.js).
+  - Menambahkan menu **6. Daftar IKU Perangkat Daerah** pada dropdown laporan [HeaderNavbar.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/components/HeaderNavbar.vue).
+- [x] Verifikasi build frontend berhasil tanpa error (`built in 987ms`).
