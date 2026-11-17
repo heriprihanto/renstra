@@ -116,7 +116,7 @@
                 <div class="dropdown-item-content">
                   <div class="dropdown-item-title-row">
                     <span class="dropdown-item-title">3. Program, Kegiatan & Pendanaan</span>
-                    <span class="badge-active">Tersedia</span>
+                    
                   </div>
                   <div class="dropdown-item-desc">Tabel 4.1 Matriks target, subkegiatan dan pagu indikatif (Export Excel)</div>
                 </div>
@@ -138,7 +138,6 @@
                 <div class="dropdown-item-content">
                   <div class="dropdown-item-title-row">
                     <span class="dropdown-item-title">4. Indikator Kinerja Utama (IKU)</span>
-                    <span class="badge-active">Tersedia</span>
                   </div>
                   <div class="dropdown-item-desc">Daftar ukuran keberhasilan strategis perangkat daerah</div>
                 </div>
@@ -163,7 +162,6 @@
                 <div class="dropdown-item-content">
                   <div class="dropdown-item-title-row">
                     <span class="dropdown-item-title">5. Evaluasi Hasil Renstra</span>
-                    <span class="badge-active">Tersedia</span>
                   </div>
                   <div class="dropdown-item-desc">Formulir evaluasi capaian kinerja & anggaran Renstra (Export Excel)</div>
                 </div>
@@ -187,7 +185,6 @@
                 <div class="dropdown-item-content">
                   <div class="dropdown-item-title-row">
                     <span class="dropdown-item-title">6. Daftar IKU Perangkat Daerah</span>
-                    <span class="badge-active">Tersedia</span>
                   </div>
                   <div class="dropdown-item-desc">Matriks komparasi Target Murni & Target Perubahan IKU se-Kota Tegal (Export Excel)</div>
                 </div>
