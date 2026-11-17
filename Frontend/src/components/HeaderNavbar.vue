@@ -18,8 +18,8 @@
           </div>
         </router-link>
 
-        <!-- Navigation Menu -->
-        <nav class="nav-menu-center">
+        <!-- Navigation Menu (Hanya tampil setelah pengguna terautentikasi) -->
+        <nav v-if="isAuthenticated" class="nav-menu-center">
           <router-link to="/" class="nav-menu-item" :class="{ active: route.path === '/' }">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <rect x="3" y="3" width="7" height="7"/>
@@ -172,7 +172,7 @@
           </div>
         </nav>
 
-        <!-- Meta badges: Year, Connection Status -->
+        <!-- Meta badges: Year, Connection Status, Firebase Auth -->
         <div class="nav-actions">
           <div class="badge-year">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -183,15 +183,49 @@
             </svg>
             <span>{{ tahunAnggaran }}</span>
           </div>
+
+          <!-- Firebase Auth Profile / Login Button -->
+          <button
+            v-if="!isAuthenticated"
+            type="button"
+            class="btn-nav-auth"
+            @click="openAuthModal"
+            title="Masuk dengan Firebase (Google / Email)"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+              <polyline points="10 17 15 12 10 7"/>
+              <line x1="15" y1="12" x2="3" y2="12"/>
+            </svg>
+            <span>Masuk</span>
+          </button>
+
+          <button
+            v-else
+            type="button"
+            class="btn-nav-user"
+            @click="openAuthModal"
+            :title="`Masuk sebagai ${userDisplayName} (${userEmail}) - Klik untuk melihat profil`"
+          >
+            <img v-if="userPhotoURL" :src="userPhotoURL" class="user-avatar-mini" alt="User" />
+            <div v-else class="user-initials-mini">{{ userInitials }}</div>
+            <span class="user-name-text">{{ userDisplayName }}</span>
+            <span class="dot-online-mini" title="Online"></span>
+          </button>
         </div>
       </div>
     </div>
+
+    <!-- Firebase Auth Modal Component -->
+    <AuthModal :is-open="isAuthModalOpen" @close="closeAuthModal" />
   </header>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useRoute } from 'vue-router';
+import { useAuth } from '../services/auth';
+import AuthModal from './AuthModal.vue';
 
 defineProps({
   tahunAnggaran: {
@@ -207,6 +241,25 @@ defineProps({
 const route = useRoute();
 const isDropdownOpen = ref(false);
 const dropdownRef = ref(null);
+
+const {
+  user,
+  isAuthenticated,
+  userDisplayName,
+  userEmail,
+  userPhotoURL,
+  userInitials,
+} = useAuth();
+
+const isAuthModalOpen = ref(false);
+
+function openAuthModal() {
+  isAuthModalOpen.value = true;
+}
+
+function closeAuthModal() {
+  isAuthModalOpen.value = false;
+}
 
 const isReportActive = computed(() => {
   return route.path.startsWith('/laporan');
@@ -417,5 +470,89 @@ onUnmounted(() => {
   border: 1px solid #a7f3d0;
   padding: 0.1rem 0.4rem;
   border-radius: 4px;
+}
+
+/* Firebase Auth Buttons in Navbar */
+.btn-nav-auth {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  background: #ffffff;
+  color: #1e3a8a;
+  border: 1px solid #cbd5e1;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-nav-auth:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  color: #1d4ed8;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+}
+
+.btn-nav-user {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  padding: 0.25rem 0.65rem 0.25rem 0.35rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  max-width: 170px;
+}
+
+.btn-nav-user:hover {
+  background: #f8fafc;
+  border-color: #94a3b8;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+}
+
+.user-avatar-mini {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.user-initials-mini {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+  color: #ffffff;
+  font-size: 0.68rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.user-name-text {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #1e293b;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dot-online-mini {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #10b981;
+  flex-shrink: 0;
 }
 </style>

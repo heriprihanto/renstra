@@ -262,3 +262,52 @@ Fitur Form Ubah Indikator (Copy Target Murni ke Target Perubahan)
 - [x] Frontend: Ditambahkan juga pada form Subkegiatan untuk tombol `Salin Volume Murni` ke Target Volume Perubahan.
 - [x] Frontend: Terdapat indikator visual animasi sukses (*Target Murni Berhasil Disalin!*).
 - [x] Verifikasi build frontend berhasil tanpa error.
+
+
+Tambahkan Authentifikasi dengan FIrebase :
+- [x] Inisialisasi Firebase SDK (`firebase/app`, `firebase/auth`, `firebase/analytics`) dengan konfigurasi `renstra-f461b` ([firebase.js](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/services/firebase.js)).
+- [x] Modul reactive state autentikasi ([auth.js](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/services/auth.js)):
+  - Google Sign-In via Popup (`signInWithPopup`).
+  - Email & Password Login / Register (`signInWithEmailAndPassword`, `createUserWithEmailAndPassword`).
+  - Sign Out (`signOut`).
+  - Penerjemahan kode error Firebase ke pesan ramah bahasa Indonesia.
+- [x] Komponen Modal Autentikasi Modern ([AuthModal.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/components/AuthModal.vue)):
+  - Tab Masuk & Daftar Akun Baru.
+  - Tombol masuk cepat dengan Akun Google (Google Branding resmi).
+  - Form email & kata sandi dengan toggle intip password.
+  - Tampilan profil pengguna (Avatar, Nama, Email, UID, Provider, Tombol Logout).
+- [x] Integrasi Navbar ([HeaderNavbar.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/components/HeaderNavbar.vue)):
+  - Tombol `Masuk` di navbar saat belum login.
+  - Badge profil mini (Avatar + Nama + Status Online) saat terautentikasi.
+- [x] Build frontend dan verifikasi inisialisasi Firebase berjalan 100% sukses.
+
+Authenfikasi di awal sebelum membuka data 
+- [x] Halaman Login dedicated ([LoginView.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/views/LoginView.vue)):
+  - Antarmuka eksekutif khas Pemerintah Kota Tegal (Banner Area Terbatas & Keamanan Perencanaan).
+  - Opsi masuk dengan Akun Google (sekali klik) atau Email & Kata Sandi.
+  - Tab pendaftaran akun baru.
+- [x] Global Router Auth Navigation Guard ([router/index.js](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/router/index.js)):
+  - Menggunakan `waitForAuthInit()` untuk menunggu pemulihan token sesi Firebase.
+  - Jika pengguna belum terautentikasi, otomatis dialihkan (*redirect*) ke `/login?redirect=...`.
+  - Jika pengguna sudah terautentikasi dan mengakses `/login`, otomatis diarahkan ke halaman utama `/`.
+- [x] Proteksi Menu Navbar ([HeaderNavbar.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/components/HeaderNavbar.vue)):
+  - Menu navigasi "Data RENSTRA" dan dropdown "Laporan" disembunyikan sampai pengguna berhasil masuk.
+  - Logout otomatis mengarahkan kembali ke `/login`.
+- [x] Verifikasi build frontend berhasil tanpa error.
+
+
+Revisi Halaman Login,hanya login dengan google saja, hapus form login 
+- [x] Halaman Login ([LoginView.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/views/LoginView.vue)):
+  - Menghapus seluruh input form email, kata sandi, dan tab pendaftaran.
+  - Menampilkan satu tombol utama berukuran besar **"Masuk dengan Akun Google"** dengan ikon resmi Google SVG dan indikator loading.
+  - Tetap mempertahankan identitas resmi Pemerintah Kota Tegal (lambang perisai, banner area terbatas, dan jaminan keamanan resmi Firebase).
+- [x] Modal Autentikasi ([AuthModal.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/components/AuthModal.vue)):
+  - Disesuaikan sehingga saat belum login, modal hanya menampilkan tombol **"Masuk dengan Akun Google"** tanpa form email/password.
+- [x] Pengujian build frontend Vite berhasil 100% tanpa error.
+- [x] Halaman Login ([LoginView.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/views/LoginView.vue)):
+  - Menghapus seluruh input form email, kata sandi, dan tab pendaftaran.
+  - Menampilkan satu tombol utama berukuran besar **"Masuk dengan Akun Google"** dengan ikon resmi Google SVG dan indikator loading.
+  - Tetap mempertahankan identitas resmi Pemerintah Kota Tegal (lambang perisai, banner area terbatas, dan jaminan keamanan resmi Firebase).
+- [x] Modal Autentikasi ([AuthModal.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/components/AuthModal.vue)):
+  - Disesuaikan sehingga saat belum login, modal hanya menampilkan tombol **"Masuk dengan Akun Google"** tanpa form email/password.
+- [x] Pengujian build frontend Vite berhasil 100% tanpa error.

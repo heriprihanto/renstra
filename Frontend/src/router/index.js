@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router';
+import LoginView from '../views/LoginView.vue';
 import OpdListView from '../views/OpdListView.vue';
 import OpdRenstraView from '../views/OpdRenstraView.vue';
 import SubOpdTableView from '../views/SubOpdTableView.vue';
@@ -7,8 +8,15 @@ import TujuanSasaranReportView from '../views/TujuanSasaranReportView.vue';
 import IkuReportView from '../views/IkuReportView.vue';
 import ProgramKegiatanReportView from '../views/ProgramKegiatanReportView.vue';
 import EvaluasiRenstraReportView from '../views/EvaluasiRenstraReportView.vue';
+import { useAuth, waitForAuthInit } from '../services/auth';
 
 const routes = [
+  {
+    path: '/login',
+    name: 'Login',
+    component: LoginView,
+    meta: { title: 'Masuk - RENSTRA Kota Tegal', public: true }
+  },
   {
     path: '/',
     name: 'OpdList',
@@ -71,11 +79,36 @@ const router = createRouter({
   }
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   if (to.meta.title) {
     document.title = to.meta.title;
   }
-  next();
+
+  // Ensure Firebase auth state is resolved before routing
+  try {
+    await waitForAuthInit();
+  } catch (err) {
+    console.error('Firebase auth init error:', err);
+  }
+
+  const { isAuthenticated } = useAuth();
+
+  if (to.path === '/login') {
+    if (isAuthenticated.value) {
+      next('/');
+    } else {
+      next();
+    }
+  } else {
+    if (!isAuthenticated.value) {
+      next({
+        path: '/login',
+        query: { redirect: to.fullPath !== '/login' ? to.fullPath : '/' },
+      });
+    } else {
+      next();
+    }
+  }
 });
 
 export default router;
