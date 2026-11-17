@@ -2908,8 +2908,6 @@ async def get_rpjmd_vs_renstra_report_data(
         o.id_skpd,
         o.kode_skpd,
         o.nama_skpd,
-        spd.kode_sub_skpd,
-        spd.nama_sub_skpd,
         s.kodeprogram,
         p.uraiprogram,
 
@@ -2917,6 +2915,7 @@ async def get_rpjmd_vs_renstra_report_data(
         s.p_pagu1, s.p_pagu2, s.p_pagu3, s.p_pagu4, s.p_pagu5,
 
         rj.t1, rj.t2, rj.t3, rj.t4, rj.t5
+
     FROM (
         SELECT
             kodeskpd,
@@ -2934,18 +2933,22 @@ async def get_rpjmd_vs_renstra_report_data(
         FROM public.renstra_subkegiatan
         GROUP BY kodeskpd, kodeprogram
     ) s
+
     JOIN public.renstra_program p
         ON p.kodeskpd = s.kodeskpd
        AND p.kodeprogram = s.kodeprogram
+
     JOIN public.ta_sub_pd spd
         ON spd.kode_sub_skpd = s.kodeskpd
+
     JOIN public.ta_opd o
         ON o.id_skpd = spd.id_skpd
+
     JOIN public.rpjmd_program rj
         ON rj.id_pd = o.id_skpd
        AND rj.kodeprogram = s.kodeprogram
     {opd_clause}
-    ORDER BY o.kode_skpd, p.kodeprogram, spd.kode_sub_skpd;
+    ORDER BY o.kode_skpd, p.kodeprogram;
     """
 
     params = {}
@@ -3028,8 +3031,6 @@ async def get_rpjmd_vs_renstra_report_data(
             "id_skpd": id_opd,
             "kode_skpd": r["kode_skpd"],
             "nama_skpd": r["nama_skpd"],
-            "kode_sub_skpd": r.get("kode_sub_skpd"),
-            "nama_sub_skpd": r.get("nama_sub_skpd"),
             "kodeprogram": r["kodeprogram"],
             "uraiprogram": r["uraiprogram"],
             "years": years_data,
@@ -3142,16 +3143,15 @@ def generate_rpjmd_vs_renstra_excel(
         (1, 1, "NO"),
         (2, 2, "KODE OPD"),
         (3, 3, "PERANGKAT DAERAH"),
-        (4, 4, "SUB UNIT (SUB SKPD)"),
-        (5, 5, "KODE PROGRAM"),
-        (6, 6, "NAMA PROGRAM"),
-        (7, 10, "TAHUN 2026"),
-        (11, 14, "TAHUN 2027"),
-        (15, 18, "TAHUN 2028"),
-        (19, 22, "TAHUN 2029"),
-        (23, 26, "TAHUN 2030"),
-        (27, 30, "TOTAL (2026 - 2030)"),
-        (31, 31, "STATUS / KETERANGAN"),
+        (4, 4, "KODE PROGRAM"),
+        (5, 5, "NAMA PROGRAM"),
+        (6, 9, "TAHUN 2026"),
+        (10, 13, "TAHUN 2027"),
+        (14, 17, "TAHUN 2028"),
+        (18, 21, "TAHUN 2029"),
+        (22, 25, "TAHUN 2030"),
+        (26, 29, "TOTAL (2026 - 2030)"),
+        (30, 30, "STATUS / KETERANGAN"),
     ]
 
     for start_c, end_c, title in top_headers:
@@ -3177,18 +3177,18 @@ def generate_rpjmd_vs_renstra_excel(
                 cell_h.fill = fill_h_total if "TOTAL" in title else fill_h1
 
     sub_headers = [
-        (7, "Pagu Murni"), (8, "Pagu Perubahan"), (9, "Pagu RPJMD"), (10, "Selisih"),
-        (11, "Pagu Murni"), (12, "Pagu Perubahan"), (13, "Pagu RPJMD"), (14, "Selisih"),
-        (15, "Pagu Murni"), (16, "Pagu Perubahan"), (17, "Pagu RPJMD"), (18, "Selisih"),
-        (19, "Pagu Murni"), (20, "Pagu Perubahan"), (21, "Pagu RPJMD"), (22, "Selisih"),
-        (23, "Pagu Murni"), (24, "Pagu Perubahan"), (25, "Pagu RPJMD"), (26, "Selisih"),
-        (27, "Total Murni"), (28, "Total Perubahan"), (29, "Total RPJMD"), (30, "Total Selisih"),
+        (6, "Pagu Murni"), (7, "Pagu Perubahan"), (8, "Pagu RPJMD"), (9, "Selisih"),
+        (10, "Pagu Murni"), (11, "Pagu Perubahan"), (12, "Pagu RPJMD"), (13, "Selisih"),
+        (14, "Pagu Murni"), (15, "Pagu Perubahan"), (16, "Pagu RPJMD"), (17, "Selisih"),
+        (18, "Pagu Murni"), (19, "Pagu Perubahan"), (20, "Pagu RPJMD"), (21, "Selisih"),
+        (22, "Pagu Murni"), (23, "Pagu Perubahan"), (24, "Pagu RPJMD"), (25, "Selisih"),
+        (26, "Total Murni"), (27, "Total Perubahan"), (28, "Total RPJMD"), (29, "Total Selisih"),
     ]
 
     for col_idx, sub_title in sub_headers:
         c = ws.cell(row=5, column=col_idx, value=sub_title)
         c.font = font_h2
-        c.fill = fill_h2 if col_idx < 27 else fill_h_total
+        c.fill = fill_h2 if col_idx < 26 else fill_h_total
         c.alignment = align_center
         c.border = border_cell
 
@@ -3222,27 +3222,19 @@ def generate_rpjmd_vs_renstra_excel(
             c3.border = border_cell
             if row_fill: c3.fill = row_fill
 
-            # Col 4: Sub Unit
-            sub_name = prog.get("nama_sub_skpd") or prog.get("nama_skpd", "")
-            c4 = ws.cell(row=current_row, column=4, value=sub_name)
-            c4.font = font_data
-            c4.alignment = align_left
+            # Col 4: Kode Program
+            c4 = ws.cell(row=current_row, column=4, value=prog.get("kodeprogram", ""))
+            c4.font = font_bold
+            c4.alignment = align_center
             c4.border = border_cell
             if row_fill: c4.fill = row_fill
 
-            # Col 5: Kode Program
-            c5 = ws.cell(row=current_row, column=5, value=prog.get("kodeprogram", ""))
-            c5.font = font_bold
-            c5.alignment = align_center
+            # Col 5: Nama Program
+            c5 = ws.cell(row=current_row, column=5, value=prog.get("uraiprogram", ""))
+            c5.font = font_data
+            c5.alignment = align_left
             c5.border = border_cell
             if row_fill: c5.fill = row_fill
-
-            # Col 6: Nama Program
-            c6 = ws.cell(row=current_row, column=6, value=prog.get("uraiprogram", ""))
-            c6.font = font_data
-            c6.alignment = align_left
-            c6.border = border_cell
-            if row_fill: c6.fill = row_fill
 
             # Years 2026 - 2030
             y_data = prog.get("years", {})
@@ -3254,7 +3246,7 @@ def generate_rpjmd_vs_renstra_excel(
                 diff_val = yd.get("selisih", 0.0)
                 is_d = yd.get("is_diff", False)
 
-                base_col = 7 + (y_idx * 4)
+                base_col = 6 + (y_idx * 4)
 
                 # Murni
                 cm = ws.cell(row=current_row, column=base_col, value=m_val)
@@ -3296,48 +3288,48 @@ def generate_rpjmd_vs_renstra_excel(
                     cdiff.font = font_data
                     if row_fill: cdiff.fill = row_fill
 
-            # Total (Cols 27 - 30)
+            # Total (Cols 26 - 29)
             tot_m = prog.get("total_murni", 0.0)
             tot_p = prog.get("total_perubahan", 0.0)
             tot_t = prog.get("total_rpjmd", 0.0)
             tot_diff = prog.get("total_selisih", 0.0)
             prog_has_diff = prog.get("has_discrepancy", False)
 
-            c27 = ws.cell(row=current_row, column=27, value=tot_m)
+            c26 = ws.cell(row=current_row, column=26, value=tot_m)
+            c26.number_format = num_format_currency
+            c26.font = font_bold
+            c26.alignment = align_right
+            c26.border = border_cell
+            if row_fill: c26.fill = row_fill
+
+            c27 = ws.cell(row=current_row, column=27, value=tot_p)
             c27.number_format = num_format_currency
-            c27.font = font_bold
+            c27.font = font_diff if prog_has_diff else font_bold
             c27.alignment = align_right
             c27.border = border_cell
-            if row_fill: c27.fill = row_fill
+            if prog_has_diff:
+                c27.fill = fill_diff_cell
+            elif row_fill:
+                c27.fill = row_fill
 
-            c28 = ws.cell(row=current_row, column=28, value=tot_p)
+            c28 = ws.cell(row=current_row, column=28, value=tot_t)
             c28.number_format = num_format_currency
-            c28.font = font_diff if prog_has_diff else font_bold
+            c28.font = font_bold
             c28.alignment = align_right
             c28.border = border_cell
-            if prog_has_diff:
-                c28.fill = fill_diff_cell
-            elif row_fill:
-                c28.fill = row_fill
+            if row_fill: c28.fill = row_fill
 
-            c29 = ws.cell(row=current_row, column=29, value=tot_t)
+            c29 = ws.cell(row=current_row, column=29, value=tot_diff)
             c29.number_format = num_format_currency
-            c29.font = font_bold
+            c29.font = font_diff if prog_has_diff else font_bold
             c29.alignment = align_right
             c29.border = border_cell
-            if row_fill: c29.fill = row_fill
-
-            c30 = ws.cell(row=current_row, column=30, value=tot_diff)
-            c30.number_format = num_format_currency
-            c30.font = font_diff if prog_has_diff else font_bold
-            c30.alignment = align_right
-            c30.border = border_cell
             if prog_has_diff:
-                c30.fill = fill_diff
+                c29.fill = fill_diff
             elif row_fill:
-                c30.fill = row_fill
+                c29.fill = row_fill
 
-            # Col 31: Status / Keterangan
+            # Col 30: Status / Keterangan
             if prog_has_diff:
                 diff_years_str = ", ".join(prog.get("discrepancy_years", []))
                 status_str = f"SELISIH ({diff_years_str})"
@@ -3348,11 +3340,11 @@ def generate_rpjmd_vs_renstra_excel(
                 st_fill = fill_match
                 st_font = font_match
 
-            c31 = ws.cell(row=current_row, column=31, value=status_str)
-            c31.font = st_font
-            c31.fill = st_fill
-            c31.alignment = align_center
-            c31.border = border_cell
+            c30 = ws.cell(row=current_row, column=30, value=status_str)
+            c30.font = st_font
+            c30.fill = st_fill
+            c30.alignment = align_center
+            c30.border = border_cell
 
             global_idx += 1
             current_row += 1
@@ -3360,16 +3352,16 @@ def generate_rpjmd_vs_renstra_excel(
     # Grand Summary Row at Bottom
     sum_row = current_row
     ws.row_dimensions[sum_row].height = 24
-    ws.merge_cells(start_row=sum_row, start_column=1, end_row=sum_row, end_column=6)
+    ws.merge_cells(start_row=sum_row, start_column=1, end_row=sum_row, end_column=5)
     c_tot_label = ws.cell(row=sum_row, column=1, value="TOTAL KESELURUHAN")
     c_tot_label.font = font_bold
     c_tot_label.alignment = align_center
-    for c_i in range(1, 7):
+    for c_i in range(1, 6):
         ws.cell(row=sum_row, column=c_i).fill = fill_summary
         ws.cell(row=sum_row, column=c_i).border = double_bottom_border
 
-    # Sum formulas for columns 7 through 30
-    for col_c in range(7, 31):
+    # Sum formulas for columns 6 through 29
+    for col_c in range(6, 30):
         col_letter = get_column_letter(col_c)
         cell_sum = ws.cell(row=sum_row, column=col_c)
         if sum_row > 6:
@@ -3382,29 +3374,28 @@ def generate_rpjmd_vs_renstra_excel(
         cell_sum.fill = fill_summary
         cell_sum.border = double_bottom_border
 
-    # Col 31 on summary row
-    c31_sum = ws.cell(row=sum_row, column=31, value="")
-    c31_sum.fill = fill_summary
-    c31_sum.border = double_bottom_border
+    # Col 30 on summary row
+    c30_sum = ws.cell(row=sum_row, column=30, value="")
+    c30_sum.fill = fill_summary
+    c30_sum.border = double_bottom_border
 
-    # Auto set column widths for 31 columns
+    # Auto set column widths for 30 columns
     col_widths = {
         1: 6,    # No
         2: 15,   # Kode OPD
-        3: 32,   # Perangkat Daerah
-        4: 30,   # Sub Unit
-        5: 14,   # Kode Program
-        6: 42,   # Program
+        3: 34,   # Perangkat Daerah
+        4: 15,   # Kode Program
+        5: 45,   # Program
         # Years 2026-2030 (4 cols each): Murni, Perubahan, RPJMD, Selisih
-        7: 16, 8: 16, 9: 16, 10: 16,
-        11: 16, 12: 16, 13: 16, 14: 16,
-        15: 16, 16: 16, 17: 16, 18: 16,
-        19: 16, 20: 16, 21: 16, 22: 16,
-        23: 16, 24: 16, 25: 16, 26: 16,
+        6: 16, 7: 16, 8: 16, 9: 16,
+        10: 16, 11: 16, 12: 16, 13: 16,
+        14: 16, 15: 16, 16: 16, 17: 16,
+        18: 16, 19: 16, 20: 16, 21: 16,
+        22: 16, 23: 16, 24: 16, 25: 16,
         # Total
-        27: 18, 28: 18, 29: 18, 30: 18,
+        26: 18, 27: 18, 28: 18, 29: 18,
         # Status
-        31: 24,
+        30: 24,
     }
     for col_idx, width in col_widths.items():
         col_letter = get_column_letter(col_idx)

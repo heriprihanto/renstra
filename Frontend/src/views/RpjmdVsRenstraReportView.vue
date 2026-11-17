@@ -98,7 +98,7 @@
 
           <!-- Live Search -->
           <div class="control-box search-box">
-            <label class="control-label">Cari Program / Sub Unit:</label>
+            <label class="control-label">Cari Program:</label>
             <div class="search-input-wrap">
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                 <circle cx="11" cy="11" r="8"/>
@@ -244,7 +244,6 @@
               <tr class="tr-top-header">
                 <th rowspan="2" class="th-no">NO</th>
                 <th rowspan="2" class="th-prog">KODE &amp; NAMA PROGRAM</th>
-                <th rowspan="2" class="th-subunit">SUB UNIT</th>
                 
                 <!-- Year columns (All or Selected) -->
                 <template v-if="selectedYearView === 'all'">
@@ -313,7 +312,7 @@
                 <!-- Program Rows under this OPD -->
                 <tr
                   v-for="(prog, progIdx) in opd.programs"
-                  :key="prog.kodeprogram + '-' + (prog.kode_sub_skpd || '')"
+                  :key="opd.id_skpd + '-' + prog.kodeprogram + '-' + progIdx"
                   :class="['tr-program-row', { 'tr-has-diff': prog.has_discrepancy }]"
                 >
                   <!-- No -->
@@ -325,16 +324,6 @@
                       <span class="prog-code">{{ prog.kodeprogram }}</span>
                       <span class="prog-name">{{ prog.uraiprogram }}</span>
                     </div>
-                  </td>
-
-                  <!-- Sub Unit -->
-                  <td class="td-subunit">
-                    <span
-                      class="subunit-tag"
-                      :class="{ 'subunit-distinct': prog.nama_sub_skpd && prog.nama_sub_skpd !== prog.nama_skpd }"
-                    >
-                      {{ prog.nama_sub_skpd || prog.nama_skpd }}
-                    </span>
                   </td>
 
                   <!-- Year Breakdown Columns -->
@@ -459,7 +448,7 @@
             <!-- Table Footer Grand Total -->
             <tfoot>
               <tr class="tr-grand-total">
-                <td colspan="3" class="td-total-label">TOTAL KESELURUHAN (KOTA TEGAL)</td>
+                <td colspan="2" class="td-total-label">TOTAL KESELURUHAN (KOTA TEGAL)</td>
                 
                 <template v-if="selectedYearView === 'all'">
                   <template v-for="y in ['2026', '2027', '2028', '2029', '2030']" :key="'foot-' + y">
@@ -524,9 +513,9 @@ export default {
 
     // Column count calculation for colspan
     const columnCount = computed(() => {
-      // 3 fixed (no, prog, subunit) + years cols + total cols (4) + status (1)
+      // 2 fixed (no, prog) + years cols + total cols (4) + status (1)
       const yearCols = selectedYearView.value === 'all' ? 20 : 4;
-      return 3 + yearCols + 4 + 1;
+      return 2 + yearCols + 4 + 1;
     });
 
     // Load OPD list
@@ -575,7 +564,6 @@ export default {
             const matchProg =
               (prog.kodeprogram && prog.kodeprogram.toLowerCase().includes(q)) ||
               (prog.uraiprogram && prog.uraiprogram.toLowerCase().includes(q)) ||
-              (prog.nama_sub_skpd && prog.nama_sub_skpd.toLowerCase().includes(q)) ||
               (opd.nama_skpd && opd.nama_skpd.toLowerCase().includes(q));
             if (!matchProg) return false;
           }
@@ -1371,3 +1359,4 @@ export default {
   margin: 0;
 }
 </style>
+

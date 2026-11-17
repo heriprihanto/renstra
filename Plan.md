@@ -433,3 +433,19 @@ JOIN public.rpjmd_program rj
   - Fitur Export Excel (.xlsx).
 - [x] Route `/laporan/rpjmd-vs-renstra` di `Frontend/src/router/index.js` dan menu dropdown "7. Pagu RPJMD vs Renstra" pada `Frontend/src/components/HeaderNavbar.vue`.
 - [x] Kompilasi frontend build `npm run build` sukses 100%.
+
+
+### Status Laporan 7: Pagu RPJMD vs Renstra
+- [x] Query SQL dieksekusi dan diverifikasi pada database (283 baris program, 138 program terdeteksi ada selisih antara Pagu Perubahan dan RPJMD).
+- [x] Backend service `get_rpjmd_vs_renstra_report_data` dan `generate_rpjmd_vs_renstra_excel` di `Backend/app/services/laporan_service.py`.
+- [x] Endpoint API:
+  - `GET /api/laporan/rpjmd-vs-renstra`: Mengembalikan ringkasan KPI (total program, program selisih, program sesuai, grand total pagu murni, perubahan, RPJMD, selisih) dan daftar program per OPD.
+  - `GET /api/laporan/rpjmd-vs-renstra/export-excel`: Menghasilkan file Excel terformat rapi dengan penandaan warna (kuning/merah) pada pagu yang tidak sama dengan RPJMD, rumus SUM otomatis, dan format Rupiah.
+- [x] Integrasi API di `Frontend/src/services/api.js`.
+- [x] Antarmuka Frontend `Frontend/src/views/RpjmdVsRenstraReportView.vue`:
+  - Kartu KPI ringkasan: Total Program, Selisih (Tidak Sama), Sesuai RPJMD, dan Total Pagu.
+  - Filter interaktif: Filter OPD, Filter Status Kesesuaian (Semua / Hanya Selisih / Hanya Sesuai), Tampilan Tahun (Semua Tahun 2026-2030 atau per tahun), dan live search.
+  - Penandaan selisih: Baris dan sel yang tidak sama dengan RPJMD ditandai dengan badge peringatan merah/kuning dan indikator selisih.
+  - Fitur Export Excel (.xlsx).
+- [x] Route `/laporan/rpjmd-vs-renstra` di `Frontend/src/router/index.js` dan menu dropdown "7. Pagu RPJMD vs Renstra" pada `Frontend/src/components/HeaderNavbar.vue`.
+- [x] Kompilasi frontend build `npm run build` sukses 100%.
