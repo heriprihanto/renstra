@@ -917,6 +917,188 @@
                 </div>
               </div>
             </div>
+
+            <!-- Bagian Pagu Indikatif (Murni) & Pagu Perubahan (Rp) -->
+            <div style="margin-top: 1.25rem; padding: 0.95rem; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 8px;">
+              <!-- Title Block -->
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.85rem; border-bottom: 1px solid #e2e8f0; padding-bottom: 0.5rem; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                  <div style="width: 24px; height: 24px; border-radius: 6px; background: #eff6ff; color: #1e40af; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.78rem;">
+                    Rp
+                  </div>
+                  <div>
+                    <div style="font-weight: 700; font-size: 0.9rem; color: #1e3a8a;">
+                      Alokasi Pagu Anggaran Subkegiatan
+                    </div>
+                    <div style="font-size: 0.72rem; color: #64748b;">
+                      Pagu Indikatif Murni & Target Pagu Perubahan (Tahun 2026 - 2030)
+                    </div>
+                  </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 0.4rem;">
+                  <span v-if="copiedPaguSuccess" class="copy-success-badge" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                    Pagu Disalin!
+                  </span>
+                  <button
+                    type="button"
+                    class="btn-copy-target"
+                    style="padding: 0.26rem 0.65rem; font-size: 0.74rem;"
+                    @click="copySubkegiatanPaguMurniToPerubahan"
+                    title="Salin nilai Pagu Murni ke Pagu Perubahan"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                    </svg>
+                    <span>Salin Pagu Murni ke Perubahan</span>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Pagu Murni Section -->
+              <div style="margin-bottom: 1rem; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 6px; padding: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                  <label class="form-label" style="font-weight: 700; color: #1e40af; font-size: 0.8rem; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+                    <span class="badge-group-murni" style="font-size: 0.68rem; padding: 0.1rem 0.4rem;">Murni</span>
+                    <span>Pagu Indikatif (Murni)</span>
+                  </label>
+                  <div style="font-size: 0.75rem; color: #475569; font-weight: 600;">
+                    Total: <span style="color: #1e40af; font-weight: 700;">{{ formatRupiah(totalSubkegiatanPaguMurni) }}</span>
+                  </div>
+                </div>
+
+                <div class="targets-form-grid" style="grid-template-columns: repeat(5, 1fr);">
+                  <div class="form-group">
+                    <label class="form-label sub">2026 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono"
+                      v-model.number="formData.pagu1"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text">{{ formatRupiah(formData.pagu1) }}</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub">2027 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono"
+                      v-model.number="formData.pagu2"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text">{{ formatRupiah(formData.pagu2) }}</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub">2028 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono"
+                      v-model.number="formData.pagu3"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text">{{ formatRupiah(formData.pagu3) }}</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub">2029 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono"
+                      v-model.number="formData.pagu4"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text">{{ formatRupiah(formData.pagu4) }}</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub">2030 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono"
+                      v-model.number="formData.pagu5"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text">{{ formatRupiah(formData.pagu5) }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Pagu Perubahan Section -->
+              <div style="background: #ffffff; border: 1px solid #fed7aa; border-radius: 6px; padding: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                  <label class="form-label" style="font-weight: 700; color: #b45309; font-size: 0.8rem; margin: 0; display: flex; align-items: center; gap: 0.35rem;">
+                    <span class="badge-perubahan" style="font-size: 0.68rem; padding: 0.1rem 0.4rem;">Perubahan</span>
+                    <span>Pagu Anggaran Perubahan</span>
+                  </label>
+                  <div style="font-size: 0.75rem; color: #475569; font-weight: 600;">
+                    Total: <span style="color: #b45309; font-weight: 700;">{{ formatRupiah(totalSubkegiatanPaguPerubahan) }}</span>
+                  </div>
+                </div>
+
+                <div class="targets-form-grid targets-perubahan-grid" style="grid-template-columns: repeat(5, 1fr);">
+                  <div class="form-group">
+                    <label class="form-label sub p-label">2026 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono p-input"
+                      v-model.number="formData.p_pagu1"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text p-text">{{ formatRupiah(formData.p_pagu1) }}</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub p-label">2027 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono p-input"
+                      v-model.number="formData.p_pagu2"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text p-text">{{ formatRupiah(formData.p_pagu2) }}</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub p-label">2028 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono p-input"
+                      v-model.number="formData.p_pagu3"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text p-text">{{ formatRupiah(formData.p_pagu3) }}</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub p-label">2029 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono p-input"
+                      v-model.number="formData.p_pagu4"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text p-text">{{ formatRupiah(formData.p_pagu4) }}</div>
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label sub p-label">2030 (Rp)</label>
+                    <input
+                      type="number"
+                      step="any"
+                      class="form-input mono p-input"
+                      v-model.number="formData.p_pagu5"
+                      placeholder="0"
+                    />
+                    <div class="pagu-preview-text p-text">{{ formatRupiah(formData.p_pagu5) }}</div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </form>
         </div>
 
@@ -1546,6 +1728,47 @@ function onTarget2029PerubahanInput() {
 
 const copiedSuccess = ref(false);
 const copiedSubSuccess = ref(false);
+const copiedPaguSuccess = ref(false);
+
+function formatRupiah(val) {
+  if (val === null || val === undefined || isNaN(val) || val === '' || val === 0) return 'Rp 0';
+  const num = parseFloat(val);
+  if (isNaN(num)) return 'Rp 0';
+  return new Intl.NumberFormat('id-ID', {
+    style: 'currency',
+    currency: 'IDR',
+    maximumFractionDigits: 0
+  }).format(num);
+}
+
+const totalSubkegiatanPaguMurni = computed(() => {
+  return (parseFloat(formData.value.pagu1) || 0) +
+         (parseFloat(formData.value.pagu2) || 0) +
+         (parseFloat(formData.value.pagu3) || 0) +
+         (parseFloat(formData.value.pagu4) || 0) +
+         (parseFloat(formData.value.pagu5) || 0);
+});
+
+const totalSubkegiatanPaguPerubahan = computed(() => {
+  return (parseFloat(formData.value.p_pagu1) || 0) +
+         (parseFloat(formData.value.p_pagu2) || 0) +
+         (parseFloat(formData.value.p_pagu3) || 0) +
+         (parseFloat(formData.value.p_pagu4) || 0) +
+         (parseFloat(formData.value.p_pagu5) || 0);
+});
+
+function copySubkegiatanPaguMurniToPerubahan() {
+  formData.value.p_pagu1 = formData.value.pagu1 ?? 0;
+  formData.value.p_pagu2 = formData.value.pagu2 ?? 0;
+  formData.value.p_pagu3 = formData.value.pagu3 ?? 0;
+  formData.value.p_pagu4 = formData.value.pagu4 ?? 0;
+  formData.value.p_pagu5 = formData.value.pagu5 ?? 0;
+
+  copiedPaguSuccess.value = true;
+  setTimeout(() => {
+    copiedPaguSuccess.value = false;
+  }, 2500);
+}
 
 function copyMurniToPerubahan() {
   formData.value.p_target2025 = formData.value.target_awal || '-';
@@ -1573,21 +1796,11 @@ function copySubkegiatanMurniToPerubahan() {
   formData.value.p_volume_5 = formData.value.volume_5 || '-';
   formData.value.p_volume_akhir = formData.value.volume_4 || formData.value.volume_5 || '-';
 
-  if (formData.value.pagu1 && (!formData.value.p_pagu1 || formData.value.p_pagu1 === 0)) {
-    formData.value.p_pagu1 = formData.value.pagu1;
-  }
-  if (formData.value.pagu2 && (!formData.value.p_pagu2 || formData.value.p_pagu2 === 0)) {
-    formData.value.p_pagu2 = formData.value.pagu2;
-  }
-  if (formData.value.pagu3 && (!formData.value.p_pagu3 || formData.value.p_pagu3 === 0)) {
-    formData.value.p_pagu3 = formData.value.pagu3;
-  }
-  if (formData.value.pagu4 && (!formData.value.p_pagu4 || formData.value.p_pagu4 === 0)) {
-    formData.value.p_pagu4 = formData.value.pagu4;
-  }
-  if (formData.value.pagu5 && (!formData.value.p_pagu5 || formData.value.p_pagu5 === 0)) {
-    formData.value.p_pagu5 = formData.value.pagu5;
-  }
+  formData.value.p_pagu1 = formData.value.pagu1 ?? 0;
+  formData.value.p_pagu2 = formData.value.pagu2 ?? 0;
+  formData.value.p_pagu3 = formData.value.pagu3 ?? 0;
+  formData.value.p_pagu4 = formData.value.pagu4 ?? 0;
+  formData.value.p_pagu5 = formData.value.pagu5 ?? 0;
 
   copiedSubSuccess.value = true;
   setTimeout(() => {
@@ -1955,6 +2168,16 @@ async function handleSubmit() {
         realisasi2028: formData.value.realisasi2028,
         realisasi2029: formData.value.realisasi2029,
         realisasi2030: formData.value.realisasi2030,
+        pagu1: parseFloat(formData.value.pagu1) || 0,
+        pagu2: parseFloat(formData.value.pagu2) || 0,
+        pagu3: parseFloat(formData.value.pagu3) || 0,
+        pagu4: parseFloat(formData.value.pagu4) || 0,
+        pagu5: parseFloat(formData.value.pagu5) || 0,
+        p_pagu1: parseFloat(formData.value.p_pagu1) || 0,
+        p_pagu2: parseFloat(formData.value.p_pagu2) || 0,
+        p_pagu3: parseFloat(formData.value.p_pagu3) || 0,
+        p_pagu4: parseFloat(formData.value.p_pagu4) || 0,
+        p_pagu5: parseFloat(formData.value.p_pagu5) || 0,
       });
     } else if (props.mode === 'edit_subkegiatan') {
       await api.updateSubkegiatan(props.itemData.id, {
@@ -1983,6 +2206,16 @@ async function handleSubmit() {
         realisasi2028: formData.value.realisasi2028,
         realisasi2029: formData.value.realisasi2029,
         realisasi2030: formData.value.realisasi2030,
+        pagu1: parseFloat(formData.value.pagu1) || 0,
+        pagu2: parseFloat(formData.value.pagu2) || 0,
+        pagu3: parseFloat(formData.value.pagu3) || 0,
+        pagu4: parseFloat(formData.value.pagu4) || 0,
+        pagu5: parseFloat(formData.value.pagu5) || 0,
+        p_pagu1: parseFloat(formData.value.p_pagu1) || 0,
+        p_pagu2: parseFloat(formData.value.p_pagu2) || 0,
+        p_pagu3: parseFloat(formData.value.p_pagu3) || 0,
+        p_pagu4: parseFloat(formData.value.p_pagu4) || 0,
+        p_pagu5: parseFloat(formData.value.p_pagu5) || 0,
       });
     }
 
@@ -2536,5 +2769,22 @@ async function handleDeleteConfirm() {
 .fade-leave-to {
   opacity: 0;
   transform: translateY(-3px);
+}
+
+.pagu-preview-text {
+  font-size: 0.65rem;
+  color: #475569;
+  font-weight: 600;
+  margin-top: 0.25rem;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--font-mono, monospace);
+  padding: 0 0.1rem;
+}
+
+.pagu-preview-text.p-text {
+  color: #b45309;
 }
 </style>

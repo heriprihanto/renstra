@@ -2280,6 +2280,16 @@ function openCreateSubkegiatan(prog, keg) {
     uraikegiatan: keg.uraikegiatan,
     parent_uraian: keg.uraikegiatan,
     opd_name: selectedSubSkpd.value?.nama_sub_skpd || cascadingData.value?.nama_skpd,
+    pagu1: 0,
+    pagu2: 0,
+    pagu3: 0,
+    pagu4: 0,
+    pagu5: 0,
+    p_pagu1: 0,
+    p_pagu2: 0,
+    p_pagu3: 0,
+    p_pagu4: 0,
+    p_pagu5: 0,
   };
   isCrudModalOpen.value = true;
 }
@@ -2312,16 +2322,16 @@ function openEditSubkegiatan(prog, keg, subkeg) {
     p_volume_4: subkeg.indikator?.p_volume_4 || '-',
     p_volume_5: subkeg.indikator?.p_volume_5 || '-',
     p_volume_akhir: subkeg.indikator?.p_volume_akhir || '-',
-    pagu1: subkeg.pagu1,
-    pagu2: subkeg.pagu2,
-    pagu3: subkeg.pagu3,
-    pagu4: subkeg.pagu4,
-    pagu5: subkeg.pagu5,
-    p_pagu1: subkeg.p_pagu1 !== undefined ? subkeg.p_pagu1 : subkeg.pagu1,
-    p_pagu2: subkeg.p_pagu2 !== undefined ? subkeg.p_pagu2 : subkeg.pagu2,
-    p_pagu3: subkeg.p_pagu3 !== undefined ? subkeg.p_pagu3 : subkeg.pagu3,
-    p_pagu4: subkeg.p_pagu4 !== undefined ? subkeg.p_pagu4 : subkeg.pagu4,
-    p_pagu5: subkeg.p_pagu5 !== undefined ? subkeg.p_pagu5 : subkeg.pagu5,
+    pagu1: subkeg.pagu1 ?? subkeg.indikator?.pagu1 ?? 0,
+    pagu2: subkeg.pagu2 ?? subkeg.indikator?.pagu2 ?? 0,
+    pagu3: subkeg.pagu3 ?? subkeg.indikator?.pagu3 ?? 0,
+    pagu4: subkeg.pagu4 ?? subkeg.indikator?.pagu4 ?? 0,
+    pagu5: subkeg.pagu5 ?? subkeg.indikator?.pagu5 ?? 0,
+    p_pagu1: subkeg.p_pagu1 ?? subkeg.indikator?.p_pagu1 ?? subkeg.pagu1 ?? 0,
+    p_pagu2: subkeg.p_pagu2 ?? subkeg.indikator?.p_pagu2 ?? subkeg.pagu2 ?? 0,
+    p_pagu3: subkeg.p_pagu3 ?? subkeg.indikator?.p_pagu3 ?? subkeg.pagu3 ?? 0,
+    p_pagu4: subkeg.p_pagu4 ?? subkeg.indikator?.p_pagu4 ?? subkeg.pagu4 ?? 0,
+    p_pagu5: subkeg.p_pagu5 ?? subkeg.indikator?.p_pagu5 ?? subkeg.pagu5 ?? 0,
   };
   isCrudModalOpen.value = true;
 }

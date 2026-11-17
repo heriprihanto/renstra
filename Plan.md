@@ -351,3 +351,15 @@ Perangkat Daerah diurut by kode perangkat daerah
   - Memastikan `availableOpds` dan `filteredGroupedOpds` diurutkan secara ascending berdasarkan `kode_skpd`.
 - [x] Verifikasi API endpoint dan build frontend Vite berhasil tanpa error.
 
+Form Subkegiatan: Field Pagu Murni dan Perubahan
+- [x] Frontend Component Modal ([RenstraCrudModal.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/components/RenstraCrudModal.vue)):
+  - Menambahkan section form **Alokasi Pagu Anggaran Subkegiatan**:
+    - **Pagu Indikatif (Murni)**: Input tahun 2026 (`pagu1`), 2027 (`pagu2`), 2028 (`pagu3`), 2029 (`pagu4`), 2030 (`pagu5`), lengkap dengan pratinjau teks format Rupiah (`Rp ...`) dan perhitungan otomatis Total Pagu Murni.
+    - **Pagu Anggaran Perubahan**: Input tahun 2026 (`p_pagu1`), 2027 (`p_pagu2`), 2028 (`p_pagu3`), 2029 (`p_pagu4`), 2030 (`p_pagu5`), lengkap dengan pratinjau teks format Rupiah (`Rp ...`) dan perhitungan otomatis Total Pagu Perubahan.
+  - Tombol **Salin Pagu Murni ke Perubahan** sekali klik untuk menyalin nilai `pagu1..pagu5` ke `p_pagu1..p_pagu5` jika tidak ada perubahan anggaran.
+  - Mengintegrasikan pengiriman payload `pagu1..pagu5` dan `p_pagu1..p_pagu5` pada `api.createSubkegiatan` dan `api.updateSubkegiatan`.
+- [x] Frontend View ([OpdRenstraView.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/views/OpdRenstraView.vue)):
+  - Memastikan modal Ubah Subkegiatan menerima data `pagu1..pagu5` dan `p_pagu1..p_pagu5` baik dari object subkegiatan maupun indikator subkegiatan.
+- [x] Verifikasi test API endpoint PUT `/api/renstra/subkegiatan/{id}` dan build frontend Vite berhasil tanpa error (`built in 840ms`).
+
+
