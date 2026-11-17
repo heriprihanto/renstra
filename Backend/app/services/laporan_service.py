@@ -2901,54 +2901,43 @@ async def get_rpjmd_vs_renstra_report_data(
     berdasarkan query renstra_subkegiatan join renstra_program, ta_sub_pd, ta_opd, dan rpjmd_program.
     Tahun 1 = 2026, Tahun 2 = 2027, Tahun 3 = 2028, Tahun 4 = 2029, Tahun 5 = 2030.
     """
-    opd_clause = "WHERE o.id_skpd = :id_skpd" if id_skpd else ""
+    where_clause = "WHERE x.id_skpd = :id_skpd" if id_skpd else ""
 
     q = f"""
-    SELECT
-        o.id_skpd,
-        o.kode_skpd,
-        o.nama_skpd,
-        s.kodeprogram,
-        p.uraiprogram,
-
-        s.pagu1, s.pagu2, s.pagu3, s.pagu4, s.pagu5,
-        s.p_pagu1, s.p_pagu2, s.p_pagu3, s.p_pagu4, s.p_pagu5,
-
-        rj.t1, rj.t2, rj.t3, rj.t4, rj.t5
-
-    FROM (
-        SELECT
-            kodeskpd,
-            kodeprogram,
-            SUM(pagu1) AS pagu1,
-            SUM(pagu2) AS pagu2,
-            SUM(pagu3) AS pagu3,
-            SUM(pagu4) AS pagu4,
-            SUM(pagu5) AS pagu5,
-            SUM(p_pagu1) AS p_pagu1,
-            SUM(p_pagu2) AS p_pagu2,
-            SUM(p_pagu3) AS p_pagu3,
-            SUM(p_pagu4) AS p_pagu4,
-            SUM(p_pagu5) AS p_pagu5
-        FROM public.renstra_subkegiatan
-        GROUP BY kodeskpd, kodeprogram
-    ) s
-
-    JOIN public.renstra_program p
-        ON p.kodeskpd = s.kodeskpd
-       AND p.kodeprogram = s.kodeprogram
-
-    JOIN public.ta_sub_pd spd
-        ON spd.kode_sub_skpd = s.kodeskpd
-
-    JOIN public.ta_opd o
-        ON o.id_skpd = spd.id_skpd
-
-    JOIN public.rpjmd_program rj
-        ON rj.id_pd = o.id_skpd
-       AND rj.kodeprogram = s.kodeprogram
-    {opd_clause}
-    ORDER BY o.kode_skpd, p.kodeprogram;
+    SELECT x.*, 
+    rj.t1, rj.t2, rj.t3, rj.t4, rj.t5 
+    FROM
+    (SELECT 
+      o.id_skpd, 
+      o.kode_skpd,
+      o.nama_skpd,
+      s.kodeprogram,
+      p.uraiprogram,
+      sum(s.pagu1) as pagu1,
+      sum(s.pagu2) as pagu2,
+      sum(s.pagu3) as pagu3,
+      sum(s.pagu4) as pagu4,
+      sum(s.pagu5) as pagu5,
+      sum(s.p_pagu1) as p_pagu1,
+      sum(s.p_pagu2) as p_pagu2,
+      sum(s.p_pagu3) as p_pagu3,
+      sum(s.p_pagu4) as p_pagu4,
+      sum(s.p_pagu5) as p_pagu5
+    FROM
+      public.renstra_subkegiatan s
+      INNER JOIN public.renstra_program p ON (s.kodeskpd = p.kodeskpd)
+      AND (s.kodeprogram = p.kodeprogram)
+      INNER JOIN public.ta_sub_pd spd ON (p.kodeskpd = spd.kode_sub_skpd)
+      INNER JOIN public.ta_opd o ON (spd.id_skpd = o.id_skpd)
+      GROUP BY
+      o.id_skpd,
+      o.kode_skpd,
+      o.nama_skpd,
+      s.kodeprogram,
+      p.uraiprogram
+      ) x JOIN rpjmd_program rj ON (x.id_skpd = rj.id_pd) AND (x.kodeprogram = rj.kodeprogram)
+    {where_clause}
+    ORDER BY x.kode_skpd, x.kodeprogram;
     """
 
     params = {}
