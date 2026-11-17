@@ -1640,7 +1640,7 @@
                             <button
                               class="btn-table-edit"
                               @click="openEditSubkegiatan(prog, keg, subkeg)"
-                              title="Ubah Target & Volume Indikator Subkegiatan"
+                              title="Ubah Target Indikator Subkegiatan"
                             >
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                                 <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>

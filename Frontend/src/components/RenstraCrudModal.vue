@@ -54,7 +54,7 @@
                 <strong>Perhatian:</strong> Menghapus Kegiatan akan menghapus seluruh <strong>Subkegiatan dan Indikator Kegiatan</strong> di bawahnya secara permanen!
               </div>
               <div v-else-if="deleteItemType === 'subkegiatan'" style="margin-top: 0.75rem; padding: 0.65rem 0.85rem; background: #fff1f2; border: 1px solid #fecdd3; border-radius: var(--radius-sm); font-size: 0.8rem; color: #be123c;">
-                <strong>Perhatian:</strong> Subkegiatan ini beserta indikator dan target volumenya akan dihapus secara permanen!
+                <strong>Perhatian:</strong> Subkegiatan ini beserta indikator dan target nya akan dihapus secara permanen!
               </div>
               <div style="margin-top: 0.75rem; font-family: var(--font-sans); font-size: 0.85rem; color: #1e293b; background: #f8fafc; padding: 0.6rem; border-radius: 6px; border: 1px solid #e2e8f0;">
                 <em>"{{ deleteItemText }}"</em>
@@ -829,7 +829,7 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem; flex-wrap: wrap; gap: 0.5rem;">
                   <label class="form-label" style="font-weight: 600; color: #b45309; font-size: 0.8rem; display: flex; align-items: center; gap: 0.35rem; margin-bottom: 0;">
                     <span class="badge-perubahan">Perubahan</span>
-                    Target Volume Perubahan
+                    Target Perubahan
                   </label>
                   <div style="display: flex; align-items: center; gap: 0.4rem;">
                     <span v-if="copiedSubSuccess" class="copy-success-badge" style="font-size: 0.72rem; padding: 0.2rem 0.5rem;">
@@ -841,13 +841,13 @@
                       class="btn-copy-target"
                       style="padding: 0.22rem 0.6rem; font-size: 0.74rem;"
                       @click="copySubkegiatanMurniToPerubahan"
-                      title="Salin nilai Target Volume Murni ke Target Volume Perubahan"
+                      title="Salin nilai Target Murni ke Target Perubahan"
                     >
                       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
                         <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
                       </svg>
-                      <span>Salin Volume Murni</span>
+                      <span>Salin Target Murni</span>
                     </button>
                   </div>
                 </div>
