@@ -60,7 +60,7 @@
             >
               <option :value="null">-- Semua Perangkat Daerah ({{ totalOpdCount }} OPD) --</option>
               <option v-for="opd in availableOpds" :key="opd.id_skpd" :value="opd.id_skpd">
-                {{ opd.nama_skpd }} ({{ opd.total_iku }} IKU)
+                {{ opd.kode_skpd }} - {{ opd.nama_skpd }} ({{ opd.total_iku }} IKU)
               </option>
             </select>
           </div>
@@ -323,6 +323,7 @@
                       <div>
                         <div class="opd-title">{{ group.nama_skpd }}</div>
                         <div class="opd-meta-sub">
+                          <span class="badge-kode-skpd">{{ group.kode_skpd }}</span>
                           <span class="badge-total-opd-iku">{{ group.indicators.length }} IKU</span>
                         </div>
                       </div>
@@ -437,7 +438,8 @@ async function fetchReport() {
 }
 
 const availableOpds = computed(() => {
-  return reportData.value?.opd_groups || [];
+  const list = [...(reportData.value?.opd_groups || [])];
+  return list.sort((a, b) => (a.kode_skpd || '').localeCompare(b.kode_skpd || ''));
 });
 
 const totalOpdCount = computed(() => {
@@ -447,26 +449,26 @@ const totalOpdCount = computed(() => {
 const selectedOpdName = computed(() => {
   if (!selectedOpdId.value) return null;
   const match = availableOpds.value.find(o => o.id_skpd === selectedOpdId.value);
-  return match?.nama_skpd || null;
+  return match ? `${match.kode_skpd} - ${match.nama_skpd}` : null;
 });
 
 // Filter indicators based on selected OPD and search query
 const filteredGroupedOpds = computed(() => {
-  if (!reportData.value?.opd_groups) return [];
+  if (!availableOpds.value) return [];
 
   const q = searchQuery.value.trim().toLowerCase();
   const opdFilter = selectedOpdId.value;
 
   const result = [];
 
-  for (const group of reportData.value.opd_groups) {
+  for (const group of availableOpds.value) {
     if (opdFilter && group.id_skpd !== opdFilter) {
       continue;
     }
 
     const filteredIndicators = group.indicators.filter(ind => {
       if (!q) return true;
-      const opdMatch = group.nama_skpd.toLowerCase().includes(q);
+      const opdMatch = (group.nama_skpd || '').toLowerCase().includes(q) || (group.kode_skpd || '').toLowerCase().includes(q);
       const tsMatch = (ind.tujuan_sasaran || '').toLowerCase().includes(q);
       const indMatch = (ind.indikator || '').toLowerCase().includes(q);
       const satMatch = (ind.satuan || '').toLowerCase().includes(q);
@@ -1054,6 +1056,22 @@ onMounted(() => {
 
 .opd-meta-sub {
   margin-top: 0.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.badge-kode-skpd {
+  display: inline-block;
+  background: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
+  font-family: monospace;
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
 }
 
 .badge-total-opd-iku {

@@ -2532,7 +2532,7 @@ async def get_daftar_iku_report_data(
     JOIN renstra_sasaran s ON s.idtujuan = t.idtujuan
     JOIN renstra_indikator_sasaran isas ON isas.idsasaran = s.idsasaran AND isas.iku = '1'
     {opd_clause}
-    ORDER BY nama_skpd, level DESC, no_urut, urut, tujuan_sasaran, indikator
+    ORDER BY kode_skpd, level DESC, no_urut, urut, tujuan_sasaran, indikator
     """
     params = {"id_skpd": id_skpd} if id_skpd else {}
     res = await session.execute(text(q), params)
@@ -2592,6 +2592,7 @@ async def get_daftar_iku_report_data(
         opd_map[skpd_id]["indicators"].append(item)
 
     opd_groups = list(opd_map.values())
+    opd_groups.sort(key=lambda x: x["kode_skpd"])
     for g in opd_groups:
         g["total_iku"] = len(g["indicators"])
 
@@ -2742,6 +2743,8 @@ def generate_daftar_iku_excel(report_data: Dict[str, Any], tahun_filter: Optiona
 
     for g in opd_groups:
         nama_opd = g.get("nama_skpd", "-")
+        kode_opd = g.get("kode_skpd", "")
+        display_opd = f"[{kode_opd}] {nama_opd}" if kode_opd else nama_opd
         indicators = g.get("indicators", [])
         num_inds = len(indicators)
         if num_inds == 0:
@@ -2764,7 +2767,7 @@ def generate_daftar_iku_excel(report_data: Dict[str, Any], tahun_filter: Optiona
             cell_no.fill = fill_no
 
             # Col 2: Perangkat Daerah
-            cell_opd = ws.cell(row=row, column=2, value=nama_opd)
+            cell_opd = ws.cell(row=row, column=2, value=display_opd)
             cell_opd.font = font_data_bold
             cell_opd.alignment = align_left
             cell_opd.border = border_cell

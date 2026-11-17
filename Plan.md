@@ -337,3 +337,17 @@ Buat Laporan :
   - Mendaftarkan rute `/laporan/daftar-iku` pada [router/index.js](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/router/index.js).
   - Menambahkan menu **6. Daftar IKU Perangkat Daerah** pada dropdown laporan [HeaderNavbar.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/components/HeaderNavbar.vue).
 - [x] Verifikasi build frontend berhasil tanpa error (`built in 987ms`).
+
+
+Revisi Laporan Daftar IKU Perangkat Daerah
+Perangkat Daerah diurut by kode perangkat daerah
+- [x] Backend Service ([laporan_service.py](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Backend/app/services/laporan_service.py)):
+  - Memperbarui query SQL untuk mengurutkan `ORDER BY kode_skpd, level DESC, no_urut, urut, tujuan_sasaran, indikator`.
+  - Mengurutkan `opd_groups` menggunakan `key=lambda x: x["kode_skpd"]` sehingga urutan Perangkat Daerah konsisten mengikuti hierarki kode Permendagri/SIPD (mulai dari 1.01 Dinas Pendidikan, 1.02 Dinas Kesehatan, dst.).
+  - Memperbarui generator Excel untuk menyertakan `[kode_opd]` pada kolom Perangkat Daerah.
+- [x] Frontend View ([DaftarIkuReportView.vue](file:///home/herry/1_Project/2026/RENSTRA_PERUBAHAN/Frontend/src/views/DaftarIkuReportView.vue)):
+  - Memperbarui dropdown pilihan OPD menampilkan `kode_skpd` (`1.01.2.22.0.00.01.0000 - Dinas Pendidikan dan Kebudayaan`).
+  - Menampilkan badge `kode_skpd` di bawah nama Perangkat Daerah pada tabel laporan.
+  - Memastikan `availableOpds` dan `filteredGroupedOpds` diurutkan secara ascending berdasarkan `kode_skpd`.
+- [x] Verifikasi API endpoint dan build frontend Vite berhasil tanpa error.
+
