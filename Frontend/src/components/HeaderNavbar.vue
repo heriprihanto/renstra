@@ -189,6 +189,29 @@
                   <div class="dropdown-item-desc">Matriks komparasi Target Murni & Target Perubahan IKU se-Kota Tegal (Export Excel)</div>
                 </div>
               </router-link>
+
+              <!-- 7. Pagu RPJMD vs Renstra -->
+              <router-link
+                to="/laporan/rpjmd-vs-renstra"
+                class="dropdown-item-link"
+                :class="{ active: route.path.startsWith('/laporan/rpjmd-vs-renstra') }"
+                @click="closeDropdown"
+              >
+                <div class="dropdown-item-icon active-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="20" x2="18" y2="10"/>
+                    <line x1="12" y1="20" x2="12" y2="4"/>
+                    <line x1="6" y1="20" x2="6" y2="14"/>
+                  </svg>
+                </div>
+                <div class="dropdown-item-content">
+                  <div class="dropdown-item-title-row">
+                    <span class="dropdown-item-title">7. Pagu RPJMD vs Renstra</span>
+                    <span class="badge-new-pill">Baru</span>
+                  </div>
+                  <div class="dropdown-item-desc">Komparasi Pagu Murni, Perubahan vs RPJMD & deteksi selisih anggaran (Export Excel)</div>
+                </div>
+              </router-link>
             </div>
           </div>
         </nav>

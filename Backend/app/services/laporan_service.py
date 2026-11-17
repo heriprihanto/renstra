@@ -2885,3 +2885,532 @@ def generate_daftar_iku_excel(report_data: Dict[str, Any], tahun_filter: Optiona
     output.seek(0)
     return output
 
+
+
+# ==============================================================================
+# 7. LAPORAN PAGU RPJMD VS RENSTRA
+# ==============================================================================
+
+async def get_rpjmd_vs_renstra_report_data(
+    session: AsyncSession,
+    id_skpd: Optional[int] = None,
+    discrepancy_only: Optional[bool] = False,
+) -> Dict[str, Any]:
+    """
+    Fetch komparasi Pagu RPJMD vs Renstra (Murni & Perubahan)
+    berdasarkan query renstra_subkegiatan join renstra_program, ta_sub_pd, ta_opd, dan rpjmd_program.
+    Tahun 1 = 2026, Tahun 2 = 2027, Tahun 3 = 2028, Tahun 4 = 2029, Tahun 5 = 2030.
+    """
+    opd_clause = "WHERE o.id_skpd = :id_skpd" if id_skpd else ""
+
+    q = f"""
+    SELECT
+        o.id_skpd,
+        o.kode_skpd,
+        o.nama_skpd,
+        spd.kode_sub_skpd,
+        spd.nama_sub_skpd,
+        s.kodeprogram,
+        p.uraiprogram,
+
+        s.pagu1, s.pagu2, s.pagu3, s.pagu4, s.pagu5,
+        s.p_pagu1, s.p_pagu2, s.p_pagu3, s.p_pagu4, s.p_pagu5,
+
+        rj.t1, rj.t2, rj.t3, rj.t4, rj.t5
+    FROM (
+        SELECT
+            kodeskpd,
+            kodeprogram,
+            SUM(pagu1) AS pagu1,
+            SUM(pagu2) AS pagu2,
+            SUM(pagu3) AS pagu3,
+            SUM(pagu4) AS pagu4,
+            SUM(pagu5) AS pagu5,
+            SUM(p_pagu1) AS p_pagu1,
+            SUM(p_pagu2) AS p_pagu2,
+            SUM(p_pagu3) AS p_pagu3,
+            SUM(p_pagu4) AS p_pagu4,
+            SUM(p_pagu5) AS p_pagu5
+        FROM public.renstra_subkegiatan
+        GROUP BY kodeskpd, kodeprogram
+    ) s
+    JOIN public.renstra_program p
+        ON p.kodeskpd = s.kodeskpd
+       AND p.kodeprogram = s.kodeprogram
+    JOIN public.ta_sub_pd spd
+        ON spd.kode_sub_skpd = s.kodeskpd
+    JOIN public.ta_opd o
+        ON o.id_skpd = spd.id_skpd
+    JOIN public.rpjmd_program rj
+        ON rj.id_pd = o.id_skpd
+       AND rj.kodeprogram = s.kodeprogram
+    {opd_clause}
+    ORDER BY o.kode_skpd, p.kodeprogram, spd.kode_sub_skpd;
+    """
+
+    params = {}
+    if id_skpd:
+        params["id_skpd"] = id_skpd
+
+    res = await session.execute(text(q), params)
+    raw_rows = [dict(r._mapping) for r in res.fetchall()]
+
+    year_keys = [
+        ("2026", "pagu1", "p_pagu1", "t1"),
+        ("2027", "pagu2", "p_pagu2", "t2"),
+        ("2028", "pagu3", "p_pagu3", "t3"),
+        ("2029", "pagu4", "p_pagu4", "t4"),
+        ("2030", "pagu5", "p_pagu5", "t5"),
+    ]
+
+    total_programs = 0
+    total_discrepancies = 0
+    total_matched = 0
+
+    grand_total_murni = 0.0
+    grand_total_perubahan = 0.0
+    grand_total_rpjmd = 0.0
+
+    opd_dict: Dict[int, Dict[str, Any]] = {}
+
+    for r in raw_rows:
+        id_opd = r["id_skpd"]
+        if id_opd not in opd_dict:
+            opd_dict[id_opd] = {
+                "id_skpd": id_opd,
+                "kode_skpd": r["kode_skpd"],
+                "nama_skpd": r["nama_skpd"],
+                "programs": [],
+                "opd_total_murni": 0.0,
+                "opd_total_perubahan": 0.0,
+                "opd_total_rpjmd": 0.0,
+                "opd_total_selisih": 0.0,
+                "discrepancy_count": 0,
+            }
+
+        years_data = {}
+        has_diff = False
+        diff_years = []
+
+        m_total_row = 0.0
+        p_total_row = 0.0
+        t_total_row = 0.0
+
+        for y_label, m_col, p_col, t_col in year_keys:
+            m_val = float(r.get(m_col) or 0.0)
+            p_val = float(r.get(p_col) or 0.0)
+            t_val = float(r.get(t_col) or 0.0)
+            diff = p_val - t_val
+            is_different = abs(diff) > 0.01
+
+            if is_different:
+                has_diff = True
+                diff_years.append(y_label)
+
+            years_data[y_label] = {
+                "murni": m_val,
+                "perubahan": p_val,
+                "rpjmd": t_val,
+                "selisih": diff,
+                "is_diff": is_different,
+            }
+
+            m_total_row += m_val
+            p_total_row += p_val
+            t_total_row += t_val
+
+        selisih_total_row = p_total_row - t_total_row
+
+        if discrepancy_only and not has_diff:
+            continue
+
+        prog_item = {
+            "id_skpd": id_opd,
+            "kode_skpd": r["kode_skpd"],
+            "nama_skpd": r["nama_skpd"],
+            "kode_sub_skpd": r.get("kode_sub_skpd"),
+            "nama_sub_skpd": r.get("nama_sub_skpd"),
+            "kodeprogram": r["kodeprogram"],
+            "uraiprogram": r["uraiprogram"],
+            "years": years_data,
+            "total_murni": m_total_row,
+            "total_perubahan": p_total_row,
+            "total_rpjmd": t_total_row,
+            "total_selisih": selisih_total_row,
+            "has_discrepancy": has_diff,
+            "discrepancy_years": diff_years,
+        }
+
+        opd_dict[id_opd]["programs"].append(prog_item)
+        opd_dict[id_opd]["opd_total_murni"] += m_total_row
+        opd_dict[id_opd]["opd_total_perubahan"] += p_total_row
+        opd_dict[id_opd]["opd_total_rpjmd"] += t_total_row
+        opd_dict[id_opd]["opd_total_selisih"] += selisih_total_row
+
+        if has_diff:
+            opd_dict[id_opd]["discrepancy_count"] += 1
+            total_discrepancies += 1
+        else:
+            total_matched += 1
+
+        total_programs += 1
+        grand_total_murni += m_total_row
+        grand_total_perubahan += p_total_row
+        grand_total_rpjmd += t_total_row
+
+    # Filter out empty OPD groups if discrepancy_only
+    opd_groups = [grp for grp in opd_dict.values() if grp["programs"]]
+
+    return {
+        "summary": {
+            "total_programs": total_programs,
+            "total_discrepancies": total_discrepancies,
+            "total_matched": total_matched,
+            "grand_total_murni": grand_total_murni,
+            "grand_total_perubahan": grand_total_perubahan,
+            "grand_total_rpjmd": grand_total_rpjmd,
+            "grand_total_selisih": grand_total_perubahan - grand_total_rpjmd,
+        },
+        "opd_groups": opd_groups,
+    }
+
+
+def generate_rpjmd_vs_renstra_excel(
+    report_data: Dict[str, Any],
+    discrepancy_only: Optional[bool] = False,
+) -> io.BytesIO:
+    """Generate Excel file for 7. Pagu RPJMD vs Renstra report."""
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Pagu RPJMD vs Renstra"
+    ws.views.sheetView[0].showGridLines = True
+
+    # Fonts
+    font_title = Font(name="Calibri", size=14, bold=True, color="1E3A8A")
+    font_subtitle = Font(name="Calibri", size=10, bold=True, color="475569")
+    font_h1 = Font(name="Calibri", size=10, bold=True, color="FFFFFF")
+    font_h2 = Font(name="Calibri", size=9, bold=True, color="FFFFFF")
+    font_data = Font(name="Calibri", size=9)
+    font_bold = Font(name="Calibri", size=9, bold=True)
+    font_diff = Font(name="Calibri", size=9, bold=True, color="B91C1C")
+    font_match = Font(name="Calibri", size=9, bold=True, color="15803D")
+
+    # Fills
+    fill_h1 = PatternFill(start_color="1E3A8A", end_color="1E3A8A", fill_type="solid")
+    fill_h2 = PatternFill(start_color="2563EB", end_color="2563EB", fill_type="solid")
+    fill_h_total = PatternFill(start_color="0F172A", end_color="0F172A", fill_type="solid")
+    fill_diff = PatternFill(start_color="FEE2E2", end_color="FEE2E2", fill_type="solid")
+    fill_diff_cell = PatternFill(start_color="FEF3C7", end_color="FEF3C7", fill_type="solid")
+    fill_match = PatternFill(start_color="DCFCE7", end_color="DCFCE7", fill_type="solid")
+    fill_zebra = PatternFill(start_color="F8FAFC", end_color="F8FAFC", fill_type="solid")
+    fill_summary = PatternFill(start_color="E2E8F0", end_color="E2E8F0", fill_type="solid")
+
+    # Borders
+    border_cell = Border(
+        left=Side(style="thin", color="CBD5E1"),
+        right=Side(style="thin", color="CBD5E1"),
+        top=Side(style="thin", color="CBD5E1"),
+        bottom=Side(style="thin", color="CBD5E1"),
+    )
+    double_bottom_border = Border(
+        left=Side(style="thin", color="CBD5E1"),
+        right=Side(style="thin", color="CBD5E1"),
+        top=Side(style="thin", color="CBD5E1"),
+        bottom=Side(style="double", color="1E293B"),
+    )
+
+    # Alignments
+    align_center = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    align_left = Alignment(horizontal="left", vertical="center", wrap_text=True)
+    align_right = Alignment(horizontal="right", vertical="center")
+
+    num_format_currency = "#,##0"
+
+    # Title block
+    ws["A1"] = "LAPORAN KOMPARASI PAGU RPJMD VS RENSTRA (MURNI & PERUBAHAN)"
+    ws["A1"].font = font_title
+    ws["A2"] = "PEMERINTAH KOTA TEGAL - TAHUN ANGGARAN 2026 s.d. 2030"
+    ws["A2"].font = font_subtitle
+
+    # Table Header Row 4 & 5
+    # Row 4: Top Group Headers
+    # Row 5: Sub-column Headers
+    ws.row_dimensions[4].height = 28
+    ws.row_dimensions[5].height = 24
+
+    top_headers = [
+        (1, 1, "NO"),
+        (2, 2, "KODE OPD"),
+        (3, 3, "PERANGKAT DAERAH"),
+        (4, 4, "SUB UNIT (SUB SKPD)"),
+        (5, 5, "KODE PROGRAM"),
+        (6, 6, "NAMA PROGRAM"),
+        (7, 10, "TAHUN 2026"),
+        (11, 14, "TAHUN 2027"),
+        (15, 18, "TAHUN 2028"),
+        (19, 22, "TAHUN 2029"),
+        (23, 26, "TAHUN 2030"),
+        (27, 30, "TOTAL (2026 - 2030)"),
+        (31, 31, "STATUS / KETERANGAN"),
+    ]
+
+    for start_c, end_c, title in top_headers:
+        if start_c == end_c:
+            ws.merge_cells(start_row=4, start_column=start_c, end_row=5, end_column=end_c)
+            c = ws.cell(row=4, column=start_c, value=title)
+            c.font = font_h1
+            c.fill = fill_h1
+            c.alignment = align_center
+            c.border = border_cell
+            c_bot = ws.cell(row=5, column=start_c)
+            c_bot.fill = fill_h1
+            c_bot.border = border_cell
+        else:
+            ws.merge_cells(start_row=4, start_column=start_c, end_row=4, end_column=end_c)
+            c = ws.cell(row=4, column=start_c, value=title)
+            c.font = font_h1
+            c.fill = fill_h_total if "TOTAL" in title else fill_h1
+            c.alignment = align_center
+            for col in range(start_c, end_c + 1):
+                cell_h = ws.cell(row=4, column=col)
+                cell_h.border = border_cell
+                cell_h.fill = fill_h_total if "TOTAL" in title else fill_h1
+
+    sub_headers = [
+        (7, "Pagu Murni"), (8, "Pagu Perubahan"), (9, "Pagu RPJMD"), (10, "Selisih"),
+        (11, "Pagu Murni"), (12, "Pagu Perubahan"), (13, "Pagu RPJMD"), (14, "Selisih"),
+        (15, "Pagu Murni"), (16, "Pagu Perubahan"), (17, "Pagu RPJMD"), (18, "Selisih"),
+        (19, "Pagu Murni"), (20, "Pagu Perubahan"), (21, "Pagu RPJMD"), (22, "Selisih"),
+        (23, "Pagu Murni"), (24, "Pagu Perubahan"), (25, "Pagu RPJMD"), (26, "Selisih"),
+        (27, "Total Murni"), (28, "Total Perubahan"), (29, "Total RPJMD"), (30, "Total Selisih"),
+    ]
+
+    for col_idx, sub_title in sub_headers:
+        c = ws.cell(row=5, column=col_idx, value=sub_title)
+        c.font = font_h2
+        c.fill = fill_h2 if col_idx < 27 else fill_h_total
+        c.alignment = align_center
+        c.border = border_cell
+
+    current_row = 6
+    global_idx = 1
+    year_labels = ["2026", "2027", "2028", "2029", "2030"]
+
+    for opd in report_data.get("opd_groups", []):
+        for prog in opd.get("programs", []):
+            ws.row_dimensions[current_row].height = 20
+            row_fill = fill_zebra if global_idx % 2 == 0 else None
+
+            # Col 1: No
+            c1 = ws.cell(row=current_row, column=1, value=global_idx)
+            c1.font = font_data
+            c1.alignment = align_center
+            c1.border = border_cell
+            if row_fill: c1.fill = row_fill
+
+            # Col 2: Kode OPD
+            c2 = ws.cell(row=current_row, column=2, value=prog.get("kode_skpd", ""))
+            c2.font = font_data
+            c2.alignment = align_center
+            c2.border = border_cell
+            if row_fill: c2.fill = row_fill
+
+            # Col 3: Nama OPD
+            c3 = ws.cell(row=current_row, column=3, value=prog.get("nama_skpd", ""))
+            c3.font = font_data
+            c3.alignment = align_left
+            c3.border = border_cell
+            if row_fill: c3.fill = row_fill
+
+            # Col 4: Sub Unit
+            sub_name = prog.get("nama_sub_skpd") or prog.get("nama_skpd", "")
+            c4 = ws.cell(row=current_row, column=4, value=sub_name)
+            c4.font = font_data
+            c4.alignment = align_left
+            c4.border = border_cell
+            if row_fill: c4.fill = row_fill
+
+            # Col 5: Kode Program
+            c5 = ws.cell(row=current_row, column=5, value=prog.get("kodeprogram", ""))
+            c5.font = font_bold
+            c5.alignment = align_center
+            c5.border = border_cell
+            if row_fill: c5.fill = row_fill
+
+            # Col 6: Nama Program
+            c6 = ws.cell(row=current_row, column=6, value=prog.get("uraiprogram", ""))
+            c6.font = font_data
+            c6.alignment = align_left
+            c6.border = border_cell
+            if row_fill: c6.fill = row_fill
+
+            # Years 2026 - 2030
+            y_data = prog.get("years", {})
+            for y_idx, y_key in enumerate(year_labels):
+                yd = y_data.get(y_key, {})
+                m_val = yd.get("murni", 0.0)
+                p_val = yd.get("perubahan", 0.0)
+                t_val = yd.get("rpjmd", 0.0)
+                diff_val = yd.get("selisih", 0.0)
+                is_d = yd.get("is_diff", False)
+
+                base_col = 7 + (y_idx * 4)
+
+                # Murni
+                cm = ws.cell(row=current_row, column=base_col, value=m_val)
+                cm.number_format = num_format_currency
+                cm.font = font_data
+                cm.alignment = align_right
+                cm.border = border_cell
+                if row_fill: cm.fill = row_fill
+
+                # Perubahan (Mark if different from RPJMD)
+                cp = ws.cell(row=current_row, column=base_col + 1, value=p_val)
+                cp.number_format = num_format_currency
+                cp.alignment = align_right
+                cp.border = border_cell
+                if is_d:
+                    cp.font = font_diff
+                    cp.fill = fill_diff_cell
+                else:
+                    cp.font = font_data
+                    if row_fill: cp.fill = row_fill
+
+                # RPJMD
+                ct = ws.cell(row=current_row, column=base_col + 2, value=t_val)
+                ct.number_format = num_format_currency
+                ct.font = font_data
+                ct.alignment = align_right
+                ct.border = border_cell
+                if row_fill: ct.fill = row_fill
+
+                # Selisih
+                cdiff = ws.cell(row=current_row, column=base_col + 3, value=diff_val)
+                cdiff.number_format = num_format_currency
+                cdiff.alignment = align_right
+                cdiff.border = border_cell
+                if is_d:
+                    cdiff.font = font_diff
+                    cdiff.fill = fill_diff
+                else:
+                    cdiff.font = font_data
+                    if row_fill: cdiff.fill = row_fill
+
+            # Total (Cols 27 - 30)
+            tot_m = prog.get("total_murni", 0.0)
+            tot_p = prog.get("total_perubahan", 0.0)
+            tot_t = prog.get("total_rpjmd", 0.0)
+            tot_diff = prog.get("total_selisih", 0.0)
+            prog_has_diff = prog.get("has_discrepancy", False)
+
+            c27 = ws.cell(row=current_row, column=27, value=tot_m)
+            c27.number_format = num_format_currency
+            c27.font = font_bold
+            c27.alignment = align_right
+            c27.border = border_cell
+            if row_fill: c27.fill = row_fill
+
+            c28 = ws.cell(row=current_row, column=28, value=tot_p)
+            c28.number_format = num_format_currency
+            c28.font = font_diff if prog_has_diff else font_bold
+            c28.alignment = align_right
+            c28.border = border_cell
+            if prog_has_diff:
+                c28.fill = fill_diff_cell
+            elif row_fill:
+                c28.fill = row_fill
+
+            c29 = ws.cell(row=current_row, column=29, value=tot_t)
+            c29.number_format = num_format_currency
+            c29.font = font_bold
+            c29.alignment = align_right
+            c29.border = border_cell
+            if row_fill: c29.fill = row_fill
+
+            c30 = ws.cell(row=current_row, column=30, value=tot_diff)
+            c30.number_format = num_format_currency
+            c30.font = font_diff if prog_has_diff else font_bold
+            c30.alignment = align_right
+            c30.border = border_cell
+            if prog_has_diff:
+                c30.fill = fill_diff
+            elif row_fill:
+                c30.fill = row_fill
+
+            # Col 31: Status / Keterangan
+            if prog_has_diff:
+                diff_years_str = ", ".join(prog.get("discrepancy_years", []))
+                status_str = f"SELISIH ({diff_years_str})"
+                st_fill = fill_diff
+                st_font = font_diff
+            else:
+                status_str = "SESUAI RPJMD"
+                st_fill = fill_match
+                st_font = font_match
+
+            c31 = ws.cell(row=current_row, column=31, value=status_str)
+            c31.font = st_font
+            c31.fill = st_fill
+            c31.alignment = align_center
+            c31.border = border_cell
+
+            global_idx += 1
+            current_row += 1
+
+    # Grand Summary Row at Bottom
+    sum_row = current_row
+    ws.row_dimensions[sum_row].height = 24
+    ws.merge_cells(start_row=sum_row, start_column=1, end_row=sum_row, end_column=6)
+    c_tot_label = ws.cell(row=sum_row, column=1, value="TOTAL KESELURUHAN")
+    c_tot_label.font = font_bold
+    c_tot_label.alignment = align_center
+    for c_i in range(1, 7):
+        ws.cell(row=sum_row, column=c_i).fill = fill_summary
+        ws.cell(row=sum_row, column=c_i).border = double_bottom_border
+
+    # Sum formulas for columns 7 through 30
+    for col_c in range(7, 31):
+        col_letter = get_column_letter(col_c)
+        cell_sum = ws.cell(row=sum_row, column=col_c)
+        if sum_row > 6:
+            cell_sum.value = f"=SUM({col_letter}6:{col_letter}{sum_row-1})"
+        else:
+            cell_sum.value = 0
+        cell_sum.number_format = num_format_currency
+        cell_sum.font = font_bold
+        cell_sum.alignment = align_right
+        cell_sum.fill = fill_summary
+        cell_sum.border = double_bottom_border
+
+    # Col 31 on summary row
+    c31_sum = ws.cell(row=sum_row, column=31, value="")
+    c31_sum.fill = fill_summary
+    c31_sum.border = double_bottom_border
+
+    # Auto set column widths for 31 columns
+    col_widths = {
+        1: 6,    # No
+        2: 15,   # Kode OPD
+        3: 32,   # Perangkat Daerah
+        4: 30,   # Sub Unit
+        5: 14,   # Kode Program
+        6: 42,   # Program
+        # Years 2026-2030 (4 cols each): Murni, Perubahan, RPJMD, Selisih
+        7: 16, 8: 16, 9: 16, 10: 16,
+        11: 16, 12: 16, 13: 16, 14: 16,
+        15: 16, 16: 16, 17: 16, 18: 16,
+        19: 16, 20: 16, 21: 16, 22: 16,
+        23: 16, 24: 16, 25: 16, 26: 16,
+        # Total
+        27: 18, 28: 18, 29: 18, 30: 18,
+        # Status
+        31: 24,
+    }
+    for col_idx, width in col_widths.items():
+        col_letter = get_column_letter(col_idx)
+        ws.column_dimensions[col_letter].width = width
+
+    output = io.BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return output

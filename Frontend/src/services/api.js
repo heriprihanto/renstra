@@ -476,6 +476,50 @@ export const api = {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(downloadUrl);
   },
+
+  // Laporan 7: Pagu RPJMD vs Renstra
+  async getLaporanRpjmdVsRenstra(params = {}) {
+    let url = `${API_BASE_URL}/laporan/rpjmd-vs-renstra`;
+    const queryParams = [];
+    if (params.idSkpd) queryParams.push(`id_skpd=${encodeURIComponent(params.idSkpd)}`);
+    if (params.discrepancyOnly !== undefined && params.discrepancyOnly !== null) {
+      queryParams.push(`discrepancy_only=${encodeURIComponent(params.discrepancyOnly)}`);
+    }
+    if (queryParams.length > 0) url += `?${queryParams.join('&')}`;
+    return fetchJson(url);
+  },
+  getLaporanRpjmdVsRenstraExcelUrl(params = {}) {
+    let url = `${API_BASE_URL}/laporan/rpjmd-vs-renstra/export-excel`;
+    const queryParams = [];
+    if (params.idSkpd) queryParams.push(`id_skpd=${encodeURIComponent(params.idSkpd)}`);
+    if (params.discrepancyOnly !== undefined && params.discrepancyOnly !== null) {
+      queryParams.push(`discrepancy_only=${encodeURIComponent(params.discrepancyOnly)}`);
+    }
+    if (queryParams.length > 0) url += `?${queryParams.join('&')}`;
+    return url;
+  },
+  async downloadLaporanRpjmdVsRenstraExcel(params = {}) {
+    const url = this.getLaporanRpjmdVsRenstraExcelUrl(params);
+    const res = await fetch(url);
+    if (!res.ok) {
+      throw new Error(`Gagal mengunduh Excel Pagu RPJMD vs Renstra: HTTP ${res.status}`);
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get('content-disposition');
+    let filename = `Pagu_RPJMD_vs_Renstra_Kota_Tegal_2026_2030.xlsx`;
+    if (disposition && disposition.includes('filename=')) {
+      const match = disposition.match(/filename=["']?([^"']+)["']?/);
+      if (match && match[1]) filename = match[1];
+    }
+    const downloadUrl = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(downloadUrl);
+  },
 };
 
 export default api;

@@ -363,3 +363,73 @@ Form Subkegiatan: Field Pagu Murni dan Perubahan
 - [x] Verifikasi test API endpoint PUT `/api/renstra/subkegiatan/{id}` dan build frontend Vite berhasil tanpa error (`built in 840ms`).
 
 
+
+
+Buat Laporan :
+7. Pagu RPJMD vs Renstra dengan query :
+SELECT
+    o.id_skpd,
+    o.kode_skpd,
+    o.nama_skpd,
+    s.kodeprogram,
+    p.uraiprogram,
+
+    s.pagu1, s.pagu2, s.pagu3, s.pagu4, s.pagu5,
+    s.p_pagu1, s.p_pagu2, s.p_pagu3, s.p_pagu4, s.p_pagu5,
+
+    rj.t1, rj.t2, rj.t3, rj.t4, rj.t5
+
+FROM (
+    SELECT
+        kodeskpd,
+        kodeprogram,
+        SUM(pagu1) AS pagu1,
+        SUM(pagu2) AS pagu2,
+        SUM(pagu3) AS pagu3,
+        SUM(pagu4) AS pagu4,
+        SUM(pagu5) AS pagu5,
+        SUM(p_pagu1) AS p_pagu1,
+        SUM(p_pagu2) AS p_pagu2,
+        SUM(p_pagu3) AS p_pagu3,
+        SUM(p_pagu4) AS p_pagu4,
+        SUM(p_pagu5) AS p_pagu5
+    FROM public.renstra_subkegiatan
+    GROUP BY kodeskpd, kodeprogram
+) s
+
+JOIN public.renstra_program p
+    ON p.kodeskpd = s.kodeskpd
+   AND p.kodeprogram = s.kodeprogram
+
+JOIN public.ta_sub_pd spd
+    ON spd.kode_sub_skpd = s.kodeskpd
+
+JOIN public.ta_opd o
+    ON o.id_skpd = spd.id_skpd
+
+JOIN public.rpjmd_program rj
+    ON rj.id_pd = o.id_skpd
+   AND rj.kodeprogram = s.kodeprogram
+   ORDER BY o.kode_skpd, p.kodeprogram;
+
+   pagu1 - pagu5 = pagu  murni
+   p_pagu1 - p_pagu5 = pagu perubahan
+   t1 - t5 = pagu rpjmd
+
+   jika pagu perubahan tidak sama dengan RPJMD tandai 
+
+
+### Status Laporan 7: Pagu RPJMD vs Renstra
+- [x] Query SQL dieksekusi dan diverifikasi pada database (283 baris program, 138 program terdeteksi ada selisih antara Pagu Perubahan dan RPJMD).
+- [x] Backend service `get_rpjmd_vs_renstra_report_data` dan `generate_rpjmd_vs_renstra_excel` di `Backend/app/services/laporan_service.py`.
+- [x] Endpoint API:
+  - `GET /api/laporan/rpjmd-vs-renstra`: Mengembalikan ringkasan KPI (total program, program selisih, program sesuai, grand total pagu murni, perubahan, RPJMD, selisih) dan daftar program per OPD.
+  - `GET /api/laporan/rpjmd-vs-renstra/export-excel`: Menghasilkan file Excel terformat rapi dengan penandaan warna (kuning/merah) pada pagu yang tidak sama dengan RPJMD, rumus SUM otomatis, dan format Rupiah.
+- [x] Integrasi API di `Frontend/src/services/api.js`.
+- [x] Antarmuka Frontend `Frontend/src/views/RpjmdVsRenstraReportView.vue`:
+  - Kartu KPI ringkasan: Total Program, Selisih (Tidak Sama), Sesuai RPJMD, dan Total Pagu.
+  - Filter interaktif: Filter OPD, Filter Status Kesesuaian (Semua / Hanya Selisih / Hanya Sesuai), Tampilan Tahun (Semua Tahun 2026-2030 atau per tahun), dan live search.
+  - Penandaan selisih: Baris dan sel yang tidak sama dengan RPJMD ditandai dengan badge peringatan merah/kuning dan indikator selisih.
+  - Fitur Export Excel (.xlsx).
+- [x] Route `/laporan/rpjmd-vs-renstra` di `Frontend/src/router/index.js` dan menu dropdown "7. Pagu RPJMD vs Renstra" pada `Frontend/src/components/HeaderNavbar.vue`.
+- [x] Kompilasi frontend build `npm run build` sukses 100%.

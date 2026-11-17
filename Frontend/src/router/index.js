@@ -9,6 +9,7 @@ import IkuReportView from '../views/IkuReportView.vue';
 import ProgramKegiatanReportView from '../views/ProgramKegiatanReportView.vue';
 import EvaluasiRenstraReportView from '../views/EvaluasiRenstraReportView.vue';
 import DaftarIkuReportView from '../views/DaftarIkuReportView.vue';
+import RpjmdVsRenstraReportView from '../views/RpjmdVsRenstraReportView.vue';
 import { useAuth, waitForAuthInit } from '../services/auth';
 
 const routes = [
@@ -71,6 +72,12 @@ const routes = [
     name: 'LaporanDaftarIku',
     component: DaftarIkuReportView,
     meta: { title: '6. Daftar IKU Perangkat Daerah - RENSTRA Kota Tegal' }
+  },
+  {
+    path: '/laporan/rpjmd-vs-renstra',
+    name: 'LaporanRpjmdVsRenstra',
+    component: RpjmdVsRenstraReportView,
+    meta: { title: '7. Pagu RPJMD vs Renstra - RENSTRA Kota Tegal' }
   },
   {
     path: '/:pathMatch(.*)*',

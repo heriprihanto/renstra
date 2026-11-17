@@ -11,11 +11,13 @@ from app.services.laporan_service import (
     generate_evaluasi_renstra_excel,
     generate_iku_excel,
     generate_program_kegiatan_excel,
+    generate_rpjmd_vs_renstra_excel,
     generate_tujuan_sasaran_excel,
     get_daftar_iku_report_data,
     get_evaluasi_renstra_report_data,
     get_iku_report_data,
     get_program_kegiatan_report_data,
+    get_rpjmd_vs_renstra_report_data,
     get_tujuan_sasaran_report_data,
 )
 
@@ -271,6 +273,55 @@ async def export_daftar_iku_excel(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Gagal generate Excel Daftar IKU: {str(e)}")
+
+
+@router.get("/rpjmd-vs-renstra", response_model=Dict[str, Any])
+async def get_rpjmd_vs_renstra_preview(
+    id_skpd: Optional[int] = Query(default=None, description="Optional filter Perangkat Daerah ID"),
+    discrepancy_only: Optional[bool] = Query(default=False, description="Filter hanya program yang pagunya selisih"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Get 7. Pagu RPJMD vs Renstra structured comparison report data."""
+    try:
+        data = await get_rpjmd_vs_renstra_report_data(
+            session, id_skpd=id_skpd, discrepancy_only=discrepancy_only
+        )
+        return data
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal memuat data Laporan Pagu RPJMD vs Renstra: {str(e)}")
+
+
+@router.get("/rpjmd-vs-renstra/export-excel")
+async def export_rpjmd_vs_renstra_excel(
+    id_skpd: Optional[int] = Query(default=None, description="Optional filter Perangkat Daerah ID"),
+    discrepancy_only: Optional[bool] = Query(default=False, description="Filter hanya program yang pagunya selisih"),
+    session: AsyncSession = Depends(get_session),
+):
+    """Download 7. Pagu RPJMD vs Renstra formatted Excel file."""
+    try:
+        data = await get_rpjmd_vs_renstra_report_data(
+            session, id_skpd=id_skpd, discrepancy_only=discrepancy_only
+        )
+        excel_buf = generate_rpjmd_vs_renstra_excel(data, discrepancy_only=discrepancy_only)
+
+        if id_skpd and data.get("opd_groups"):
+            nama_opd = data["opd_groups"][0].get("nama_skpd", f"OPD_{id_skpd}")
+            clean_nama = re.sub(r"[^\w\s-]", "", nama_opd).strip().replace(" ", "_")
+            filename = f"Pagu_RPJMD_vs_Renstra_{clean_nama}.xlsx"
+        else:
+            filename = "Pagu_RPJMD_vs_Renstra_Kota_Tegal_2026_2030.xlsx"
+
+        return Response(
+            content=excel_buf.getvalue(),
+            media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+            headers={
+                "Content-Disposition": f'attachment; filename="{filename}"',
+                "Access-Control-Expose-Headers": "Content-Disposition",
+            },
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Gagal generate Excel Pagu RPJMD vs Renstra: {str(e)}")
+
 
 
 
