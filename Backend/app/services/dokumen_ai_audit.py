@@ -5,9 +5,12 @@ import logging
 import os
 import re
 import shutil
+import ssl
+import subprocess
 import urllib.request
 from typing import Any, Dict, List, Optional, Tuple
 
+import httpx
 import pypdf
 from openai import AsyncOpenAI
 from sqlmodel import select, text
@@ -142,6 +145,102 @@ async def get_target_document_for_opd(
     return chosen_doc, tahap, opd
 
 
+def _fetch_pdf_bytes(link_gd: str) -> bytes:
+    """
+    Mengunduh berkas PDF dengan strategi bertingkat (multi-tier fallback):
+    1. Cek filesystem lokal (jika aplikasi dihosting pada server yang sama dengan penyimpanan file)
+    2. Coba httpx (verify=False, trust_env=False) dengan HTTPS lalu HTTP
+    3. Coba httpx (verify=False, trust_env=True)
+    4. Coba curl subprocess (-k -s -L) untuk mengatasi keanehan SSL/proxy environment di Linux
+    5. Coba urllib dengan SSL unverified & proxy bypass
+    """
+    raw_link = (link_gd or "").strip()
+    if not raw_link:
+        raise ValueError("Link dokumen kosong.")
+
+    link_clean = raw_link.lstrip("/")
+
+    # 1. Cek filesystem lokal terlebih dahulu
+    local_candidates = [
+        raw_link,
+        f"/var/www/dokren/{link_clean}",
+        f"/var/www/monevrkpd/dokren/{link_clean}",
+        f"/var/www/html/dokren/{link_clean}",
+        f"/var/www/html/monevrkpd/dokren/{link_clean}",
+        os.path.join(os.getcwd(), "dokren", link_clean),
+    ]
+    for lp in local_candidates:
+        if os.path.isfile(lp):
+            try:
+                with open(lp, "rb") as f:
+                    data = f.read()
+                    if len(data) > 500:
+                        logger.info("PDF ditemukan di filesystem lokal: %s (%d bytes)", lp, len(data))
+                        return data
+            except Exception as e:
+                logger.warning("Gagal membaca file lokal %s: %s", lp, e)
+
+    urls = [
+        f"https://monevrkpd.tegalkota.go.id/dokren/{link_clean}",
+        f"http://monevrkpd.tegalkota.go.id/dokren/{link_clean}",
+    ]
+    headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) RENSTRA-AI/1.0"}
+    errors = []
+
+    # 2. Coba httpx tanpa proxy environment (mengatasi wrong version number akibat intercepting proxy)
+    for trust_env in [False, True]:
+        for url in urls:
+            try:
+                with httpx.Client(verify=False, trust_env=trust_env, follow_redirects=True, timeout=30.0) as client:
+                    resp = client.get(url, headers=headers)
+                    if resp.status_code == 200 and len(resp.content) > 500:
+                        logger.info("PDF berhasil diunduh via httpx (trust_env=%s) dari %s (%d bytes)", trust_env, url, len(resp.content))
+                        return resp.content
+                    elif resp.status_code != 200:
+                        errors.append(f"HTTP {resp.status_code} on {url}")
+            except Exception as e:
+                errors.append(f"httpx({url}, trust_env={trust_env}): {e}")
+
+    # 3. Coba curl subprocess (-k abaikan sertifikat SSL, -L ikuti redirect)
+    for url in urls:
+        try:
+            res = subprocess.run(
+                ["curl", "-k", "-s", "-L", "--max-time", "30", url],
+                capture_output=True,
+                timeout=35,
+            )
+            if res.returncode == 0 and len(res.stdout) > 500:
+                logger.info("PDF berhasil diunduh via curl dari %s (%d bytes)", url, len(res.stdout))
+                return res.stdout
+            elif res.returncode != 0:
+                errors.append(f"curl exit code {res.returncode} on {url}")
+        except Exception as e:
+            errors.append(f"curl({url}): {e}")
+
+    # 4. Coba urllib dengan SSL unverified & ProxyHandler kosong
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    for opener in [
+        urllib.request.build_opener(urllib.request.ProxyHandler({}), urllib.request.HTTPSHandler(context=ctx)),
+        urllib.request.build_opener(urllib.request.HTTPSHandler(context=ctx)),
+    ]:
+        for url in urls:
+            try:
+                req = urllib.request.Request(url, headers=headers)
+                with opener.open(req, timeout=30) as r:
+                    b = r.read()
+                    if len(b) > 500:
+                        logger.info("PDF berhasil diunduh via urllib dari %s (%d bytes)", url, len(b))
+                        return b
+            except Exception as e:
+                errors.append(f"urllib({url}): {e}")
+
+    error_summary = "; ".join(errors[:4])
+    logger.error("Gagal mengunduh PDF untuk %s. Riwayat percobaan: %s", raw_link, error_summary)
+    raise ValueError(f"Gagal mengunduh file PDF dari server: {error_summary}")
+
+
 def download_and_extract_pdf(link_gd: str) -> Tuple[int, int, str]:
     """
     Mengunduh file PDF dari storage dan mengekstrak teks halaman-halaman tabel yang relevan.
@@ -151,26 +250,12 @@ def download_and_extract_pdf(link_gd: str) -> Tuple[int, int, str]:
     if not raw_link:
         raise ValueError("Link dokumen kosong.")
 
-    if raw_link.startswith("/"):
-        full_url = f"https://monevrkpd.tegalkota.go.id/dokren{raw_link}"
-    else:
-        full_url = f"https://monevrkpd.tegalkota.go.id/dokren/{raw_link}"
-
     # Validasi ekstensi
-    if not full_url.lower().endswith(".pdf"):
+    if not raw_link.lower().endswith(".pdf"):
         raise ValueError(f"File dokumen bukan format PDF ({raw_link.split('.')[-1]}). Analisa AI hanya mendukung dokumen PDF.")
 
-    logger.info("Mengunduh dokumen PDF: %s", full_url)
-    req = urllib.request.Request(
-        full_url,
-        headers={"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) RENSTRA-AI/1.0"},
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            pdf_bytes = resp.read()
-    except Exception as e:
-        logger.error("Gagal mengunduh PDF dari %s: %s", full_url, e)
-        raise ValueError(f"Gagal mengunduh file PDF dari server: {str(e)}")
+    logger.info("Memulai proses unduh dan ekstraksi PDF: %s", raw_link)
+    pdf_bytes = _fetch_pdf_bytes(raw_link)
 
     reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
     total_pages = len(reader.pages)
