@@ -90,7 +90,7 @@
             <th class="col-code">KODE SKPD</th>
             <th>NAMA PERANGKAT DAERAH</th>
             <th style="min-width: 260px;">DOKUMEN PERENCANAAN</th>
-            <th style="width: 170px; text-align: center;">JUMLAH SUB SKPD</th>
+            <th style="width: 190px; text-align: center;">AUDIT AI</th>
           </tr>
         </thead>
         <tbody>
@@ -116,67 +116,58 @@
 
             <!-- Dokumen Perencanaan (id_ref_dokumen 64, 65, 66) -->
             <td>
-              <div v-if="opd.dokumen && opd.dokumen.length > 0" class="doc-cell-content">
-                <div class="doc-badge-group">
-                  <a
-                    v-for="doc in opd.dokumen"
-                    :key="doc.id"
-                    :href="getDocUrl(doc)"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    :class="['doc-pill', getDocBadgeClass(doc.id_ref_dokumen)]"
-                    :title="`${doc.tahap}: ${doc.nama_file}\nDiunggah: ${formatDate(doc.uploaded_at)}\n(Klik untuk membuka berkas)`"
-                    @click.stop
-                  >
-                    <!-- Penetapan (66) Icon -->
-                    <svg v-if="doc.id_ref_dokumen === 66" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
-                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                      <polyline points="22 4 12 14.01 9 11.01"/>
-                    </svg>
-                    <!-- Rankir (65) Icon -->
-                    <svg v-else-if="doc.id_ref_dokumen === 65" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                      <polyline points="14 2 14 8 20 8"/>
-                      <line x1="16" y1="13" x2="8" y2="13"/>
-                      <line x1="16" y1="17" x2="8" y2="17"/>
-                    </svg>
-                    <!-- Rancangan (64) Icon -->
-                    <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                    </svg>
-                    <span class="doc-pill-name">{{ doc.tahap }}</span>
-                    <span class="doc-file-format">{{ getFileExt(doc.nama_file) }}</span>
-                  </a>
-                </div>
-
-                <!-- Tombol Analisa Kesesuaian AI (Penetapan jika ada, jika belum Rancangan Akhir) -->
-                <button
-                  v-if="getCandidateAuditDoc(opd)"
-                  type="button"
-                  class="btn-ai-audit-tag"
-                  :class="getCandidateAuditDoc(opd).id_ref_dokumen === 66 ? 'tag-penetapan' : 'tag-rankir'"
-                  :title="`Klik untuk Menganalisa Kesesuaian Dokumen ${getCandidateAuditDoc(opd).tahap} (${getCandidateAuditDoc(opd).nama_file}) terhadap Database menggunakan AI`"
-                  @click.stop="openAuditModal(opd, getCandidateAuditDoc(opd))"
+              <div v-if="opd.dokumen && opd.dokumen.length > 0" class="doc-badge-group">
+                <a
+                  v-for="doc in opd.dokumen"
+                  :key="doc.id"
+                  :href="getDocUrl(doc)"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  :class="['doc-pill', getDocBadgeClass(doc.id_ref_dokumen)]"
+                  :title="`${doc.tahap}: ${doc.nama_file}\nDiunggah: ${formatDate(doc.uploaded_at)}\n(Klik untuk membuka berkas)`"
+                  @click.stop
                 >
-                  <span class="sparkle-emoji">✨</span>
-                  <span class="audit-btn-text">Audit AI ({{ getCandidateAuditDoc(opd).tahap }})</span>
-                </button>
+                  <!-- Penetapan (66) Icon -->
+                  <svg v-if="doc.id_ref_dokumen === 66" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                    <polyline points="22 4 12 14.01 9 11.01"/>
+                  </svg>
+                  <!-- Rankir (65) Icon -->
+                  <svg v-else-if="doc.id_ref_dokumen === 65" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                  <!-- Rancangan (64) Icon -->
+                  <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                  </svg>
+                  <span class="doc-pill-name">{{ doc.tahap }}</span>
+                  <span class="doc-file-format">{{ getFileExt(doc.nama_file) }}</span>
+                </a>
               </div>
               <span v-else class="doc-empty-text" title="Belum mengunggah Dokumen Perencanaan (Rancangan/Rankir/Penetapan)">
                 <span class="doc-empty-dash">-</span>
               </span>
             </td>
 
-            <!-- Jumlah Sub SKPD -->
+            <!-- Kolom Audit AI -->
             <td style="text-align: center;">
-              <span
-                :class="['sub-badge', opd.sub_count > 0 ? 'has-units' : 'empty-units']"
+              <button
+                v-if="getCandidateAuditDoc(opd)"
+                type="button"
+                class="btn-ai-audit-tag"
+                :class="getCandidateAuditDoc(opd).id_ref_dokumen === 66 ? 'tag-penetapan' : 'tag-rankir'"
+                :title="`Klik untuk Menganalisa Kesesuaian Dokumen ${getCandidateAuditDoc(opd).tahap} (${getCandidateAuditDoc(opd).nama_file}) terhadap Database menggunakan AI`"
+                @click.stop="openAuditModal(opd, getCandidateAuditDoc(opd))"
               >
-                <svg v-if="opd.sub_count > 0" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                  <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
-                </svg>
-                <span>{{ opd.sub_count }} Unit</span>
+                <span class="sparkle-emoji">✨</span>
+                <span class="audit-btn-text">Audit AI ({{ getCandidateAuditDoc(opd).tahap }})</span>
+              </button>
+              <span v-else class="doc-empty-text" title="Belum ada dokumen yang dapat diaudit">
+                <span class="doc-empty-dash">-</span>
               </span>
             </td>
           </tr>
@@ -340,15 +331,16 @@ function openAuditModal(opd, doc) {
 
 /* AI Audit Button */
 .btn-ai-audit-tag {
-  align-self: flex-start;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.35rem;
-  padding: 0.22rem 0.6rem;
+  padding: 0.32rem 0.75rem;
   border-radius: 9999px;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   font-weight: 700;
   cursor: pointer;
+  white-space: nowrap;
   transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
