@@ -207,7 +207,6 @@
                 <div class="dropdown-item-content">
                   <div class="dropdown-item-title-row">
                     <span class="dropdown-item-title">7. Pagu RPJMD vs Renstra</span>
-                    <span class="badge-new-pill">Baru</span>
                   </div>
                   <div class="dropdown-item-desc">Komparasi Pagu Murni, Perubahan vs RPJMD & deteksi selisih anggaran (Export Excel)</div>
                 </div>

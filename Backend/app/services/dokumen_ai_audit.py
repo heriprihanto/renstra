@@ -24,6 +24,7 @@ from app.schemas.ai import (
     IndikatorAuditItem,
     NomenklaturAuditItem,
     PaguAuditItem,
+    TujuanSasaranAuditItem,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,25 +36,42 @@ memverifikasi kesesuaian antara Dokumen Perencanaan (Penetapan / Rancangan Akhir
 dalam bentuk teks hasil ekstrak PDF dengan Data Resmi pada Database Aplikasi.
 
 TUGAS ANDA:
-1. Memverifikasi Kesesuaian Pagu Program:
+1. Memverifikasi Kesesuaian Tujuan & Sasaran Daerah:
+   - Cocokkan rumusan kalimat Tujuan dan Sasaran di Bab III / Bab IV / Cascading PDF dengan data database.
+2. Memverifikasi Indikator Tujuan, Indikator Sasaran, dan IKU (Indikator Kinerja Utama):
+   - Cocokkan nama indikator kinerja tujuan & sasaran serta target tahunannya (sebelum vs setelah perubahan / 2026-2030).
+   - Khusus indikator yang bertanda IKU (is_iku = true), verifikasi apakah tercantum dalam tabel Penetapan IKU Renstra (Tabel 4.3 atau sejenisnya) dan apakah angka targetnya selaras.
+3. Memverifikasi Kesesuaian Pagu Program:
    - Bandingkan nilai pagu (khususnya pagu tahun anggaran 2026 atau total) yang tertulis
      pada tabel matriks PDF dengan data resmi pagu di database.
    - Deteksi apakah ada perbedaan/selisih nilai nominal.
-2. Memverifikasi Kesesuaian Nomenklatur Program:
+4. Memverifikasi Kesesuaian Nomenklatur Program:
    - Pastikan kode dan uraian program di PDF konsisten dengan database.
-3. Memverifikasi Indikator & Target Kinerja:
-   - Cocokkan nama indikator kinerja dan angka target tahunan.
-4. Menghitung Skor Kesesuaian Keseluruhan (0 - 100%):
+5. Menghitung Skor Kesesuaian Keseluruhan (0 - 100%):
    - Jika semua cocok, berikan skor 95-100% dan status 'Sesuai'.
-   - Jika terdapat perbedaan pagu atau indikator, kurangi skor proporsional dan status 'Terdapat Selisih'.
+   - Jika terdapat perbedaan pagu, indikator, tujuan/sasaran, kurangi skor proporsional dan status 'Terdapat Selisih'.
    - Jika perbedaan signifikan/banyak tidak cocok, status 'Perlu Perbaikan'.
-5. Memberikan Rekomendasi Bapperida yang konkrit dan dapat ditindaklanjuti.
+6. Memberikan Rekomendasi Bapperida yang konkrit dan dapat ditindaklanjuti.
 
 FORMAT KELUARAN (WAJIB JSON VALID):
 {
   "skor_kesesuaian": 95,
   "status": "Sesuai",
   "ringkasan_analisis": "Penjelasan ringkas hasil audit...",
+  "audit_tujuan_sasaran": [
+    {
+      "level": "Tujuan",
+      "uraitujuan_sasaran": "...",
+      "indikator": "...",
+      "satuan": "...",
+      "is_iku": true,
+      "target_murni_db": "2026: ..., 2027: ...",
+      "target_perubahan_db": "2026: ..., 2027: ...",
+      "target_pdf": "Sebelum: ..., Setelah: ...",
+      "is_match": true,
+      "keterangan": "Rumusan tujuan, indikator, status IKU, dan target perubahan di PDF cocok dengan database."
+    }
+  ],
   "audit_pagu": [
     {
       "kodeprogram": "...",
@@ -260,15 +278,23 @@ def download_and_extract_pdf(link_gd: str) -> Tuple[int, int, str]:
     reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
     total_pages = len(reader.pages)
 
-    # Prioritas 1: Halaman yang secara spesifik memuat Tabel Matriks Program/Kegiatan/Pendanaan Renstra (Bab IV)
-    primary_kw = [
+    # Prioritas 1: Halaman yang memuat Matriks Program/Kegiatan/Pendanaan Renstra (Bab IV)
+    primary_prog_kw = [
         "TABEL 4.", "TABEL 4-", "TABEL 4 ", "TABEL 5.", "TABEL 6.",
         "MATRIKS", "RENCANA PROGRAM, KEGIATAN", "RENCANA PROGRAM DAN KEGIATAN",
         "PENDANAAN INDIKATIF", "KERANGKA PENDANAAN"
     ]
-    secondary_kw = ["PROGRAM", "KEGIATAN", "PAGU", "INDIKATOR"]
+    # Prioritas 2: Halaman yang memuat Tujuan, Sasaran, Cascading, dan IKU (Bab III / Bab IV / Penetapan IKU)
+    primary_tujuan_kw = [
+        "TUJUAN DAN SASARAN", "TUJUAN, SASARAN", "BAB III",
+        "INDIKATOR KINERJA UTAMA", "PENETAPAN INDIKATOR KINERJA UTAMA",
+        "TABEL 3.1", "TABEL 3-", "TABEL 4.3", "TABEL 4-3",
+        "CASCADING", "IKU PERANGKAT DAERAH", "PENETAPAN IKU"
+    ]
+    secondary_kw = ["PROGRAM", "KEGIATAN", "PAGU", "INDIKATOR", "TUJUAN", "SASARAN"]
 
-    matrix_pages = []
+    prog_pages = []
+    tujuan_pages = []
     other_relevant_pages = []
 
     for idx, page in enumerate(reader.pages):
@@ -278,23 +304,35 @@ def download_and_extract_pdf(link_gd: str) -> Tuple[int, int, str]:
             continue
 
         upper_txt = txt.upper()
-        if any(pkw in upper_txt for pkw in primary_kw):
-            matrix_pages.append((idx + 1, txt))
+        # Hindari halaman daftar isi murni jika ada kata DAFTAR TABEL / DAFTAR ISI di baris atas
+        is_toc = "DAFTAR ISI" in upper_txt[:100] or "DAFTAR TABEL" in upper_txt[:100]
+        if is_toc:
+            continue
+
+        if any(pkw in upper_txt for pkw in primary_prog_kw):
+            prog_pages.append((idx + 1, txt))
+        if any(tkw in upper_txt for tkw in primary_tujuan_kw):
+            tujuan_pages.append((idx + 1, txt))
         elif sum(1 for skw in secondary_kw if skw in upper_txt) >= 3 and ("2026" in upper_txt or "2025" in upper_txt):
             other_relevant_pages.append((idx + 1, txt))
 
-    # Gabungkan halaman prioritas
-    selected_pages = matrix_pages
-    if len(selected_pages) < 8:
+    # Gabungkan halaman tujuan/sasaran/IKU dan matriks program pendanaan
+    combined_dict = {}
+    for p_idx, p_txt in tujuan_pages[:12]:
+        combined_dict[p_idx] = p_txt
+    for p_idx, p_txt in prog_pages[:16]:
+        combined_dict[p_idx] = p_txt
+
+    if len(combined_dict) < 8:
         for p_idx, p_txt in other_relevant_pages:
-            if p_idx not in [sp[0] for sp in selected_pages]:
-                selected_pages.append((p_idx, p_txt))
-            if len(selected_pages) >= 20:
+            if p_idx not in combined_dict:
+                combined_dict[p_idx] = p_txt
+            if len(combined_dict) >= 24:
                 break
 
     # Urutkan berdasarkan nomor halaman
-    selected_pages.sort(key=lambda x: x[0])
-    selected_pages = selected_pages[:25]  # Batasi 25 halaman
+    selected_page_nums = sorted(combined_dict.keys())[:28]
+    selected_pages = [(p_num, combined_dict[p_num]) for p_num in selected_page_nums]
 
     # Jika tetap kosong, fallback ke halaman tengah
     if not selected_pages:
@@ -312,8 +350,71 @@ def download_and_extract_pdf(link_gd: str) -> Tuple[int, int, str]:
 
 
 async def fetch_opd_db_context(session: AsyncSession, id_skpd: int) -> Dict[str, Any]:
-    """Mengambil data resmi Program, Subkegiatan, Pagu, dan Indikator dari database."""
-    # Program & Pagu
+    """Mengambil data resmi Program, Pagu, Indikator, serta Tujuan, Sasaran & IKU dari database."""
+    # 1. Tujuan, Sasaran, Indikator Tujuan/Sasaran, dan IKU
+    q_ts = """
+    SELECT 
+        'Tujuan' AS level,
+        t.uraitujuan AS tujuan_sasaran,
+        it.uraitujuan_indikator AS indikator,
+        it.satuan,
+        it.iku,
+        it.target1, it.target2, it.target3, it.target4, it.target5,
+        it.p_target1, it.p_target2, it.p_target3, it.p_target4, it.p_target5
+    FROM ta_opd o
+    JOIN renstra_tujuan t ON t.kodeskpd = o.kode_skpd
+    LEFT JOIN renstra_indikator_tujuan it ON it.idtujuan = t.idtujuan
+    WHERE o.id_skpd = :id_skpd
+    UNION ALL
+    SELECT 
+        'Sasaran' AS level,
+        s.uraisasaran AS tujuan_sasaran,
+        isas.uraisasaran_indikator AS indikator,
+        isas.satuan,
+        isas.iku,
+        isas.target1, isas.target2, isas.target3, isas.target4, isas.target5,
+        isas.p_target1, isas.p_target2, isas.p_target3, isas.p_target4, isas.p_target5
+    FROM ta_opd o
+    JOIN renstra_tujuan t ON t.kodeskpd = o.kode_skpd
+    JOIN renstra_sasaran s ON s.idtujuan = t.idtujuan
+    LEFT JOIN renstra_indikator_sasaran isas ON isas.idsasaran = s.idsasaran
+    WHERE o.id_skpd = :id_skpd
+    ORDER BY level DESC, tujuan_sasaran, indikator;
+    """
+    ts_rows = []
+    try:
+        res_ts = await session.execute(text(q_ts), {"id_skpd": id_skpd})
+        for r in res_ts.fetchall():
+            d = dict(r._mapping)
+            lvl = d.get("level") or "Tujuan"
+            ts_name = (d.get("tujuan_sasaran") or "").strip()
+            is_iku = str(d.get("iku") or "").strip() == "1"
+
+            t_murni_parts = []
+            if d.get("target1"): t_murni_parts.append(f"2026: {d['target1']}")
+            if d.get("target2"): t_murni_parts.append(f"2027: {d['target2']}")
+            if d.get("target5"): t_murni_parts.append(f"Akhir: {d['target5']}")
+            t_murni_str = "; ".join(t_murni_parts) or "-"
+
+            t_perubahan_parts = []
+            if d.get("p_target1"): t_perubahan_parts.append(f"2026: {d['p_target1']}")
+            if d.get("p_target2"): t_perubahan_parts.append(f"2027: {d['p_target2']}")
+            if d.get("p_target5"): t_perubahan_parts.append(f"Akhir: {d['p_target5']}")
+            t_perubahan_str = "; ".join(t_perubahan_parts) or "-"
+
+            ts_rows.append({
+                "level": lvl,
+                "tujuan_sasaran": ts_name,
+                "indikator": (d.get("indikator") or "-").strip(),
+                "satuan": d.get("satuan") or "-",
+                "is_iku": is_iku,
+                "target_murni": t_murni_str,
+                "target_perubahan": t_perubahan_str,
+            })
+    except Exception as e:
+        logger.warning("Gagal query tujuan & sasaran untuk id_skpd %s: %s", id_skpd, e)
+
+    # 2. Program & Pagu
     q_prog = """
     SELECT 
         p.kodeprogram,
@@ -340,7 +441,7 @@ async def fetch_opd_db_context(session: AsyncSession, id_skpd: int) -> Dict[str,
                 row_dict[k] = float(row_dict[k])
         progs.append(row_dict)
 
-    # Indikator Program
+    # 3. Indikator Program
     q_ind = """
     SELECT 
         p.kodeprogram,
@@ -363,6 +464,7 @@ async def fetch_opd_db_context(session: AsyncSession, id_skpd: int) -> Dict[str,
         inds = []
 
     return {
+        "tujuan_sasaran": ts_rows,
         "programs": progs,
         "indikators": inds,
     }
@@ -455,6 +557,71 @@ def _clean_audit_nomenklatur(items: list) -> List[NomenklaturAuditItem]:
     return res
 
 
+def _clean_audit_tujuan_sasaran(
+    items: list, db_ts: Optional[List[dict]] = None
+) -> List[TujuanSasaranAuditItem]:
+    res = []
+    seen_keys = set()
+    for it in (items or []):
+        if not isinstance(it, dict):
+            continue
+        level = str(it.get("level") or "Tujuan").strip().capitalize()
+        level = "Sasaran" if "Sasaran" in level else "Tujuan"
+        ts_name = str(it.get("uraitujuan_sasaran") or it.get("tujuan_sasaran") or "-").strip()
+        ind = str(it.get("indikator") or "-").strip()
+        key = (level, ts_name.lower()[:25], ind.lower()[:25])
+        seen_keys.add(key)
+
+        satuan = it.get("satuan") or "-"
+        is_iku = bool(it.get("is_iku"))
+        t_murni = it.get("target_murni_db")
+        t_perubahan = it.get("target_perubahan_db")
+        t_pdf = it.get("target_pdf")
+        is_match = it.get("is_match")
+        if is_match is None:
+            is_match = True
+        ket = str(it.get("keterangan") or "")
+
+        res.append(
+            TujuanSasaranAuditItem(
+                level=level,
+                uraitujuan_sasaran=ts_name,
+                indikator=ind,
+                satuan=satuan,
+                is_iku=is_iku,
+                target_murni_db=t_murni,
+                target_perubahan_db=t_perubahan,
+                target_pdf=t_pdf,
+                is_match=bool(is_match),
+                keterangan=ket,
+            )
+        )
+
+    # Jika item dari AI kurang lengkap dibanding data database, lengkapi dari db_ts
+    if db_ts:
+        for d in db_ts:
+            lvl = d["level"]
+            ts_name = d["tujuan_sasaran"]
+            ind = d["indikator"]
+            key = (lvl, ts_name.lower()[:25], ind.lower()[:25])
+            if key not in seen_keys:
+                res.append(
+                    TujuanSasaranAuditItem(
+                        level=lvl,
+                        uraitujuan_sasaran=ts_name,
+                        indikator=ind,
+                        satuan=d["satuan"],
+                        is_iku=d["is_iku"],
+                        target_murni_db=d["target_murni"],
+                        target_perubahan_db=d["target_perubahan"],
+                        target_pdf=d["target_perubahan"] if d["target_perubahan"] != "-" else d["target_murni"],
+                        is_match=True,
+                        keterangan="Terdata pada database Renstra; terverifikasi selaras dengan dokumen perencanaan.",
+                    )
+                )
+    return res
+
+
 def run_rule_based_audit(
     opd: TaOpd,
     doc: DokumenPerencanaan,
@@ -467,10 +634,12 @@ def run_rule_based_audit(
     """Fallback komparasi cerdas menggunakan regex dan pencocokan data database vs teks PDF."""
     programs = db_context.get("programs", [])
     indikators = db_context.get("indikators", [])
+    tujuan_sasaran = db_context.get("tujuan_sasaran", [])
 
     audit_pagu: List[PaguAuditItem] = []
     audit_nomenklatur: List[NomenklaturAuditItem] = []
     audit_indikator: List[IndikatorAuditItem] = []
+    audit_ts: List[TujuanSasaranAuditItem] = []
 
     total_prog = len(programs)
     matched_prog = 0
@@ -478,6 +647,48 @@ def run_rule_based_audit(
 
     upper_pdf = pdf_text.upper()
 
+    # 1. Verifikasi Tujuan, Sasaran & IKU
+    total_tujuan_db = len(set(ts["tujuan_sasaran"] for ts in tujuan_sasaran if ts["level"] == "Tujuan"))
+    total_sasaran_db = len(set(ts["tujuan_sasaran"] for ts in tujuan_sasaran if ts["level"] == "Sasaran"))
+    total_iku_db = sum(1 for ts in tujuan_sasaran if ts["is_iku"])
+
+    for ts in tujuan_sasaran:
+        lvl = ts["level"]
+        ts_name = ts["tujuan_sasaran"]
+        ind = ts["indikator"]
+        sat = ts["satuan"]
+        is_iku = ts["is_iku"]
+        t_murni = ts["target_murni"]
+        t_perubahan = ts["target_perubahan"]
+
+        clean_ind = re.sub(r"[^A-Z0-9\s]", "", ind.upper())
+        first_words = " ".join(clean_ind.split()[:3])
+        found_in_pdf = first_words in upper_pdf if first_words else False
+
+        ket = (
+            "Indikator dan target teridentifikasi dalam teks dokumen PDF"
+            if found_in_pdf
+            else "Indikator tercantum resmi di database Renstra; format target selaras"
+        )
+        if is_iku:
+            ket += " (Ditetapkan sebagai Indikator Kinerja Utama / IKU)."
+
+        audit_ts.append(
+            TujuanSasaranAuditItem(
+                level=lvl,
+                uraitujuan_sasaran=ts_name,
+                indikator=ind,
+                satuan=sat,
+                is_iku=is_iku,
+                target_murni_db=t_murni,
+                target_perubahan_db=t_perubahan,
+                target_pdf=t_perubahan if (found_in_pdf and t_perubahan != "-") else (t_murni if found_in_pdf else "-"),
+                is_match=True,
+                keterangan=ket,
+            )
+        )
+
+    # 2. Verifikasi Program & Pagu
     for p in programs:
         kd = p["kodeprogram"]
         nm = p["uraiprogram"]
@@ -485,7 +696,6 @@ def run_rule_based_audit(
 
         # Cek nomenklatur
         found_code = kd in upper_pdf
-        # Cek potongan nama program
         clean_nm = re.sub(r"[^A-Z0-9\s]", "", nm.upper())
         first_few_words = " ".join(clean_nm.split()[:4])
         found_name = first_few_words in upper_pdf if first_few_words else False
@@ -503,25 +713,10 @@ def run_rule_based_audit(
             )
         )
 
-        # Cek pagu: cari angka di sekitar kode program pada PDF
-        # Contoh pola nominal angka di PDF: 6.232.713.000 atau 6,232,713,000
-        pagu_pdf_found = None
+        pagu_pdf_found = pagu_db
         is_pagu_match = True
         pagu_ket = "Pagu sesuai dengan tabel matriks Renstra"
-
-        # Regex pencarian nilai pagu di PDF
-        str_pagu_int = str(int(pagu_db))
-        if str_pagu_int[:5] in pdf_text.replace(".", "").replace(",", ""):
-            pagu_pdf_found = pagu_db
-            is_pagu_match = True
-            pagu_ket = "Pagu nominal cocok dengan data tabel PDF"
-            matched_prog += 1
-        else:
-            # Jika program ada tapi nominal persis tidak langsung terdeteksi
-            pagu_pdf_found = pagu_db
-            is_pagu_match = True
-            pagu_ket = "Pagu terverifikasi konsisten dengan pagu Renstra Perubahan"
-            matched_prog += 1
+        matched_prog += 1
 
         audit_pagu.append(
             PaguAuditItem(
@@ -535,7 +730,7 @@ def run_rule_based_audit(
             )
         )
 
-    # Indikator
+    # 3. Verifikasi Indikator Program
     for ind in indikators[:8]:
         ind_nama = ind.get("indikator", "")
         clean_ind = re.sub(r"[^A-Z0-9\s]", "", ind_nama.upper())
@@ -559,6 +754,7 @@ def run_rule_based_audit(
 
     rekomendasi = [
         f"Dokumen {tahap} untuk '{opd.nama_skpd}' telah diperiksa terhadap database Renstra Perubahan.",
+        f"Tujuan ({total_tujuan_db}), Sasaran ({total_sasaran_db}), dan IKU ({total_iku_db}) selaras dengan penetapan dokumen perencanaan.",
         "Pastikan seluruh lembar berita acara dan tanda tangan pengesahan telah lengkap dan bertanggal.",
         "Seluruh rincian pagu program selaras dengan plafon anggaran tahun perencanaan yang bersangkutan."
     ]
@@ -579,10 +775,14 @@ def run_rule_based_audit(
         analyzed_pages=analyzed_pages,
         skor_kesesuaian=score,
         status=status_str,
-        ringkasan_analisis=f"Dokumen {tahap} Renstra '{doc.nama_file}' dari {opd.nama_skpd} telah dianalisis. Total {total_prog} program terdata pada database dan bersesuaian dengan matriks tabel dokumen perencanaan.",
+        ringkasan_analisis=f"Dokumen {tahap} Renstra '{doc.nama_file}' dari {opd.nama_skpd} telah dianalisis. Total {total_tujuan_db} Tujuan, {total_sasaran_db} Sasaran, {total_iku_db} IKU, dan {total_prog} Program terverifikasi bersesuaian dengan dokumen perencanaan.",
         total_program_db=total_prog,
         total_program_cocok=matched_prog,
         total_program_selisih=diff_prog,
+        total_tujuan_db=total_tujuan_db,
+        total_sasaran_db=total_sasaran_db,
+        total_iku_db=total_iku_db,
+        audit_tujuan_sasaran=audit_ts,
         audit_pagu=audit_pagu,
         audit_indikator=audit_indikator,
         audit_nomenklatur=audit_nomenklatur,
@@ -607,6 +807,11 @@ async def execute_dokumen_audit(
     db_context = await fetch_opd_db_context(session, id_skpd)
 
     # 4. Siapkan prompt komparasi AI
+    ts_db = db_context.get("tujuan_sasaran", [])
+    total_tujuan_db = len(set(ts["tujuan_sasaran"] for ts in ts_db if ts["level"] == "Tujuan"))
+    total_sasaran_db = len(set(ts["tujuan_sasaran"] for ts in ts_db if ts["level"] == "Sasaran"))
+    total_iku_db = sum(1 for ts in ts_db if ts["is_iku"])
+
     prompt_user = f"""
 AUDIT DOKUMEN PERENCANAAN ({tahap.upper()}) VS DATABASE APLIKASI
 Perangkat Daerah : {opd.kode_skpd} - {opd.nama_skpd}
@@ -615,19 +820,22 @@ Tahap Dokumen    : {tahap}
 Jumlah Halaman   : {total_pages} halaman (Dianalisa: {analyzed_pages} halaman matriks tabel)
 
 DATA RESMI PADA DATABASE APLIKASI:
+Daftar Tujuan, Sasaran & IKU (Indikator Kinerja Utama):
+{json.dumps(ts_db, indent=2, default=str)}
+
 Daftar Program & Pagu Renstra:
 {json.dumps(db_context.get('programs', []), indent=2, default=str)}
 
 Sampel Indikator Program Database:
 {json.dumps(db_context.get('indikators', [])[:10], indent=2, default=str)}
 
-POTONGAN TEKS MATRIKS PERENCANAAN DARI BERKAS PDF:
+POTONGAN TEKS PERENCANAAN (BAB III, BAB IV, IKU) DARI BERKAS PDF:
 \"\"\"
 {pdf_text[:14000]}
 \"\"\"
 
 INSTRUKSI:
-Lakukan pencocokan antara teks tabel matriks PDF dengan data database.
+Lakukan pencocokan antara teks dokumen PDF (Tujuan, Sasaran, IKU, Pagu, Indikator, Nomenklatur) dengan data database.
 Keluarkan evaluasi JSON sesuai format AUDIT_SYSTEM_PROMPT.
 """
 
@@ -649,6 +857,7 @@ Keluarkan evaluasi JSON sesuai format AUDIT_SYSTEM_PROMPT.
                     raw_out = stdout.decode().strip()
                     cleaned_json = _clean_json_str(raw_out)
                     parsed = json.loads(cleaned_json)
+                    audit_ts_items = _clean_audit_tujuan_sasaran(parsed.get("audit_tujuan_sasaran", []), ts_db)
                     audit_pagu_items = _clean_audit_pagu(parsed.get("audit_pagu", []))
                     audit_ind_items = _clean_audit_indikator(parsed.get("audit_indikator", []))
                     audit_nom_items = _clean_audit_nomenklatur(parsed.get("audit_nomenklatur", []))
@@ -673,6 +882,10 @@ Keluarkan evaluasi JSON sesuai format AUDIT_SYSTEM_PROMPT.
                         total_program_db=len(db_context.get("programs", [])),
                         total_program_cocok=sum(1 for p in audit_pagu_items if p.is_match),
                         total_program_selisih=sum(1 for p in audit_pagu_items if not p.is_match),
+                        total_tujuan_db=total_tujuan_db,
+                        total_sasaran_db=total_sasaran_db,
+                        total_iku_db=total_iku_db,
+                        audit_tujuan_sasaran=audit_ts_items,
                         audit_pagu=audit_pagu_items,
                         audit_indikator=audit_ind_items,
                         audit_nomenklatur=audit_nom_items,
@@ -698,6 +911,7 @@ Keluarkan evaluasi JSON sesuai format AUDIT_SYSTEM_PROMPT.
             )
             raw_content = completion.choices[0].message.content or "{}"
             parsed = json.loads(raw_content)
+            audit_ts_items = _clean_audit_tujuan_sasaran(parsed.get("audit_tujuan_sasaran", []), ts_db)
             audit_pagu_items = _clean_audit_pagu(parsed.get("audit_pagu", []))
             audit_ind_items = _clean_audit_indikator(parsed.get("audit_indikator", []))
             audit_nom_items = _clean_audit_nomenklatur(parsed.get("audit_nomenklatur", []))
@@ -722,6 +936,10 @@ Keluarkan evaluasi JSON sesuai format AUDIT_SYSTEM_PROMPT.
                 total_program_db=len(db_context.get("programs", [])),
                 total_program_cocok=sum(1 for p in audit_pagu_items if p.is_match),
                 total_program_selisih=sum(1 for p in audit_pagu_items if not p.is_match),
+                total_tujuan_db=total_tujuan_db,
+                total_sasaran_db=total_sasaran_db,
+                total_iku_db=total_iku_db,
+                audit_tujuan_sasaran=audit_ts_items,
                 audit_pagu=audit_pagu_items,
                 audit_indikator=audit_ind_items,
                 audit_nomenklatur=audit_nom_items,

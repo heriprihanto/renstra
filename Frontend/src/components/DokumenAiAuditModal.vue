@@ -116,6 +116,14 @@
                 <span class="metric-lbl">Total Program</span>
               </div>
               <div class="score-metric-box">
+                <span class="metric-num text-purple">{{ (auditResult.total_tujuan_db || 0) + ' / ' + (auditResult.total_sasaran_db || 0) }}</span>
+                <span class="metric-lbl">Tujuan / Sasaran</span>
+              </div>
+              <div class="score-metric-box">
+                <span class="metric-num text-amber font-bold">⭐ {{ auditResult.total_iku_db || 0 }}</span>
+                <span class="metric-lbl">Indikator IKU</span>
+              </div>
+              <div class="score-metric-box">
                 <span class="metric-num text-green">{{ auditResult.total_program_cocok }}</span>
                 <span class="metric-lbl">Pagu Cocok</span>
               </div>
@@ -147,10 +155,19 @@
             <button
               type="button"
               class="audit-tab-btn"
+              :class="{ active: activeTab === 'tujuan_sasaran' }"
+              @click="activeTab = 'tujuan_sasaran'"
+            >
+              <span>🎯 1. Tujuan, Sasaran &amp; IKU</span>
+              <span class="tab-count-pill">{{ auditResult.audit_tujuan_sasaran?.length || 0 }}</span>
+            </button>
+            <button
+              type="button"
+              class="audit-tab-btn"
               :class="{ active: activeTab === 'pagu' }"
               @click="activeTab = 'pagu'"
             >
-              <span>1. Pagu Anggaran</span>
+              <span>💰 2. Pagu Anggaran</span>
               <span class="tab-count-pill">{{ auditResult.audit_pagu?.length || 0 }}</span>
             </button>
             <button
@@ -159,7 +176,7 @@
               :class="{ active: activeTab === 'indikator' }"
               @click="activeTab = 'indikator'"
             >
-              <span>2. Indikator &amp; Target</span>
+              <span>📊 3. Indikator &amp; Target</span>
               <span class="tab-count-pill">{{ auditResult.audit_indikator?.length || 0 }}</span>
             </button>
             <button
@@ -168,7 +185,7 @@
               :class="{ active: activeTab === 'nomenklatur' }"
               @click="activeTab = 'nomenklatur'"
             >
-              <span>3. Nomenklatur</span>
+              <span>🏷️ 4. Nomenklatur</span>
               <span class="tab-count-pill">{{ auditResult.audit_nomenklatur?.length || 0 }}</span>
             </button>
             <button
@@ -177,9 +194,130 @@
               :class="{ active: activeTab === 'rekomendasi' }"
               @click="activeTab = 'rekomendasi'"
             >
-              <span>4. Rekomendasi Bapperida</span>
+              <span>📋 5. Rekomendasi Bapperida</span>
               <span class="tab-count-pill">{{ auditResult.rekomendasi?.length || 0 }}</span>
             </button>
+          </div>
+
+          <!-- Tab 1: Tujuan, Sasaran & IKU -->
+          <div v-if="activeTab === 'tujuan_sasaran'" class="tab-pane-content">
+            <div class="tab-pane-desc d-flex justify-between align-center">
+              <div>
+                Memverifikasi keselarasan <strong>Tujuan</strong>, <strong>Sasaran</strong>, <strong>Indikator Kinerja</strong>, dan <strong>IKU (Indikator Kinerja Utama)</strong> antara Bab III / Penetapan IKU dokumen PDF dengan database aplikasi.
+              </div>
+              <div class="ts-filter-pills">
+                <button
+                  type="button"
+                  class="ts-filter-pill"
+                  :class="{ active: tsFilter === 'all' }"
+                  @click="tsFilter = 'all'"
+                >
+                  Semua ({{ auditResult.audit_tujuan_sasaran?.length || 0 }})
+                </button>
+                <button
+                  type="button"
+                  class="ts-filter-pill pill-iku"
+                  :class="{ active: tsFilter === 'iku' }"
+                  @click="tsFilter = 'iku'"
+                >
+                  ⭐ Khusus IKU ({{ countIku }})
+                </button>
+                <button
+                  type="button"
+                  class="ts-filter-pill"
+                  :class="{ active: tsFilter === 'Tujuan' }"
+                  @click="tsFilter = 'Tujuan'"
+                >
+                  Tujuan
+                </button>
+                <button
+                  type="button"
+                  class="ts-filter-pill"
+                  :class="{ active: tsFilter === 'Sasaran' }"
+                  @click="tsFilter = 'Sasaran'"
+                >
+                  Sasaran
+                </button>
+              </div>
+            </div>
+
+            <div class="table-responsive">
+              <table class="audit-data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 45px; text-align: center;">NO</th>
+                    <th style="width: 130px; text-align: center;">LEVEL &amp; STATUS</th>
+                    <th style="width: 250px;">TUJUAN / SASARAN DAERAH</th>
+                    <th style="width: 240px;">INDIKATOR KINERJA</th>
+                    <th style="width: 70px; text-align: center;">SATUAN</th>
+                    <th style="width: 210px;">TARGET DATABASE</th>
+                    <th style="width: 190px;">TARGET DOKUMEN PDF</th>
+                    <th style="text-align: center; width: 100px;">STATUS</th>
+                    <th style="min-width: 200px;">CATATAN AUDIT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(item, idx) in filteredTujuanSasaran"
+                    :key="idx"
+                    :class="{ 'row-diff': !item.is_match, 'row-iku': item.is_iku }"
+                  >
+                    <td class="text-center font-bold">{{ idx + 1 }}</td>
+                    <td class="text-center">
+                      <div class="level-badges-stack">
+                        <span
+                          class="badge-level"
+                          :class="item.level?.toLowerCase() === 'tujuan' ? 'badge-tujuan' : 'badge-sasaran'"
+                        >
+                          {{ item.level?.toUpperCase() }}
+                        </span>
+                        <span v-if="item.is_iku" class="badge-iku-gold" title="Ditetapkan sebagai Indikator Kinerja Utama (IKU)">
+                          ⭐ IKU
+                        </span>
+                      </div>
+                    </td>
+                    <td class="font-medium text-slate-800">
+                      {{ item.uraitujuan_sasaran || '-' }}
+                    </td>
+                    <td>
+                      <div class="font-bold text-slate-900">{{ item.indikator }}</div>
+                    </td>
+                    <td class="text-center text-mono text-xs">
+                      {{ item.satuan || '-' }}
+                    </td>
+                    <td class="text-xs">
+                      <div v-if="item.target_murni_db" class="target-val-line">
+                        <span class="target-lbl">Murni:</span>
+                        <span class="target-txt">{{ item.target_murni_db }}</span>
+                      </div>
+                      <div v-if="item.target_perubahan_db" class="target-val-line text-blue">
+                        <span class="target-lbl">Perubahan:</span>
+                        <span class="target-txt font-bold">{{ item.target_perubahan_db }}</span>
+                      </div>
+                    </td>
+                    <td class="text-xs">
+                      <div v-if="item.target_pdf" class="target-pdf-box">
+                        {{ item.target_pdf }}
+                      </div>
+                      <span v-else class="text-slate-400 italic">Tidak tertera</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="badge-audit" :class="item.is_match ? 'badge-match' : 'badge-mismatch'">
+                        {{ item.is_match ? 'Sesuai' : 'Periksa' }}
+                      </span>
+                    </td>
+                    <td class="text-keterangan text-xs">
+                      {{ item.keterangan || '-' }}
+                    </td>
+                  </tr>
+                  <tr v-if="!filteredTujuanSasaran?.length">
+                    <td colspan="9" class="text-center py-6 text-slate-400">
+                      Tidak ada data Tujuan/Sasaran yang sesuai dengan filter yang dipilih.
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
 
           <!-- Tab 1: Pagu Anggaran -->
@@ -380,7 +518,26 @@ export default {
     const opdData = ref(null);
     const targetDoc = ref(null);
     const auditResult = ref(null);
-    const activeTab = ref('pagu'); // pagu, indikator, nomenklatur, rekomendasi
+    const activeTab = ref('tujuan_sasaran'); // tujuan_sasaran, pagu, indikator, nomenklatur, rekomendasi
+    const tsFilter = ref('all'); // all, iku, Tujuan, Sasaran
+
+    const countIku = computed(() => {
+      return (auditResult.value?.audit_tujuan_sasaran || []).filter(i => i.is_iku).length;
+    });
+
+    const filteredTujuanSasaran = computed(() => {
+      const list = auditResult.value?.audit_tujuan_sasaran || [];
+      if (tsFilter.value === 'iku') {
+        return list.filter(i => i.is_iku);
+      }
+      if (tsFilter.value === 'Tujuan') {
+        return list.filter(i => i.level?.toLowerCase() === 'tujuan');
+      }
+      if (tsFilter.value === 'Sasaran') {
+        return list.filter(i => i.level?.toLowerCase() === 'sasaran');
+      }
+      return list;
+    });
 
     const auditTargetTahap = computed(() => {
       if (targetDoc.value) {
@@ -404,7 +561,8 @@ export default {
       targetDoc.value = doc;
       auditResult.value = null;
       errorMessage.value = '';
-      activeTab.value = 'pagu';
+      activeTab.value = 'tujuan_sasaran';
+      tsFilter.value = 'all';
       isOpen.value = true;
 
       await startAudit();
@@ -470,6 +628,8 @@ export default {
 Perangkat Daerah : ${auditResult.value.nama_skpd} (${auditResult.value.kode_skpd})
 Nama Berkas PDF  : ${auditResult.value.nama_file}
 Skor Kesesuaian  : ${auditResult.value.skor_kesesuaian}% (${auditResult.value.status})
+Tujuan / Sasaran : ${auditResult.value.total_tujuan_db || 0} Tujuan / ${auditResult.value.total_sasaran_db || 0} Sasaran
+Indikator IKU    : ${auditResult.value.total_iku_db || 0} IKU
 Total Program    : ${auditResult.value.total_program_db} (Cocok: ${auditResult.value.total_program_cocok}, Selisih: ${auditResult.value.total_program_selisih})
 
 Ringkasan:
@@ -494,6 +654,9 @@ ${(auditResult.value.rekomendasi || []).map((r, i) => `${i + 1}. ${r}`).join('\n
       targetDoc,
       auditResult,
       activeTab,
+      tsFilter,
+      countIku,
+      filteredTujuanSasaran,
       auditTargetTahap,
       docFileUrl,
       openModal,
@@ -1192,6 +1355,142 @@ ${(auditResult.value.rekomendasi || []).map((r, i) => `${i + 1}. ${r}`).join('\n
   color: #64748b;
   font-style: italic;
   font-size: 0.86rem;
+}
+
+/* Tujuan, Sasaran & IKU Tab Styles */
+.text-purple {
+  color: #7c3aed !important;
+}
+
+.text-amber {
+  color: #b45309 !important;
+}
+
+.d-flex {
+  display: flex;
+}
+
+.justify-between {
+  justify-content: space-between;
+}
+
+.align-center {
+  align-items: center;
+}
+
+.ts-filter-pills {
+  display: flex;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  margin-left: 1rem;
+}
+
+.ts-filter-pill {
+  background: #f1f5f9;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+  border-radius: 9999px;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.ts-filter-pill:hover {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.ts-filter-pill.active {
+  background: #1e3a8a;
+  color: #ffffff;
+  border-color: #1e3a8a;
+}
+
+.ts-filter-pill.pill-iku.active {
+  background: #d97706;
+  color: #ffffff;
+  border-color: #d97706;
+}
+
+.level-badges-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.badge-level {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+}
+
+.badge-tujuan {
+  background: #ede9fe;
+  color: #6d28d9;
+  border: 1px solid #ddd6fe;
+}
+
+.badge-sasaran {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+}
+
+.badge-iku-gold {
+  background: #fef3c7;
+  color: #b45309;
+  border: 1px solid #fde68a;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.1rem 0.45rem;
+  box-shadow: 0 1px 2px rgba(245, 158, 11, 0.15);
+}
+
+.row-iku {
+  background-color: #fffbeb !important;
+}
+
+.row-iku:hover {
+  background-color: #fef3c7 !important;
+}
+
+.target-val-line {
+  display: flex;
+  gap: 0.35rem;
+  align-items: baseline;
+  line-height: 1.35;
+  margin-bottom: 0.15rem;
+}
+
+.target-lbl {
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.target-txt {
+  font-family: monospace;
+  font-size: 0.73rem;
+  color: #1e293b;
+}
+
+.target-pdf-box {
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 0.25rem 0.45rem;
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: #0f172a;
+  line-height: 1.3;
 }
 </style>
 

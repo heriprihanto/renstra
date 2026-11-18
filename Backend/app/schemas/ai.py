@@ -92,6 +92,19 @@ class NomenklaturAuditItem(BaseModel):
     keterangan: str = ""
 
 
+class TujuanSasaranAuditItem(BaseModel):
+    level: str = "Tujuan"  # "Tujuan" | "Sasaran"
+    uraitujuan_sasaran: str
+    indikator: str
+    satuan: Optional[str] = None
+    is_iku: Optional[bool] = False
+    target_murni_db: Optional[str] = None
+    target_perubahan_db: Optional[str] = None
+    target_pdf: Optional[str] = None
+    is_match: Optional[bool] = True
+    keterangan: str = ""
+
+
 class DokumenAuditResponse(BaseModel):
     success: bool
     source: str = "ai"
@@ -112,6 +125,10 @@ class DokumenAuditResponse(BaseModel):
     total_program_db: int = 0
     total_program_cocok: int = 0
     total_program_selisih: int = 0
+    total_tujuan_db: int = 0
+    total_sasaran_db: int = 0
+    total_iku_db: int = 0
+    audit_tujuan_sasaran: List[TujuanSasaranAuditItem] = []
     audit_pagu: List[PaguAuditItem] = []
     audit_indikator: List[IndikatorAuditItem] = []
     audit_nomenklatur: List[NomenklaturAuditItem] = []
