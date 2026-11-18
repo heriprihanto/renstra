@@ -116,37 +116,52 @@
 
             <!-- Dokumen Perencanaan (id_ref_dokumen 64, 65, 66) -->
             <td>
-              <div v-if="opd.dokumen && opd.dokumen.length > 0" class="doc-badge-group">
-                <a
-                  v-for="doc in opd.dokumen"
-                  :key="doc.id"
-                  :href="getDocUrl(doc)"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  :class="['doc-pill', getDocBadgeClass(doc.id_ref_dokumen)]"
-                  :title="`${doc.tahap}: ${doc.nama_file}\nDiunggah: ${formatDate(doc.uploaded_at)}\n(Klik untuk membuka berkas)`"
-                  @click.stop
+              <div v-if="opd.dokumen && opd.dokumen.length > 0" class="doc-cell-content">
+                <div class="doc-badge-group">
+                  <a
+                    v-for="doc in opd.dokumen"
+                    :key="doc.id"
+                    :href="getDocUrl(doc)"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    :class="['doc-pill', getDocBadgeClass(doc.id_ref_dokumen)]"
+                    :title="`${doc.tahap}: ${doc.nama_file}\nDiunggah: ${formatDate(doc.uploaded_at)}\n(Klik untuk membuka berkas)`"
+                    @click.stop
+                  >
+                    <!-- Penetapan (66) Icon -->
+                    <svg v-if="doc.id_ref_dokumen === 66" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
+                      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+                      <polyline points="22 4 12 14.01 9 11.01"/>
+                    </svg>
+                    <!-- Rankir (65) Icon -->
+                    <svg v-else-if="doc.id_ref_dokumen === 65" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                      <line x1="16" y1="13" x2="8" y2="13"/>
+                      <line x1="16" y1="17" x2="8" y2="17"/>
+                    </svg>
+                    <!-- Rancangan (64) Icon -->
+                    <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    <span class="doc-pill-name">{{ doc.tahap }}</span>
+                    <span class="doc-file-format">{{ getFileExt(doc.nama_file) }}</span>
+                  </a>
+                </div>
+
+                <!-- Tombol Analisa Kesesuaian AI (Penetapan jika ada, jika belum Rancangan Akhir) -->
+                <button
+                  v-if="getCandidateAuditDoc(opd)"
+                  type="button"
+                  class="btn-ai-audit-tag"
+                  :class="getCandidateAuditDoc(opd).id_ref_dokumen === 66 ? 'tag-penetapan' : 'tag-rankir'"
+                  :title="`Klik untuk Menganalisa Kesesuaian Dokumen ${getCandidateAuditDoc(opd).tahap} (${getCandidateAuditDoc(opd).nama_file}) terhadap Database menggunakan AI`"
+                  @click.stop="openAuditModal(opd, getCandidateAuditDoc(opd))"
                 >
-                  <!-- Penetapan (66) Icon -->
-                  <svg v-if="doc.id_ref_dokumen === 66" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-                    <polyline points="22 4 12 14.01 9 11.01"/>
-                  </svg>
-                  <!-- Rankir (65) Icon -->
-                  <svg v-else-if="doc.id_ref_dokumen === 65" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <polyline points="14 2 14 8 20 8"/>
-                    <line x1="16" y1="13" x2="8" y2="13"/>
-                    <line x1="16" y1="17" x2="8" y2="17"/>
-                  </svg>
-                  <!-- Rancangan (64) Icon -->
-                  <svg v-else width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                  </svg>
-                  <span class="doc-pill-name">{{ doc.tahap }}</span>
-                  <span class="doc-file-format">{{ getFileExt(doc.nama_file) }}</span>
-                </a>
+                  <span class="sparkle-emoji">✨</span>
+                  <span class="audit-btn-text">Audit AI ({{ getCandidateAuditDoc(opd).tahap }})</span>
+                </button>
               </div>
               <span v-else class="doc-empty-text" title="Belum mengunggah Dokumen Perencanaan (Rancangan/Rankir/Penetapan)">
                 <span class="doc-empty-dash">-</span>
@@ -168,11 +183,15 @@
         </tbody>
       </table>
     </div>
+
+    <!-- Modal Audit Dokumen AI -->
+    <DokumenAiAuditModal ref="auditModalRef" />
   </div>
 </template>
 
 <script setup>
 import { ref, computed } from 'vue';
+import DokumenAiAuditModal from './DokumenAiAuditModal.vue';
 
 const props = defineProps({
   opdList: {
@@ -283,14 +302,88 @@ function formatDate(dateStr) {
     return dateStr;
   }
 }
+
+// AI Document Audit Integration
+const auditModalRef = ref(null);
+
+function getCandidateAuditDoc(opd) {
+  if (!opd || !opd.dokumen || opd.dokumen.length === 0) return null;
+  // Prioritas 1: Jika sudah ada Penetapan Renstra (66), analisa Penetapan
+  const penetapan = opd.dokumen.find(d => d.id_ref_dokumen === 66);
+  if (penetapan) return penetapan;
+  // Prioritas 2: Jika belum ada Penetapan, analisa Rancangan Akhir (65)
+  const rankir = opd.dokumen.find(d => d.id_ref_dokumen === 65);
+  if (rankir) return rankir;
+  return null;
+}
+
+function openAuditModal(opd, doc) {
+  if (auditModalRef.value) {
+    auditModalRef.value.openModal(opd, doc);
+  }
+}
 </script>
 
 <style scoped>
+.doc-cell-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
 .doc-badge-group {
   display: flex;
   flex-wrap: wrap;
   gap: 0.35rem;
   align-items: center;
+}
+
+/* AI Audit Button */
+.btn-ai-audit-tag {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.22rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+.btn-ai-audit-tag:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+.tag-penetapan {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: #ffffff;
+  border: 1px solid #065f46;
+}
+
+.tag-penetapan:hover {
+  background: linear-gradient(135deg, #047857 0%, #065f46 100%);
+}
+
+.tag-rankir {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  border: 1px solid #1e40af;
+}
+
+.tag-rankir:hover {
+  background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
+}
+
+.sparkle-emoji {
+  font-size: 0.76rem;
+}
+
+.audit-btn-text {
+  letter-spacing: 0.02em;
 }
 
 .doc-pill {

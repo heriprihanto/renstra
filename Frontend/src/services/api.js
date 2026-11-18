@@ -520,6 +520,15 @@ export const api = {
     document.body.removeChild(link);
     window.URL.revokeObjectURL(downloadUrl);
   },
+
+  // Audit Kesesuaian Dokumen Perencanaan (Penetapan / Rancangan Akhir) dengan AI
+  async auditDokumenPerencanaan(idSkpd, idDokumen = null) {
+    let url = `${API_BASE_URL}/ai/audit-dokumen-perencanaan/${encodeURIComponent(idSkpd)}`;
+    if (idDokumen) url += `?id_dokumen=${encodeURIComponent(idDokumen)}`;
+    return fetchJson(url, {
+      method: 'POST',
+    });
+  },
 };
 
 export default api;

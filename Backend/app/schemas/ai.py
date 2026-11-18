@@ -59,3 +59,60 @@ class SmartRecommendationResponse(BaseModel):
     level: str
     input_uraian: str
     recommendations: List[SmartIndicatorItem]
+
+
+
+class PaguAuditItem(BaseModel):
+    kodeprogram: str
+    uraiprogram: str
+    pagu_pdf: Optional[float] = None
+    pagu_db: float = 0.0
+    selisih: Optional[float] = 0.0
+    is_match: Optional[bool] = True
+    keterangan: str = ""
+
+
+class IndikatorAuditItem(BaseModel):
+    kodeprogram: Optional[str] = None
+    uraiprogram: Optional[str] = None
+    indikator: str
+    target_pdf: Optional[str] = None
+    target_db: Optional[str] = None
+    satuan: Optional[str] = None
+    is_match: Optional[bool] = True
+    keterangan: str = ""
+
+
+class NomenklaturAuditItem(BaseModel):
+    level: str = "program"
+    kode: str
+    nama_pdf: str
+    nama_db: str
+    is_match: Optional[bool] = True
+    keterangan: str = ""
+
+
+class DokumenAuditResponse(BaseModel):
+    success: bool
+    source: str = "ai"
+    id_dokumen: int
+    id_ref_dokumen: int
+    tahap: str
+    nama_file: str
+    file_url: str
+    uploaded_at: Optional[str] = None
+    id_skpd: int
+    kode_skpd: str
+    nama_skpd: str
+    total_pages: int = 0
+    analyzed_pages: int = 0
+    skor_kesesuaian: int = 100
+    status: str = "Sesuai"
+    ringkasan_analisis: str
+    total_program_db: int = 0
+    total_program_cocok: int = 0
+    total_program_selisih: int = 0
+    audit_pagu: List[PaguAuditItem] = []
+    audit_indikator: List[IndikatorAuditItem] = []
+    audit_nomenklatur: List[NomenklaturAuditItem] = []
+    rekomendasi: List[str] = []
