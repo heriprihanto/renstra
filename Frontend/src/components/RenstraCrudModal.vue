@@ -1557,12 +1557,12 @@ watch(
           p_target2029: props.itemData.p_target2029 || '-',
           p_target2030: props.itemData.p_target2030 || '-',
           p_target_akhir: props.itemData.p_target_akhir || '-',
-          realisasi2025: props.itemData.indikator?.realisasi2025 || props.itemData.realisasi2025 || '-',
-          realisasi2026: props.itemData.indikator?.realisasi2026 || props.itemData.realisasi2026 || '-',
-          realisasi2027: props.itemData.indikator?.realisasi2027 || props.itemData.realisasi2027 || '-',
-          realisasi2028: props.itemData.indikator?.realisasi2028 || props.itemData.realisasi2028 || '-',
-          realisasi2029: props.itemData.indikator?.realisasi2029 || props.itemData.realisasi2029 || '-',
-          realisasi2030: props.itemData.indikator?.realisasi2030 || props.itemData.realisasi2030 || '-',
+          realisasi2025: props.itemData.indikator?.realisasi2025 ?? props.itemData.realisasi2025 ?? '-',
+          realisasi2026: props.itemData.indikator?.realisasi2026 ?? props.itemData.realisasi2026 ?? '-',
+          realisasi2027: props.itemData.indikator?.realisasi2027 ?? props.itemData.realisasi2027 ?? '-',
+          realisasi2028: props.itemData.indikator?.realisasi2028 ?? props.itemData.realisasi2028 ?? '-',
+          realisasi2029: props.itemData.indikator?.realisasi2029 ?? props.itemData.realisasi2029 ?? '-',
+          realisasi2030: props.itemData.indikator?.realisasi2030 ?? props.itemData.realisasi2030 ?? '-',
 
           // Program, Kegiatan, Subkegiatan fields
           kodeprogram: props.itemData.kodeprogram || '',

@@ -1340,17 +1340,17 @@ async def update_subkegiatan(id: int, data: SubkegiatanUpdate, session: AsyncSes
     if data.p_volume_akhir is not None:
         subkeg.p_volume_akhir = data.p_volume_akhir
     if data.realisasi2025 is not None:
-        subkeg.realisasi0 = data.realisasi2025
+        subkeg.realisasi0 = data.realisasi2025 or "-"
     if data.realisasi2026 is not None:
-        subkeg.realisasi1 = data.realisasi2026
+        subkeg.realisasi1 = data.realisasi2026 or "-"
     if data.realisasi2027 is not None:
-        subkeg.realisasi2 = data.realisasi2027
+        subkeg.realisasi2 = data.realisasi2027 or "-"
     if data.realisasi2028 is not None:
-        subkeg.realisasi3 = data.realisasi2028
+        subkeg.realisasi3 = data.realisasi2028 or "-"
     if data.realisasi2029 is not None:
-        subkeg.realisasi4 = data.realisasi2029
+        subkeg.realisasi4 = data.realisasi2029 or "-"
     if data.realisasi2030 is not None:
-        subkeg.realisasi5 = data.realisasi2030
+        subkeg.realisasi5 = data.realisasi2030 or "-"
     if data.perubahan_status is not None:
         subkeg.perubahan_status = data.perubahan_status
     if data.definisi_operasional is not None:

@@ -1955,6 +1955,12 @@ function openEditIndikatorTujuan(ind, tujuan) {
     p_target2029: ind.p_target2029,
     p_target2030: ind.p_target2030,
     p_target_akhir: ind.p_target_akhir,
+    realisasi2025: ind.realisasi2025 ?? '-',
+    realisasi2026: ind.realisasi2026 ?? '-',
+    realisasi2027: ind.realisasi2027 ?? '-',
+    realisasi2028: ind.realisasi2028 ?? '-',
+    realisasi2029: ind.realisasi2029 ?? '-',
+    realisasi2030: ind.realisasi2030 ?? '-',
   };
   isCrudModalOpen.value = true;
 }
@@ -2044,6 +2050,12 @@ function openEditIndikatorSasaran(ind, sasaran) {
     p_target2029: ind.p_target2029,
     p_target2030: ind.p_target2030,
     p_target_akhir: ind.p_target_akhir,
+    realisasi2025: ind.realisasi2025 ?? '-',
+    realisasi2026: ind.realisasi2026 ?? '-',
+    realisasi2027: ind.realisasi2027 ?? '-',
+    realisasi2028: ind.realisasi2028 ?? '-',
+    realisasi2029: ind.realisasi2029 ?? '-',
+    realisasi2030: ind.realisasi2030 ?? '-',
   };
   isCrudModalOpen.value = true;
 }
@@ -2119,6 +2131,12 @@ function openEditIndikatorKegiatan(prog, keg, indKeg) {
     p_pagu3: indKeg.p_pagu3,
     p_pagu4: indKeg.p_pagu4,
     p_pagu5: indKeg.p_pagu5,
+    realisasi2025: indKeg.realisasi2025 ?? '-',
+    realisasi2026: indKeg.realisasi2026 ?? '-',
+    realisasi2027: indKeg.realisasi2027 ?? '-',
+    realisasi2028: indKeg.realisasi2028 ?? '-',
+    realisasi2029: indKeg.realisasi2029 ?? '-',
+    realisasi2030: indKeg.realisasi2030 ?? '-',
   };
   isCrudModalOpen.value = true;
 }
@@ -2176,6 +2194,12 @@ function openEditIndikatorProgram(prog, indProg) {
     p_target2029: indProg.p_target2029,
     p_target2030: indProg.p_target2030,
     p_target_akhir: indProg.p_target_akhir,
+    realisasi2025: indProg.realisasi2025 ?? '-',
+    realisasi2026: indProg.realisasi2026 ?? '-',
+    realisasi2027: indProg.realisasi2027 ?? '-',
+    realisasi2028: indProg.realisasi2028 ?? '-',
+    realisasi2029: indProg.realisasi2029 ?? '-',
+    realisasi2030: indProg.realisasi2030 ?? '-',
   };
   isCrudModalOpen.value = true;
 }
@@ -2332,6 +2356,12 @@ function openEditSubkegiatan(prog, keg, subkeg) {
     p_pagu3: subkeg.p_pagu3 ?? subkeg.indikator?.p_pagu3 ?? subkeg.pagu3 ?? 0,
     p_pagu4: subkeg.p_pagu4 ?? subkeg.indikator?.p_pagu4 ?? subkeg.pagu4 ?? 0,
     p_pagu5: subkeg.p_pagu5 ?? subkeg.indikator?.p_pagu5 ?? subkeg.pagu5 ?? 0,
+    realisasi2025: subkeg.indikator?.realisasi2025 ?? subkeg.realisasi2025 ?? '-',
+    realisasi2026: subkeg.indikator?.realisasi2026 ?? subkeg.realisasi2026 ?? '-',
+    realisasi2027: subkeg.indikator?.realisasi2027 ?? subkeg.realisasi2027 ?? '-',
+    realisasi2028: subkeg.indikator?.realisasi2028 ?? subkeg.realisasi2028 ?? '-',
+    realisasi2029: subkeg.indikator?.realisasi2029 ?? subkeg.realisasi2029 ?? '-',
+    realisasi2030: subkeg.indikator?.realisasi2030 ?? subkeg.realisasi2030 ?? '-',
   };
   isCrudModalOpen.value = true;
 }
