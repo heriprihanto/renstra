@@ -51,9 +51,11 @@ TUGAS ANDA:
 4. Memverifikasi Kesesuaian Nomenklatur Program:
    - Pastikan kode dan uraian program di PDF konsisten dengan database.
 5. Menghitung Skor Kesesuaian Keseluruhan (0 - 100%):
-   - Jika semua cocok, berikan skor 95-100% dan status 'Sesuai'.
-   - Jika terdapat perbedaan pagu, indikator, tujuan/sasaran, kurangi skor proporsional dan status 'Terdapat Selisih'.
-   - Jika perbedaan signifikan/banyak tidak cocok, status 'Perlu Perbaikan'.
+   - ATURAN WAJIB PENILAIAN SKOR:
+     * Jika data Tujuan dan/atau Sasaran pada database aplikasi KOSONG (0 entri atau belum dientri oleh OPD), berikan skor MAKSIMAL 40-50% dan status 'Perlu Perbaikan (Belum Entri Tujuan/Sasaran)'. JANGAN PERNAH memberikan nilai tinggi/100% jika Tujuan/Sasaran belum ada di database!
+     * Jika semua cocok dan lengkap, berikan skor 90-100% dan status 'Sangat Sesuai'.
+     * Jika terdapat selisih pagu/indikator, kurangi skor proporsional dan status 'Terdapat Selisih'.
+     * Jika banyak tidak cocok atau data tidak lengkap, status 'Perlu Perbaikan'.
 6. Memberikan Rekomendasi Bapperida yang konkrit dan dapat ditindaklanjuti.
 
 FORMAT KELUARAN (WAJIB JSON VALID):
@@ -201,10 +203,13 @@ def _fetch_pdf_bytes(link_gd: str) -> bytes:
             except Exception as e:
                 logger.warning("Gagal membaca file lokal %s: %s", lp, e)
 
-    urls = [
-        f"https://monevrkpd.tegalkota.go.id/dokren/{link_clean}",
-        f"http://monevrkpd.tegalkota.go.id/dokren/{link_clean}",
-    ]
+    if raw_link.startswith("http://") or raw_link.startswith("https://"):
+        urls = [raw_link]
+    else:
+        urls = [
+            f"https://monevrkpd.tegalkota.go.id/dokren/{link_clean}",
+            f"http://monevrkpd.tegalkota.go.id/dokren/{link_clean}",
+        ]
     headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) RENSTRA-AI/1.0"}
     errors = []
 
@@ -281,73 +286,17 @@ def download_and_extract_pdf(link_gd: str) -> Tuple[int, int, str]:
     reader = pypdf.PdfReader(io.BytesIO(pdf_bytes))
     total_pages = len(reader.pages)
 
-    # Prioritas 1: Halaman yang memuat Matriks Program/Kegiatan/Pendanaan Renstra (Bab IV)
-    primary_prog_kw = [
-        "TABEL 4.", "TABEL 4-", "TABEL 4 ", "TABEL 5.", "TABEL 6.",
-        "MATRIKS", "RENCANA PROGRAM, KEGIATAN", "RENCANA PROGRAM DAN KEGIATAN",
-        "PENDANAAN INDIKATIF", "KERANGKA PENDANAAN"
-    ]
-    # Prioritas 2: Halaman yang memuat Tujuan, Sasaran, Cascading, dan IKU (Bab III / Bab IV / Penetapan IKU)
-    primary_tujuan_kw = [
-        "TUJUAN DAN SASARAN", "TUJUAN, SASARAN", "BAB III",
-        "INDIKATOR KINERJA UTAMA", "PENETAPAN INDIKATOR KINERJA UTAMA",
-        "TABEL 3.1", "TABEL 3-", "TABEL 4.3", "TABEL 4-3",
-        "CASCADING", "IKU PERANGKAT DAERAH", "PENETAPAN IKU"
-    ]
-    secondary_kw = ["PROGRAM", "KEGIATAN", "PAGU", "INDIKATOR", "TUJUAN", "SASARAN"]
-
-    prog_pages = []
-    tujuan_pages = []
-    other_relevant_pages = []
-
+    # Ekstrak seluruh halaman yang memuat teks untuk audit komparasi 10 elemen
+    extracted_pages_text = []
     for idx, page in enumerate(reader.pages):
         try:
             txt = page.extract_text() or ""
+            if txt.strip():
+                extracted_pages_text.append(f"--- [HALAMAN {idx + 1}] ---\n{txt}")
         except Exception:
             continue
 
-        upper_txt = txt.upper()
-        # Hindari halaman daftar isi murni jika ada kata DAFTAR TABEL / DAFTAR ISI di baris atas
-        is_toc = "DAFTAR ISI" in upper_txt[:100] or "DAFTAR TABEL" in upper_txt[:100]
-        if is_toc:
-            continue
-
-        if any(pkw in upper_txt for pkw in primary_prog_kw):
-            prog_pages.append((idx + 1, txt))
-        if any(tkw in upper_txt for tkw in primary_tujuan_kw):
-            tujuan_pages.append((idx + 1, txt))
-        elif sum(1 for skw in secondary_kw if skw in upper_txt) >= 3 and ("2026" in upper_txt or "2025" in upper_txt):
-            other_relevant_pages.append((idx + 1, txt))
-
-    # Gabungkan halaman tujuan/sasaran/IKU dan matriks program pendanaan
-    combined_dict = {}
-    for p_idx, p_txt in tujuan_pages[:12]:
-        combined_dict[p_idx] = p_txt
-    for p_idx, p_txt in prog_pages[:16]:
-        combined_dict[p_idx] = p_txt
-
-    if len(combined_dict) < 8:
-        for p_idx, p_txt in other_relevant_pages:
-            if p_idx not in combined_dict:
-                combined_dict[p_idx] = p_txt
-            if len(combined_dict) >= 24:
-                break
-
-    # Urutkan berdasarkan nomor halaman
-    selected_page_nums = sorted(combined_dict.keys())[:28]
-    selected_pages = [(p_num, combined_dict[p_num]) for p_num in selected_page_nums]
-
-    # Jika tetap kosong, fallback ke halaman tengah
-    if not selected_pages:
-        start_p = max(0, total_pages // 2 - 8)
-        end_p = min(total_pages, start_p + 16)
-        for idx in range(start_p, end_p):
-            txt = reader.pages[idx].extract_text() or ""
-            selected_pages.append((idx + 1, txt))
-
-    extracted_pages_text = [f"--- [HALAMAN {p_num}] ---\n{p_txt}" for p_num, p_txt in selected_pages]
-    analyzed_pages_count = len(selected_pages)
-
+    analyzed_pages_count = len(extracted_pages_text)
     combined_text = "\n\n".join(extracted_pages_text)
     return total_pages, analyzed_pages_count, combined_text
 
@@ -706,23 +655,41 @@ def _clean_audit_tujuan_sasaran(
     return res
 
 
-def check_phrase_in_pdf(phrase: str, upper_pdf: str) -> Tuple[bool, float, str]:
-    if not phrase or not phrase.strip():
-        return True, 1.0, "Rumusan kalimat tidak dispesifikasikan"
-    clean = re.sub(r"[^A-Z0-9\s]", " ", phrase.upper())
-    words = [w for w in clean.split() if len(w) > 2]
-    if not words:
-        return True, 1.0, "Sesuai"
-    norm = " ".join(words)
-    if norm in upper_pdf:
-        return True, 1.0, "Rumusan kalimat terverifikasi persis pada berkas dokumen PDF"
-    matched = [w for w in words if w in upper_pdf]
-    ratio = len(matched) / len(words)
-    if ratio >= 0.65:
-        return True, ratio, f"Rumusan terverifikasi ({int(ratio * 100)}% padanan kata kunci pada PDF)"
-    elif ratio >= 0.40:
-        return True, ratio, f"Rumusan teridentifikasi sebagian ({int(ratio * 100)}% padanan kata)"
-    return False, ratio, "Rumusan kalimat tidak terdeteksi atau berbeda redaksi pada berkas dokumen"
+def normalize_text_for_exact_match(text: str) -> str:
+    """Normalisasi teks untuk pencocokan sama persis (exact match):
+    - Huruf besar (uppercase)
+    - Bersihkan spasi ganda, baris baru, tab
+    - Hapus tanda baca non-alfanumerik
+    """
+    if not text:
+        return ""
+    t = text.upper().replace("\xa0", " ").replace("–", "-").replace("—", "-")
+    t = re.sub(r"[^A-Z0-9]", " ", t)
+    return " ".join(t.split())
+
+
+def check_exact_phrase_in_pdf(phrase: str, norm_pdf: str, norm_pdf_no_space: str) -> Tuple[bool, str]:
+    """
+    Verifikasi apakah rumusan kalimat database aplikasi SAMA PERSIS dengan dokumen PDF.
+    Return: (is_match: bool, keterangan: str)
+    """
+    if not phrase or not phrase.strip() or phrase.strip() == "-":
+        return True, "Rumusan kalimat tidak dispesifikasikan pada database"
+
+    norm_p = normalize_text_for_exact_match(phrase)
+    if not norm_p:
+        return True, "Sesuai"
+
+    # 1. Cek kalimat persis berurutan dengan spasi standar
+    if norm_p in norm_pdf:
+        return True, "Rumusan kalimat sama persis dengan dokumen PDF"
+
+    # 2. Cek tanpa spasi (mengatasi jeda suku kata / pembagian baris pypdf pada tabel kolom sempit)
+    norm_p_no_space = norm_p.replace(" ", "")
+    if len(norm_p_no_space) >= 8 and norm_p_no_space in norm_pdf_no_space:
+        return True, "Rumusan kalimat sama persis dengan dokumen PDF"
+
+    return False, "Rumusan kalimat berbeda atau tidak sama persis pada dokumen PDF"
 
 
 def run_rule_based_audit(
@@ -734,7 +701,7 @@ def run_rule_based_audit(
     total_pages: int,
     analyzed_pages: int,
 ) -> DokumenAuditResponse:
-    """Komparasi menyeluruh antara berkas PDF dokumen perencanaan dengan database aplikasi:
+    """Komparasi menyeluruh sama persis antara berkas PDF dokumen perencanaan dengan database aplikasi:
     Tujuan, Indikator Tujuan, Sasaran, Indikator Sasaran, Program, Indikator Program,
     Kegiatan, Indikator Kegiatan, Subkegiatan, Indikator Subkegiatan, Pagu Anggaran, dan Target.
     """
@@ -745,6 +712,8 @@ def run_rule_based_audit(
     subkegiatans = db_context.get("subkegiatans", [])
 
     upper_pdf = pdf_text.upper()
+    norm_pdf = normalize_text_for_exact_match(pdf_text)
+    norm_pdf_no_space = norm_pdf.replace(" ", "")
 
     audit_ts: List[TujuanSasaranAuditItem] = []
     audit_nomenklatur: List[NomenklaturAuditItem] = []
@@ -759,6 +728,54 @@ def run_rule_based_audit(
     total_iku_db = sum(1 for ts in tujuan_sasaran if ts["is_iku"])
     ts_cocok_count = 0
 
+    if total_tujuan_db == 0:
+        audit_ts.append(
+            TujuanSasaranAuditItem(
+                level="Tujuan",
+                uraitujuan_sasaran="(Belum dientri pada database aplikasi)",
+                indikator="(Belum dientri)",
+                satuan="-",
+                is_iku=False,
+                target_murni_db="-",
+                target_perubahan_db="-",
+                target_pdf="(Periksa Dokumen PDF Bab III)",
+                is_match=False,
+                keterangan="PERINGATAN: Perangkat Daerah belum mengentri rumusan Tujuan Renstra pada database aplikasi.",
+            )
+        )
+
+    if total_sasaran_db == 0:
+        audit_ts.append(
+            TujuanSasaranAuditItem(
+                level="Sasaran",
+                uraitujuan_sasaran="(Belum dientri pada database aplikasi)",
+                indikator="(Belum dientri)",
+                satuan="-",
+                is_iku=False,
+                target_murni_db="-",
+                target_perubahan_db="-",
+                target_pdf="(Periksa Dokumen PDF Bab III)",
+                is_match=False,
+                keterangan="PERINGATAN: Perangkat Daerah belum mengentri rumusan Sasaran Renstra pada database aplikasi.",
+            )
+        )
+
+    if total_iku_db == 0:
+        audit_ts.append(
+            TujuanSasaranAuditItem(
+                level="Sasaran",
+                uraitujuan_sasaran="(Indikator Kinerja Utama / IKU)",
+                indikator="(Belum ada penetapan IKU di database)",
+                satuan="-",
+                is_iku=True,
+                target_murni_db="-",
+                target_perubahan_db="-",
+                target_pdf="(Periksa Dokumen PDF Bab IV / Penetapan IKU)",
+                is_match=False,
+                keterangan="PERINGATAN: Belum ada Indikator yang ditetapkan sebagai IKU pada database aplikasi.",
+            )
+        )
+
     for ts in tujuan_sasaran:
         lvl = ts["level"]
         ts_name = ts["tujuan_sasaran"]
@@ -768,10 +785,15 @@ def run_rule_based_audit(
         t_murni = ts["target_murni"]
         t_perubahan = ts["target_perubahan"]
 
-        match_ts, ratio_ts, ket_ts = check_phrase_in_pdf(ts_name, upper_pdf)
-        match_ind, ratio_ind, ket_ind = check_phrase_in_pdf(ind, upper_pdf)
+        match_ts, ket_ts = check_exact_phrase_in_pdf(ts_name, norm_pdf, norm_pdf_no_space)
+        match_ind, ket_ind = (
+            check_exact_phrase_in_pdf(ind, norm_pdf, norm_pdf_no_space)
+            if (ind and ind.strip() != "-")
+            else (True, "Indikator belum dientri")
+        )
 
-        is_match = match_ts or match_ind
+        # Kalimat Tujuan/Sasaran dan Indikator harus sama persis
+        is_match = match_ts and match_ind
         if is_match:
             ts_cocok_count += 1
 
@@ -808,36 +830,40 @@ def run_rule_based_audit(
         p_perubahan = float(p.get("p_pagu1") or p_murni)
         pagu_db = p_perubahan if p_perubahan > 0 else p_murni
 
-        # Cek nomenklatur & kode program
+        # Cek nomenklatur & kalimat program sama persis
         match_kd = kd in upper_pdf
-        match_nm, ratio_nm, ket_nm = check_phrase_in_pdf(nm, upper_pdf)
-        is_nom_match = match_kd or match_nm
+        match_nm, ket_nm = check_exact_phrase_in_pdf(nm, norm_pdf, norm_pdf_no_space)
+        is_nom_match = match_nm
 
         audit_nomenklatur.append(
             NomenklaturAuditItem(
                 level="program",
                 kode=kd,
-                nama_pdf=nm if is_nom_match else "(Tidak ditemukan spesifik)",
+                nama_pdf=nm if is_nom_match else "(Rumusan kalimat berbeda di PDF)",
                 nama_db=nm,
                 is_match=is_nom_match,
-                keterangan=f"Kode: {'Ditemukan' if match_kd else 'Tidak terdeteksi'}. Kalimat: {ket_nm}",
+                keterangan=f"Kalimat Program: {ket_nm}. Kode: {'Ditemukan' if match_kd else 'Tidak terdeteksi'}.",
             )
         )
 
         # Cek Pagu Program
-        pagu_ket = "Pagu program selaras dengan tabel matriks kerangka pendanaan"
+        pagu_ket = (
+            "Pagu program selaras dengan tabel matriks kerangka pendanaan"
+            if is_nom_match
+            else "Pagu belum dapat dicocokkan karena rumusan kalimat program berbeda"
+        )
         audit_pagu.append(
             PaguAuditItem(
                 level="program",
                 kode=kd,
                 kodeprogram=kd,
                 uraiprogram=nm,
-                pagu_pdf=pagu_db,
+                pagu_pdf=pagu_db if is_nom_match else 0.0,
                 pagu_db=pagu_db,
                 pagu_murni_db=p_murni,
                 pagu_perubahan_db=p_perubahan,
-                selisih=0.0,
-                is_match=True,
+                selisih=0.0 if is_nom_match else pagu_db,
+                is_match=is_nom_match,
                 keterangan=pagu_ket,
             )
         )
@@ -847,12 +873,12 @@ def run_rule_based_audit(
         else:
             diff_prog += 1
 
-    # 3. Verifikasi Indikator Program
+    # 3. Verifikasi Indikator Program sama persis
     for ind in indikators:
         ind_nama = ind.get("indikator", "")
         kd_prog = ind.get("kodeprogram")
         nm_prog = ind.get("uraiprogram")
-        match_ind, ratio_ind, ket_ind = check_phrase_in_pdf(ind_nama, upper_pdf)
+        match_ind, ket_ind = check_exact_phrase_in_pdf(ind_nama, norm_pdf, norm_pdf_no_space)
         t_murni = str(ind.get("target1") or "-")
         t_perubahan = str(ind.get("p_target1") or t_murni)
 
@@ -868,11 +894,11 @@ def run_rule_based_audit(
                 target_pdf=t_perubahan if match_ind else "-",
                 satuan=ind.get("satuan"),
                 is_match=match_ind,
-                keterangan=f"Kalimat Indikator Program: {ket_ind}",
+                keterangan=f"Kalimat Indikator Program: {ket_ind}.",
             )
         )
 
-    # 4. Verifikasi Kegiatan & Indikator Kegiatan
+    # 4. Verifikasi Kegiatan & Indikator Kegiatan sama persis
     total_keg_db = len(kegiatans)
     matched_keg = 0
 
@@ -884,10 +910,14 @@ def run_rule_based_audit(
         t_keg = str(k.get("p_target1") or k.get("target1") or "-")
 
         match_kd = kd_keg in upper_pdf
-        match_nm, ratio_nm, ket_nm = check_phrase_in_pdf(nm_keg, upper_pdf)
-        match_ind, ratio_ind, ket_ind = check_phrase_in_pdf(ind_keg, upper_pdf) if ind_keg else (True, 1.0, "")
+        match_nm, ket_nm = check_exact_phrase_in_pdf(nm_keg, norm_pdf, norm_pdf_no_space)
+        match_ind, ket_ind = (
+            check_exact_phrase_in_pdf(ind_keg, norm_pdf, norm_pdf_no_space)
+            if ind_keg
+            else (True, "Indikator tidak dientri")
+        )
 
-        is_match = match_kd or match_nm or (match_ind and bool(ind_keg))
+        is_match = match_nm and match_ind
         if is_match:
             matched_keg += 1
 
@@ -911,7 +941,7 @@ def run_rule_based_audit(
             )
         )
 
-    # 5. Verifikasi Subkegiatan & Indikator Subkegiatan
+    # 5. Verifikasi Subkegiatan & Indikator Subkegiatan sama persis
     total_subkeg_db = len(subkegiatans)
     matched_subkeg = 0
 
@@ -923,10 +953,14 @@ def run_rule_based_audit(
         v_sk = str(sk.get("p_volume_1") or sk.get("volume_1") or "-")
 
         match_kd = kd_sk in upper_pdf
-        match_nm, ratio_nm, ket_nm = check_phrase_in_pdf(nm_sk, upper_pdf)
-        match_ind, ratio_ind, ket_ind = check_phrase_in_pdf(ind_sk, upper_pdf) if ind_sk else (True, 1.0, "")
+        match_nm, ket_nm = check_exact_phrase_in_pdf(nm_sk, norm_pdf, norm_pdf_no_space)
+        match_ind, ket_ind = (
+            check_exact_phrase_in_pdf(ind_sk, norm_pdf, norm_pdf_no_space)
+            if ind_sk
+            else (True, "Indikator tidak dientri")
+        )
 
-        is_match = match_kd or match_nm or (match_ind and bool(ind_sk))
+        is_match = match_nm and match_ind
         if is_match:
             matched_subkeg += 1
 
@@ -952,38 +986,73 @@ def run_rule_based_audit(
         )
 
     # 6. Perhitungan Skor Kesesuaian Komprehensif (0-100%)
-    # Bobot: Tujuan & Indikator (15%), Sasaran & IKU (20%), Program & Indikator (20%), Kegiatan (15%), Subkegiatan (15%), Pagu & Target (15%)
-    r_ts = (ts_cocok_count / len(tujuan_sasaran)) if tujuan_sasaran else 1.0
-    r_prog = (matched_prog / total_prog_db) if total_prog_db else 1.0
-    r_keg = (matched_keg / total_keg_db) if total_keg_db else 1.0
-    r_sub = (matched_subkeg / total_subkeg_db) if total_subkeg_db else 1.0
-    r_pagu = 1.0 if diff_prog == 0 else max(0.5, (matched_prog / total_prog_db) if total_prog_db else 1.0)
+    tujuan_items = [ts for ts in tujuan_sasaran if ts["level"].lower() == "tujuan"]
+    sasaran_items = [ts for ts in tujuan_sasaran if ts["level"].lower() == "sasaran"]
 
-    calculated_score = (r_ts * 35.0) + (r_prog * 20.0) + (r_keg * 15.0) + (r_sub * 15.0) + (r_pagu * 15.0)
-    score = min(100, max(50, int(round(calculated_score))))
+    # Jumlah cocok per level
+    tujuan_cocok_count = sum(1 for ts in audit_ts if ts.level == "Tujuan" and ts.is_match)
+    sasaran_cocok_count = sum(1 for ts in audit_ts if ts.level == "Sasaran" and ts.is_match)
 
-    if score >= 90:
+    r_tujuan = (tujuan_cocok_count / len(tujuan_items)) if tujuan_items else 0.0
+    r_sasaran = (sasaran_cocok_count / len(sasaran_items)) if sasaran_items else 0.0
+    r_ts = (r_tujuan * 0.45) + (r_sasaran * 0.55)
+
+    r_prog = (matched_prog / total_prog_db) if total_prog_db else 0.0
+    matched_ind_prog = sum(1 for ind in audit_indikator if ind.is_match)
+    r_ind_prog = (matched_ind_prog / len(audit_indikator)) if audit_indikator else r_prog
+
+    r_keg = (matched_keg / total_keg_db) if total_keg_db else 0.0
+    r_sub = (matched_subkeg / total_subkeg_db) if total_subkeg_db else 0.0
+    r_pagu = 1.0 if (diff_prog == 0 and total_prog_db > 0) else (max(0.0, (matched_prog / total_prog_db)) if total_prog_db else 0.0)
+
+    if total_subkeg_db == 0:
+        calculated_score = (r_ts * 40.0) + (r_prog * 20.0) + (r_ind_prog * 10.0) + (r_keg * 20.0) + (r_pagu * 10.0)
+    else:
+        calculated_score = (r_ts * 35.0) + (r_prog * 15.0) + (r_ind_prog * 10.0) + (r_keg * 15.0) + (r_sub * 15.0) + (r_pagu * 10.0)
+
+    score = int(round(calculated_score))
+
+    is_missing_ts = (total_tujuan_db == 0) or (total_sasaran_db == 0)
+    if is_missing_ts:
+        # Pinalti wajib: Jika Tujuan / Sasaran belum dientri di database, nilai maksimal 45-50%
+        score = min(score, 50)
+        status_str = "Perlu Perbaikan (Belum Entri Tujuan/Sasaran)"
+    elif score >= 90:
         status_str = "Sangat Sesuai"
     elif score >= 75:
         status_str = "Sesuai"
     else:
         status_str = "Terdapat Selisih"
 
-    rekomendasi = [
+    rekomendasi = []
+    if is_missing_ts:
+        rekomendasi.append(
+            "PERINGATAN UTAMA: Perangkat Daerah belum mengentri rumusan Tujuan dan/atau Sasaran serta IKU pada database aplikasi Renstra. Segera lakukan pengentrian Tujuan, Sasaran, dan IKU agar cascading perencanaan tersusun lengkap dan selaras dengan dokumen perencanaan."
+        )
+    rekomendasi.extend([
         f"Dokumen {tahap} untuk '{opd.nama_skpd}' telah diperiksa terhadap database Renstra Perubahan.",
-        f"Tujuan ({total_tujuan_db}), Sasaran ({total_sasaran_db}), dan IKU ({total_iku_db}) terverifikasi selaras.",
-        f"Total {matched_prog} dari {total_prog_db} Program dan {matched_keg} dari {total_keg_db} Kegiatan sesuai dengan matriks rencana.",
-        f"Rincian {matched_subkeg} Subkegiatan beserta Pagu Anggaran dan Target Kinerja selaras dengan perencanaan tahun bersangkutan.",
+        f"Ketersediaan database: Tujuan ({total_tujuan_db}), Sasaran ({total_sasaran_db}), dan IKU ({total_iku_db}).",
+        f"Total {matched_prog} dari {total_prog_db} Program dan {matched_keg} dari {total_keg_db} Kegiatan terverifikasi persis pada dokumen perencanaan.",
+        f"Rincian {matched_subkeg} Subkegiatan beserta Pagu Anggaran dan Target Kinerja dicek terhadap perencanaan tahun bersangkutan.",
         "Pastikan seluruh lembar berita acara dan tanda tangan pengesahan telah lengkap dan bertanggal."
-    ]
+    ])
 
-    ringkasan = (
-        f"Hasil Audit Dokumen {tahap} '{doc.nama_file}' untuk {opd.nama_skpd}: "
-        f"Skor Kesesuaian {score}% ({status_str}). "
-        f"Terverifikasi {total_tujuan_db} Tujuan, {total_sasaran_db} Sasaran, {total_iku_db} IKU, "
-        f"{matched_prog}/{total_prog_db} Program, {matched_keg}/{total_keg_db} Kegiatan, dan "
-        f"{matched_subkeg}/{total_subkeg_db} Subkegiatan beserta Target Kinerja dan Pagu Anggaran."
-    )
+    if is_missing_ts:
+        ringkasan = (
+            f"Hasil Audit Dokumen {tahap} '{doc.nama_file}' untuk {opd.nama_skpd}: "
+            f"Skor Kesesuaian {score}% ({status_str}). "
+            f"Perangkat Daerah belum mengentri Tujuan dan/atau Sasaran serta IKU pada database aplikasi "
+            f"(Tujuan DB: {total_tujuan_db}, Sasaran DB: {total_sasaran_db}, IKU DB: {total_iku_db}). "
+            f"Rincian program terverifikasi {matched_prog} dari {total_prog_db} program."
+        )
+    else:
+        ringkasan = (
+            f"Hasil Audit Dokumen {tahap} '{doc.nama_file}' untuk {opd.nama_skpd}: "
+            f"Skor Kesesuaian {score}% ({status_str}). "
+            f"Terverifikasi {tujuan_cocok_count}/{total_tujuan_db} Tujuan, {sasaran_cocok_count}/{total_sasaran_db} Sasaran, {total_iku_db} IKU, "
+            f"{matched_prog}/{total_prog_db} Program, {matched_keg}/{total_keg_db} Kegiatan, dan "
+            f"{matched_subkeg}/{total_subkeg_db} Subkegiatan beserta Target Kinerja dan Pagu Anggaran."
+        )
 
     return DokumenAuditResponse(
         success=True,
@@ -1118,12 +1187,12 @@ Keluarkan evaluasi JSON sesuai format AUDIT_SYSTEM_PROMPT.
                         nama_skpd=opd.nama_skpd,
                         total_pages=total_pages,
                         analyzed_pages=analyzed_pages,
-                        skor_kesesuaian=int(parsed.get("skor_kesesuaian") or rule_res.skor_kesesuaian),
-                        status=str(parsed.get("status") or rule_res.status),
+                        skor_kesesuaian=rule_res.skor_kesesuaian,
+                        status=rule_res.status,
                         ringkasan_analisis=str(parsed.get("ringkasan_analisis") or rule_res.ringkasan_analisis),
-                        total_program_db=len(db_context.get("programs", [])),
-                        total_program_cocok=sum(1 for p in audit_pagu_items if p.is_match) or rule_res.total_program_cocok,
-                        total_program_selisih=sum(1 for p in audit_pagu_items if not p.is_match) or rule_res.total_program_selisih,
+                        total_program_db=rule_res.total_program_db,
+                        total_program_cocok=rule_res.total_program_cocok,
+                        total_program_selisih=rule_res.total_program_selisih,
                         total_kegiatan_db=rule_res.total_kegiatan_db,
                         total_kegiatan_cocok=rule_res.total_kegiatan_cocok,
                         total_subkegiatan_db=rule_res.total_subkegiatan_db,
@@ -1131,12 +1200,12 @@ Keluarkan evaluasi JSON sesuai format AUDIT_SYSTEM_PROMPT.
                         total_tujuan_db=total_tujuan_db,
                         total_sasaran_db=total_sasaran_db,
                         total_iku_db=total_iku_db,
-                        audit_tujuan_sasaran=audit_ts_items or rule_res.audit_tujuan_sasaran,
-                        audit_pagu=audit_pagu_items or rule_res.audit_pagu,
-                        audit_indikator=audit_ind_items or rule_res.audit_indikator,
+                        audit_tujuan_sasaran=rule_res.audit_tujuan_sasaran,
+                        audit_pagu=rule_res.audit_pagu,
+                        audit_indikator=rule_res.audit_indikator,
                         audit_kegiatan=rule_res.audit_kegiatan,
                         audit_subkegiatan=rule_res.audit_subkegiatan,
-                        audit_nomenklatur=audit_nom_items or rule_res.audit_nomenklatur,
+                        audit_nomenklatur=rule_res.audit_nomenklatur,
                         rekomendasi=parsed.get("rekomendasi", []) or rule_res.rekomendasi,
                     )
                     await save_audit_result_to_db(session, audit_res)
@@ -1192,12 +1261,12 @@ Keluarkan evaluasi JSON sesuai format AUDIT_SYSTEM_PROMPT.
                 nama_skpd=opd.nama_skpd,
                 total_pages=total_pages,
                 analyzed_pages=analyzed_pages,
-                skor_kesesuaian=int(parsed.get("skor_kesesuaian") or rule_res.skor_kesesuaian),
-                status=str(parsed.get("status") or rule_res.status),
+                skor_kesesuaian=rule_res.skor_kesesuaian,
+                status=rule_res.status,
                 ringkasan_analisis=str(parsed.get("ringkasan_analisis") or rule_res.ringkasan_analisis),
-                total_program_db=len(db_context.get("programs", [])),
-                total_program_cocok=sum(1 for p in audit_pagu_items if p.is_match) or rule_res.total_program_cocok,
-                total_program_selisih=sum(1 for p in audit_pagu_items if not p.is_match) or rule_res.total_program_selisih,
+                total_program_db=rule_res.total_program_db,
+                total_program_cocok=rule_res.total_program_cocok,
+                total_program_selisih=rule_res.total_program_selisih,
                 total_kegiatan_db=rule_res.total_kegiatan_db,
                 total_kegiatan_cocok=rule_res.total_kegiatan_cocok,
                 total_subkegiatan_db=rule_res.total_subkegiatan_db,
@@ -1205,12 +1274,12 @@ Keluarkan evaluasi JSON sesuai format AUDIT_SYSTEM_PROMPT.
                 total_tujuan_db=total_tujuan_db,
                 total_sasaran_db=total_sasaran_db,
                 total_iku_db=total_iku_db,
-                audit_tujuan_sasaran=audit_ts_items or rule_res.audit_tujuan_sasaran,
-                audit_pagu=audit_pagu_items or rule_res.audit_pagu,
-                audit_indikator=audit_ind_items or rule_res.audit_indikator,
+                audit_tujuan_sasaran=rule_res.audit_tujuan_sasaran,
+                audit_pagu=rule_res.audit_pagu,
+                audit_indikator=rule_res.audit_indikator,
                 audit_kegiatan=rule_res.audit_kegiatan,
                 audit_subkegiatan=rule_res.audit_subkegiatan,
-                audit_nomenklatur=audit_nom_items or rule_res.audit_nomenklatur,
+                audit_nomenklatur=rule_res.audit_nomenklatur,
                 rekomendasi=parsed.get("rekomendasi", []) or rule_res.rekomendasi,
             )
             await save_audit_result_to_db(session, audit_res)

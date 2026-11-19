@@ -456,3 +456,5 @@ Simpan hasil Audit Kesesuaian Dokumen Renstra ke database, pengguna bisa analisa
 
 Audit kesesuaian kalimat Tujuan, Indikator Tujuan, Sasaran, Indikator Sasaran, Program, Indikator Program, Kegiatan, Indikator Kegiatan, SUb kegiatan, Indikator Subkegiatan, Pagu Anggaran, Target antara Database Aplikasi dengan Dokumen yang sudah diupload
 tampilkan skor di Daftar Perangkat Daerah
+
+Kalimat Tujuan, Indikator Tujuan, Sasaran, Indikator Sasaran, Program, Indikator Program, Kegiatan, Indikator Kegiatan, SUb kegiatan, Indikator Subkegiatan harus sama persis antara Database Aplikasi dengan Dokumen yang sudah diupload
