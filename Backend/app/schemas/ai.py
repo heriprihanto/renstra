@@ -63,28 +63,64 @@ class SmartRecommendationResponse(BaseModel):
 
 
 class PaguAuditItem(BaseModel):
-    kodeprogram: str
+    level: str = "program"  # program | kegiatan | subkegiatan
+    kode: Optional[str] = None
+    kodeprogram: Optional[str] = None
     uraiprogram: str
     pagu_pdf: Optional[float] = None
     pagu_db: float = 0.0
+    pagu_murni_db: Optional[float] = None
+    pagu_perubahan_db: Optional[float] = None
     selisih: Optional[float] = 0.0
     is_match: Optional[bool] = True
     keterangan: str = ""
 
 
 class IndikatorAuditItem(BaseModel):
+    level: str = "program"  # program | kegiatan | subkegiatan | tujuan | sasaran
     kodeprogram: Optional[str] = None
     uraiprogram: Optional[str] = None
     indikator: str
     target_pdf: Optional[str] = None
     target_db: Optional[str] = None
+    target_murni_db: Optional[str] = None
+    target_perubahan_db: Optional[str] = None
     satuan: Optional[str] = None
     is_match: Optional[bool] = True
     keterangan: str = ""
 
 
+class KegiatanAuditItem(BaseModel):
+    kodeprogram: Optional[str] = None
+    kodekegiatan: str
+    uraikegiatan: str
+    indikator: Optional[str] = None
+    satuan: Optional[str] = None
+    target_db: Optional[str] = None
+    target_pdf: Optional[str] = None
+    pagu_db: Optional[float] = 0.0
+    pagu_pdf: Optional[float] = None
+    is_match: Optional[bool] = True
+    keterangan: str = ""
+
+
+class SubkegiatanAuditItem(BaseModel):
+    kodeprogram: Optional[str] = None
+    kodekegiatan: Optional[str] = None
+    kodesubkegiatan: str
+    uraisubkegiatan: str
+    indikator: Optional[str] = None
+    satuan: Optional[str] = None
+    target_db: Optional[str] = None
+    target_pdf: Optional[str] = None
+    pagu_db: Optional[float] = 0.0
+    pagu_pdf: Optional[float] = None
+    is_match: Optional[bool] = True
+    keterangan: str = ""
+
+
 class NomenklaturAuditItem(BaseModel):
-    level: str = "program"
+    level: str = "program"  # tujuan | sasaran | program | kegiatan | subkegiatan
     kode: str
     nama_pdf: str
     nama_db: str
@@ -125,11 +161,19 @@ class DokumenAuditResponse(BaseModel):
     total_program_db: int = 0
     total_program_cocok: int = 0
     total_program_selisih: int = 0
+    total_kegiatan_db: int = 0
+    total_kegiatan_cocok: int = 0
+    total_subkegiatan_db: int = 0
+    total_subkegiatan_cocok: int = 0
     total_tujuan_db: int = 0
     total_sasaran_db: int = 0
     total_iku_db: int = 0
     audit_tujuan_sasaran: List[TujuanSasaranAuditItem] = []
     audit_pagu: List[PaguAuditItem] = []
     audit_indikator: List[IndikatorAuditItem] = []
+    audit_kegiatan: List[KegiatanAuditItem] = []
+    audit_subkegiatan: List[SubkegiatanAuditItem] = []
     audit_nomenklatur: List[NomenklaturAuditItem] = []
     rekomendasi: List[str] = []
+    audited_at: Optional[str] = None
+    is_cached: Optional[bool] = False

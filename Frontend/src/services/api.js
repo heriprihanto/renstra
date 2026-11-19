@@ -522,11 +522,21 @@ export const api = {
   },
 
   // Audit Kesesuaian Dokumen Perencanaan (Penetapan / Rancangan Akhir) dengan AI
-  async auditDokumenPerencanaan(idSkpd, idDokumen = null) {
-    let url = `${API_BASE_URL}/ai/audit-dokumen-perencanaan/${encodeURIComponent(idSkpd)}`;
-    if (idDokumen) url += `?id_dokumen=${encodeURIComponent(idDokumen)}`;
-    return fetchJson(url, {
+  async auditDokumenPerencanaan(idSkpd, idDokumen = null, forceReanalyze = false) {
+    const params = new URLSearchParams();
+    if (idDokumen) params.append('id_dokumen', idDokumen);
+    if (forceReanalyze) params.append('force_reanalyze', 'true');
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return fetchJson(`${API_BASE_URL}/ai/audit-dokumen-perencanaan/${encodeURIComponent(idSkpd)}${query}`, {
       method: 'POST',
+    });
+  },
+  async getSavedDokumenAudit(idSkpd, idDokumen = null) {
+    const params = new URLSearchParams();
+    if (idDokumen) params.append('id_dokumen', idDokumen);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return fetchJson(`${API_BASE_URL}/ai/audit-dokumen-perencanaan/${encodeURIComponent(idSkpd)}${query}`, {
+      method: 'GET',
     });
   },
 };

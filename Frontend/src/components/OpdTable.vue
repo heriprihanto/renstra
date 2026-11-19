@@ -159,12 +159,22 @@
                 v-if="getCandidateAuditDoc(opd)"
                 type="button"
                 class="btn-ai-audit-tag"
-                :class="getCandidateAuditDoc(opd).id_ref_dokumen === 66 ? 'tag-penetapan' : 'tag-rankir'"
-                :title="`Klik untuk Menganalisa Kesesuaian Dokumen ${getCandidateAuditDoc(opd).tahap} (${getCandidateAuditDoc(opd).nama_file}) terhadap Database menggunakan AI`"
+                :class="getAuditButtonClass(opd)"
+                :title="getAuditButtonTitle(opd)"
                 @click.stop="openAuditModal(opd, getCandidateAuditDoc(opd))"
               >
-                <span class="sparkle-emoji">✨</span>
-                <span class="audit-btn-text">Audit AI ({{ getCandidateAuditDoc(opd).tahap }})</span>
+                <template v-if="opd.latest_audit">
+                  <span class="audit-score-pill">
+                    <span class="sparkle-emoji">✨</span>
+                    <strong class="score-num">{{ opd.latest_audit.skor_kesesuaian }}%</strong>
+                  </span>
+                  <span class="audit-status-lbl">{{ opd.latest_audit.status }}</span>
+                  <span class="audit-tahap-tag">({{ opd.latest_audit.tahap }})</span>
+                </template>
+                <template v-else>
+                  <span class="sparkle-emoji">✨</span>
+                  <span class="audit-btn-text">Audit AI ({{ getCandidateAuditDoc(opd).tahap }})</span>
+                </template>
               </button>
               <span v-else class="doc-empty-text" title="Belum ada dokumen yang dapat diaudit">
                 <span class="doc-empty-dash">-</span>
@@ -176,7 +186,7 @@
     </div>
 
     <!-- Modal Audit Dokumen AI -->
-    <DokumenAiAuditModal ref="auditModalRef" />
+    <DokumenAiAuditModal ref="auditModalRef" @audit-saved="handleAuditSaved" />
   </div>
 </template>
 
@@ -313,6 +323,43 @@ function openAuditModal(opd, doc) {
     auditModalRef.value.openModal(opd, doc);
   }
 }
+
+function getAuditButtonClass(opd) {
+  if (opd.latest_audit) {
+    const score = opd.latest_audit.skor_kesesuaian || 0;
+    if (score >= 90) return 'tag-audited-green';
+    if (score >= 75) return 'tag-audited-amber';
+    return 'tag-audited-red';
+  }
+  const cand = getCandidateAuditDoc(opd);
+  if (cand && cand.id_ref_dokumen === 66) return 'tag-penetapan';
+  return 'tag-rankir';
+}
+
+function getAuditButtonTitle(opd) {
+  const cand = getCandidateAuditDoc(opd);
+  if (!cand) return '';
+  if (opd.latest_audit) {
+    const dt = opd.latest_audit.audited_at || formatDate(opd.latest_audit.updated_at);
+    return `Hasil Audit AI: ${opd.latest_audit.skor_kesesuaian}% (${opd.latest_audit.status}) untuk Dokumen ${opd.latest_audit.tahap}. Terakhir dianalisa: ${dt}. Klik untuk melihat detail atau analisa ulang.`;
+  }
+  return `Klik untuk Menganalisa Kesesuaian Dokumen ${cand.tahap} (${cand.nama_file}) terhadap Database menggunakan AI`;
+}
+
+function handleAuditSaved(auditRes) {
+  if (!auditRes) return;
+  const target = props.opdList.find(o => o.id_skpd === auditRes.id_skpd);
+  if (target) {
+    target.latest_audit = {
+      id_dokumen: auditRes.id_dokumen,
+      tahap: auditRes.tahap,
+      skor_kesesuaian: auditRes.skor_kesesuaian,
+      status: auditRes.status,
+      audited_at: auditRes.audited_at || new Date().toLocaleString('id-ID'),
+      source: auditRes.source || 'ai',
+    };
+  }
+}
 </script>
 
 <style scoped>
@@ -370,8 +417,62 @@ function openAuditModal(opd, doc) {
   background: linear-gradient(135deg, #1d4ed8 0%, #1e3a8a 100%);
 }
 
+.tag-audited-green {
+  background: #ecfdf5;
+  color: #065f46;
+  border: 1px solid #10b981;
+}
+
+.tag-audited-green:hover {
+  background: #d1fae5;
+  border-color: #059669;
+}
+
+.tag-audited-amber {
+  background: #fffbeb;
+  color: #92400e;
+  border: 1px solid #f59e0b;
+}
+
+.tag-audited-amber:hover {
+  background: #fef3c7;
+  border-color: #d97706;
+}
+
+.tag-audited-red {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #ef4444;
+}
+
+.tag-audited-red:hover {
+  background: #fee2e2;
+  border-color: #dc2626;
+}
+
 .sparkle-emoji {
   font-size: 0.76rem;
+}
+
+.audit-score-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  font-weight: 800;
+}
+
+.score-num {
+  font-size: 0.85rem;
+}
+
+.audit-status-lbl {
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.audit-tahap-tag {
+  font-size: 0.7rem;
+  opacity: 0.8;
 }
 
 .audit-btn-text {

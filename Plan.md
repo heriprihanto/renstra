@@ -450,3 +450,9 @@ JOIN public.rpjmd_program rj
 - [x] Route `/laporan/rpjmd-vs-renstra` di `Frontend/src/router/index.js` dan menu dropdown "7. Pagu RPJMD vs Renstra" pada `Frontend/src/components/HeaderNavbar.vue`.
 - [x] Kompilasi frontend build `npm run build` sukses 100%.
 [text](../../../../..)
+
+
+Simpan hasil Audit Kesesuaian Dokumen Renstra ke database, pengguna bisa analisa ulang jika data database aplikasi atau dokumen sudah diupdate oleh user perangkat daerah
+
+Audit kesesuaian kalimat Tujuan, Indikator Tujuan, Sasaran, Indikator Sasaran, Program, Indikator Program, Kegiatan, Indikator Kegiatan, SUb kegiatan, Indikator Subkegiatan, Pagu Anggaran, Target antara Database Aplikasi dengan Dokumen yang sudah diupload
+tampilkan skor di Daftar Perangkat Daerah

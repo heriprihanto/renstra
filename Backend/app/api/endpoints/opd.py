@@ -8,9 +8,9 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 
 from app.core.config import settings
 from app.core.db import get_session
-from app.models.dokumen import DokumenPerencanaan
+from app.models.dokumen import DokumenPerencanaan, RenstraDokumenAudit
 from app.models.opd import TaOpd, TaSubPd
-from app.schemas.opd import DashboardStats, DokumenItem, OpdDetail, OpdListItem, SubPdDetail, SubPdItem
+from app.schemas.opd import DashboardStats, DokumenItem, OpdAuditSummaryItem, OpdDetail, OpdListItem, SubPdDetail, SubPdItem
 
 router = APIRouter(prefix="/opd", tags=["Perangkat Daerah"])
 
@@ -88,6 +88,25 @@ async def list_opd(
             )
         )
 
+    # Preload audit mapping: id_skpd -> latest audit result
+    audit_query = (
+        select(RenstraDokumenAudit)
+        .order_by(RenstraDokumenAudit.id_ref_dokumen.desc(), RenstraDokumenAudit.updated_at.desc())
+    )
+    all_audits = (await session.exec(audit_query)).all()
+    opd_audit_map: Dict[int, OpdAuditSummaryItem] = {}
+    for a in all_audits:
+        if a.id_skpd not in opd_audit_map:
+            audited_at_str = (a.updated_at or a.created_at).strftime("%d/%m/%Y %H:%M") if (a.updated_at or a.created_at) else None
+            opd_audit_map[a.id_skpd] = OpdAuditSummaryItem(
+                id_dokumen=a.id_dokumen,
+                tahap=a.tahap,
+                skor_kesesuaian=a.skor_kesesuaian,
+                status=a.status,
+                audited_at=audited_at_str,
+                source=a.source or "ai",
+            )
+
     items: List[OpdListItem] = []
     for row in results:
         items.append(
@@ -97,6 +116,7 @@ async def list_opd(
                 nama_skpd=row.nama_skpd,
                 sub_count=row.sub_count,
                 dokumen=opd_docs_map.get(row.id_skpd, []),
+                latest_audit=opd_audit_map.get(row.id_skpd),
             )
         )
     return items

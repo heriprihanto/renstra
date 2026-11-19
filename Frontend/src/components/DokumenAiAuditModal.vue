@@ -21,6 +21,22 @@
         </div>
 
         <div class="header-right">
+          <!-- Tombol Analisa Ulang AI -->
+          <button
+            v-if="auditResult && !loading"
+            type="button"
+            class="btn-reanalyze-audit"
+            @click="reanalyzeAudit"
+            title="Jalankan analisa ulang AI jika data database aplikasi atau berkas dokumen PDF telah diperbarui"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M23 4v6h-6"/>
+              <path d="M1 20v-6h6"/>
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+            </svg>
+            <span>Analisa Ulang</span>
+          </button>
+
           <a
             v-if="docFileUrl"
             :href="docFileUrl"
@@ -92,6 +108,29 @@
 
         <!-- Audit Result Content -->
         <div v-else-if="auditResult" class="audit-result-wrap">
+          <!-- Status Database & Analisa Ulang Bar -->
+          <div class="audit-db-status-bar">
+            <div class="db-status-left">
+              <span class="db-icon">💾</span>
+              <span class="db-text">
+                <template v-if="auditResult.is_cached">
+                  Hasil audit tersimpan di database &bull; Terakhir dianalisa: <strong>{{ auditResult.audited_at || 'Sebelumnya' }}</strong>
+                </template>
+                <template v-else>
+                  Analisa AI terbaru berhasil dijalankan dan disimpan ke database!
+                </template>
+              </span>
+            </div>
+            <button
+              type="button"
+              class="btn-reanalyze-link"
+              @click="reanalyzeAudit"
+              title="Jalankan analisa ulang AI jika ada pembaruan dokumen PDF atau data aplikasi"
+            >
+              🔄 Analisa Ulang
+            </button>
+          </div>
+
           <!-- Top Scorecard Banner -->
           <div class="audit-score-banner" :class="getScoreCardClass(auditResult.skor_kesesuaian)">
             <div class="score-left">
@@ -112,10 +151,6 @@
 
             <div class="score-metrics-grid">
               <div class="score-metric-box">
-                <span class="metric-num">{{ auditResult.total_program_db }}</span>
-                <span class="metric-lbl">Total Program</span>
-              </div>
-              <div class="score-metric-box">
                 <span class="metric-num text-purple">{{ (auditResult.total_tujuan_db || 0) + ' / ' + (auditResult.total_sasaran_db || 0) }}</span>
                 <span class="metric-lbl">Tujuan / Sasaran</span>
               </div>
@@ -124,14 +159,16 @@
                 <span class="metric-lbl">Indikator IKU</span>
               </div>
               <div class="score-metric-box">
-                <span class="metric-num text-green">{{ auditResult.total_program_cocok }}</span>
-                <span class="metric-lbl">Pagu Cocok</span>
+                <span class="metric-num text-blue">{{ auditResult.total_program_cocok || 0 }} / {{ auditResult.total_program_db || 0 }}</span>
+                <span class="metric-lbl">Program Sesuai</span>
               </div>
               <div class="score-metric-box">
-                <span class="metric-num" :class="auditResult.total_program_selisih > 0 ? 'text-red' : 'text-slate'">
-                  {{ auditResult.total_program_selisih }}
-                </span>
-                <span class="metric-lbl">Pagu Selisih</span>
+                <span class="metric-num text-teal">{{ auditResult.total_kegiatan_cocok || 0 }} / {{ auditResult.total_kegiatan_db || 0 }}</span>
+                <span class="metric-lbl">Kegiatan Sesuai</span>
+              </div>
+              <div class="score-metric-box">
+                <span class="metric-num text-green">{{ auditResult.total_subkegiatan_cocok || 0 }} / {{ auditResult.total_subkegiatan_db || 0 }}</span>
+                <span class="metric-lbl">Subkegiatan Sesuai</span>
               </div>
               <div class="score-metric-box">
                 <span class="metric-num">{{ auditResult.analyzed_pages }} / {{ auditResult.total_pages }}</span>
@@ -158,8 +195,35 @@
               :class="{ active: activeTab === 'tujuan_sasaran' }"
               @click="activeTab = 'tujuan_sasaran'"
             >
-              <span>🎯 1. Tujuan, Sasaran &amp; IKU</span>
+              <span>🎯 1. Tujuan &amp; Sasaran</span>
               <span class="tab-count-pill">{{ auditResult.audit_tujuan_sasaran?.length || 0 }}</span>
+            </button>
+            <button
+              type="button"
+              class="audit-tab-btn"
+              :class="{ active: activeTab === 'program' }"
+              @click="activeTab = 'program'"
+            >
+              <span>📂 2. Program</span>
+              <span class="tab-count-pill">{{ auditResult.audit_nomenklatur?.length || auditResult.total_program_db || 0 }}</span>
+            </button>
+            <button
+              type="button"
+              class="audit-tab-btn"
+              :class="{ active: activeTab === 'kegiatan' }"
+              @click="activeTab = 'kegiatan'"
+            >
+              <span>📁 3. Kegiatan</span>
+              <span class="tab-count-pill">{{ auditResult.audit_kegiatan?.length || auditResult.total_kegiatan_db || 0 }}</span>
+            </button>
+            <button
+              type="button"
+              class="audit-tab-btn"
+              :class="{ active: activeTab === 'subkegiatan' }"
+              @click="activeTab = 'subkegiatan'"
+            >
+              <span>📄 4. Subkegiatan</span>
+              <span class="tab-count-pill">{{ auditResult.audit_subkegiatan?.length || auditResult.total_subkegiatan_db || 0 }}</span>
             </button>
             <button
               type="button"
@@ -167,26 +231,8 @@
               :class="{ active: activeTab === 'pagu' }"
               @click="activeTab = 'pagu'"
             >
-              <span>💰 2. Pagu Anggaran</span>
+              <span>💰 5. Pagu &amp; Target</span>
               <span class="tab-count-pill">{{ auditResult.audit_pagu?.length || 0 }}</span>
-            </button>
-            <button
-              type="button"
-              class="audit-tab-btn"
-              :class="{ active: activeTab === 'indikator' }"
-              @click="activeTab = 'indikator'"
-            >
-              <span>📊 3. Indikator &amp; Target</span>
-              <span class="tab-count-pill">{{ auditResult.audit_indikator?.length || 0 }}</span>
-            </button>
-            <button
-              type="button"
-              class="audit-tab-btn"
-              :class="{ active: activeTab === 'nomenklatur' }"
-              @click="activeTab = 'nomenklatur'"
-            >
-              <span>🏷️ 4. Nomenklatur</span>
-              <span class="tab-count-pill">{{ auditResult.audit_nomenklatur?.length || 0 }}</span>
             </button>
             <button
               type="button"
@@ -194,7 +240,7 @@
               :class="{ active: activeTab === 'rekomendasi' }"
               @click="activeTab = 'rekomendasi'"
             >
-              <span>📋 5. Rekomendasi Bapperida</span>
+              <span>📋 6. Rekomendasi</span>
               <span class="tab-count-pill">{{ auditResult.rekomendasi?.length || 0 }}</span>
             </button>
           </div>
@@ -320,21 +366,233 @@
             </div>
           </div>
 
-          <!-- Tab 1: Pagu Anggaran -->
+          <!-- Tab 2: Program & Indikator Program -->
+          <div v-if="activeTab === 'program'" class="tab-pane-content">
+            <div class="tab-pane-desc">
+              Memverifikasi kesesuaian rumusan <strong>Program</strong>, <strong>Indikator Kinerja Program</strong>, dan <strong>Nomenklatur Standar</strong> terhadap dokumen PDF.
+            </div>
+
+            <!-- Nomenklatur & Status Program -->
+            <div class="table-responsive">
+              <table class="audit-data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">NO</th>
+                    <th style="width: 120px;">KODE PROGRAM</th>
+                    <th>NOMENKLATUR PROGRAM (DATABASE)</th>
+                    <th>TERDETEKSI PADA BERKAS PDF</th>
+                    <th style="text-align: center; width: 110px;">STATUS</th>
+                    <th style="width: 250px;">CATATAN AUDIT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(nom, idx) in auditResult.audit_nomenklatur"
+                    :key="idx"
+                    :class="{ 'row-diff': !nom.is_match }"
+                  >
+                    <td class="text-center font-bold">{{ idx + 1 }}</td>
+                    <td class="text-mono font-bold">{{ nom.kode }}</td>
+                    <td class="font-bold text-slate-800">{{ nom.nama_db }}</td>
+                    <td :class="nom.is_match ? 'text-slate-700' : 'text-slate-400 italic'">
+                      {{ nom.nama_pdf || '-' }}
+                    </td>
+                    <td class="text-center">
+                      <span class="badge-audit" :class="nom.is_match ? 'badge-match' : 'badge-mismatch'">
+                        {{ nom.is_match ? 'Sesuai' : 'Periksa' }}
+                      </span>
+                    </td>
+                    <td class="text-keterangan">{{ nom.keterangan || '-' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Indikator Program -->
+            <div v-if="auditResult.audit_indikator?.length" class="mt-6">
+              <h5 class="text-sm font-bold text-slate-700 mb-2">Indikator Kinerja Program:</h5>
+              <div class="table-responsive">
+                <table class="audit-data-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 50px;">NO</th>
+                      <th style="width: 120px;">KODE PROGRAM</th>
+                      <th>INDIKATOR KINERJA PROGRAM</th>
+                      <th style="text-align: center; width: 85px;">SATUAN</th>
+                      <th style="text-align: center; width: 130px;">TARGET DATABASE</th>
+                      <th style="text-align: center; width: 130px;">TARGET PDF</th>
+                      <th style="text-align: center; width: 100px;">STATUS</th>
+                      <th>CATATAN</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr
+                      v-for="(ind, idx) in auditResult.audit_indikator"
+                      :key="'ind-'+idx"
+                      :class="{ 'row-diff': !ind.is_match }"
+                    >
+                      <td class="text-center">{{ idx + 1 }}</td>
+                      <td class="text-mono">{{ ind.kodeprogram || '-' }}</td>
+                      <td class="font-medium">{{ ind.indikator }}</td>
+                      <td class="text-center">{{ ind.satuan || '-' }}</td>
+                      <td class="text-center text-mono font-bold text-blue">{{ ind.target_db || '-' }}</td>
+                      <td class="text-center text-mono font-bold">{{ ind.target_pdf || '-' }}</td>
+                      <td class="text-center">
+                        <span class="badge-audit" :class="ind.is_match ? 'badge-match' : 'badge-mismatch'">
+                          {{ ind.is_match ? 'Cocok' : 'Perlu Cek' }}
+                        </span>
+                      </td>
+                      <td class="text-keterangan">{{ ind.keterangan || '-' }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab 3: Kegiatan & Indikator Kegiatan -->
+          <div v-if="activeTab === 'kegiatan'" class="tab-pane-content">
+            <div class="tab-pane-desc d-flex justify-between align-center">
+              <div>
+                Memverifikasi rumusan <strong>Kegiatan</strong>, <strong>Indikator Kegiatan</strong>, dan <strong>Pagu/Target</strong> (Total {{ auditResult.total_kegiatan_cocok || 0 }} dari {{ auditResult.total_kegiatan_db || auditResult.audit_kegiatan?.length || 0 }} Kegiatan sesuai).
+              </div>
+              <div class="search-input-wrap">
+                <input
+                  v-model="searchKegiatan"
+                  type="text"
+                  placeholder="Cari kode/nama kegiatan..."
+                  class="audit-search-input"
+                />
+              </div>
+            </div>
+
+            <div v-if="!auditResult.audit_kegiatan?.length" class="empty-tab-text">
+              Tidak ada data rincian kegiatan untuk OPD ini.
+            </div>
+            <div v-else class="table-responsive">
+              <table class="audit-data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 50px;">NO</th>
+                    <th style="width: 140px;">KODE KEGIATAN</th>
+                    <th>NAMA KEGIATAN</th>
+                    <th>INDIKATOR KINERJA</th>
+                    <th style="text-align: center; width: 80px;">SATUAN</th>
+                    <th style="text-align: center; width: 110px;">TARGET</th>
+                    <th style="text-align: right; width: 140px;">PAGU ANGGARAN</th>
+                    <th style="text-align: center; width: 100px;">STATUS</th>
+                    <th style="width: 220px;">CATATAN AUDIT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(k, idx) in filteredKegiatan"
+                    :key="idx"
+                    :class="{ 'row-diff': !k.is_match }"
+                  >
+                    <td class="text-center">{{ idx + 1 }}</td>
+                    <td class="text-mono font-bold">{{ k.kodekegiatan }}</td>
+                    <td class="font-medium text-slate-800">{{ k.uraikegiatan }}</td>
+                    <td>{{ k.indikator || '-' }}</td>
+                    <td class="text-center text-xs">{{ k.satuan || '-' }}</td>
+                    <td class="text-center text-mono font-bold">{{ k.target_db || '-' }}</td>
+                    <td class="text-right text-mono font-bold text-blue">{{ formatCurrency(k.pagu_db) }}</td>
+                    <td class="text-center">
+                      <span class="badge-audit" :class="k.is_match ? 'badge-match' : 'badge-mismatch'">
+                        {{ k.is_match ? 'Sesuai' : 'Periksa' }}
+                      </span>
+                    </td>
+                    <td class="text-keterangan">{{ k.keterangan || '-' }}</td>
+                  </tr>
+                  <tr v-if="!filteredKegiatan.length">
+                    <td colspan="9" class="text-center py-6 text-slate-400">
+                      Tidak ada kegiatan yang cocok dengan pencarian "{{ searchKegiatan }}".
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tab 4: Subkegiatan & Indikator Subkegiatan -->
+          <div v-if="activeTab === 'subkegiatan'" class="tab-pane-content">
+            <div class="tab-pane-desc d-flex justify-between align-center">
+              <div>
+                Memverifikasi rumusan <strong>Subkegiatan</strong>, <strong>Indikator Kinerja Subkegiatan</strong>, <strong>Volume/Target</strong>, dan <strong>Pagu</strong> (Total {{ auditResult.total_subkegiatan_cocok || 0 }} dari {{ auditResult.total_subkegiatan_db || auditResult.audit_subkegiatan?.length || 0 }} Subkegiatan sesuai).
+              </div>
+              <div class="search-input-wrap">
+                <input
+                  v-model="searchSubkegiatan"
+                  type="text"
+                  placeholder="Cari kode/nama subkegiatan..."
+                  class="audit-search-input"
+                />
+              </div>
+            </div>
+
+            <div v-if="!auditResult.audit_subkegiatan?.length" class="empty-tab-text">
+              Tidak ada data rincian subkegiatan untuk OPD ini.
+            </div>
+            <div v-else class="table-responsive">
+              <table class="audit-data-table">
+                <thead>
+                  <tr>
+                    <th style="width: 45px;">NO</th>
+                    <th style="width: 160px;">KODE SUBKEGIATAN</th>
+                    <th>NAMA SUBKEGIATAN</th>
+                    <th>INDIKATOR SUBKEGIATAN</th>
+                    <th style="text-align: center; width: 75px;">SATUAN</th>
+                    <th style="text-align: center; width: 100px;">TARGET / VOL</th>
+                    <th style="text-align: right; width: 140px;">PAGU ANGGARAN</th>
+                    <th style="text-align: center; width: 95px;">STATUS</th>
+                    <th style="width: 220px;">CATATAN AUDIT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    v-for="(sk, idx) in filteredSubkegiatan"
+                    :key="idx"
+                    :class="{ 'row-diff': !sk.is_match }"
+                  >
+                    <td class="text-center">{{ idx + 1 }}</td>
+                    <td class="text-mono font-bold text-xs">{{ sk.kodesubkegiatan }}</td>
+                    <td class="font-medium text-slate-800 text-xs">{{ sk.uraisubkegiatan }}</td>
+                    <td class="text-xs">{{ sk.indikator || '-' }}</td>
+                    <td class="text-center text-xs">{{ sk.satuan || '-' }}</td>
+                    <td class="text-center text-mono font-bold text-xs">{{ sk.target_db || '-' }}</td>
+                    <td class="text-right text-mono font-bold text-blue text-xs">{{ formatCurrency(sk.pagu_db) }}</td>
+                    <td class="text-center">
+                      <span class="badge-audit" :class="sk.is_match ? 'badge-match' : 'badge-mismatch'">
+                        {{ sk.is_match ? 'Sesuai' : 'Periksa' }}
+                      </span>
+                    </td>
+                    <td class="text-keterangan text-xs">{{ sk.keterangan || '-' }}</td>
+                  </tr>
+                  <tr v-if="!filteredSubkegiatan.length">
+                    <td colspan="9" class="text-center py-6 text-slate-400">
+                      Tidak ada subkegiatan yang cocok dengan pencarian "{{ searchSubkegiatan }}".
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Tab 5: Pagu Anggaran & Target -->
           <div v-if="activeTab === 'pagu'" class="tab-pane-content">
             <div class="tab-pane-desc">
-              Membandingkan nilai pagu anggaran yang tertera pada tabel matriks dokumen PDF dengan data pagu resmi di database aplikasi.
+              Membandingkan nilai <strong>Pagu Anggaran</strong> dan <strong>Plafon Pembiayaan</strong> antara dokumen perencanaan PDF dengan data resmi di database aplikasi.
             </div>
             <div class="table-responsive">
               <table class="audit-data-table">
                 <thead>
                   <tr>
                     <th style="width: 50px;">NO</th>
-                    <th style="width: 100px;">KODE</th>
+                    <th style="width: 120px;">KODE</th>
                     <th>NAMA PROGRAM</th>
-                    <th style="text-align: right; width: 150px;">PAGU DI PDF</th>
-                    <th style="text-align: right; width: 150px;">PAGU DATABASE</th>
-                    <th style="text-align: right; width: 140px;">SELISIH</th>
+                    <th style="text-align: right; width: 160px;">PAGU MURNI (DB)</th>
+                    <th style="text-align: right; width: 160px;">PAGU PERUBAHAN (DB)</th>
+                    <th style="text-align: right; width: 160px;">PAGU DOKUMEN PDF</th>
                     <th style="text-align: center; width: 110px;">STATUS</th>
                     <th style="width: 220px;">KETERANGAN</th>
                   </tr>
@@ -347,15 +605,15 @@
                   >
                     <td class="text-center">{{ idx + 1 }}</td>
                     <td class="text-mono font-bold">{{ item.kodeprogram }}</td>
-                    <td>{{ item.uraiprogram }}</td>
-                    <td class="text-right text-mono font-bold">
-                      {{ formatCurrency(item.pagu_pdf) }}
+                    <td class="font-medium">{{ item.uraiprogram }}</td>
+                    <td class="text-right text-mono text-slate-700">
+                      {{ formatCurrency(item.pagu_murni_db || item.pagu_db) }}
                     </td>
                     <td class="text-right text-mono font-bold text-blue">
-                      {{ formatCurrency(item.pagu_db) }}
+                      {{ formatCurrency(item.pagu_perubahan_db || item.pagu_db) }}
                     </td>
-                    <td class="text-right text-mono font-bold" :class="item.selisih !== 0 ? 'text-red' : 'text-slate'">
-                      {{ formatCurrency(item.selisih) }}
+                    <td class="text-right text-mono font-bold text-emerald-700">
+                      {{ formatCurrency(item.pagu_pdf) }}
                     </td>
                     <td class="text-center">
                       <span class="badge-audit" :class="item.is_match ? 'badge-match' : 'badge-mismatch'">
@@ -369,92 +627,7 @@
             </div>
           </div>
 
-          <!-- Tab 2: Indikator & Target -->
-          <div v-if="activeTab === 'indikator'" class="tab-pane-content">
-            <div class="tab-pane-desc">
-              Memverifikasi keselarasan rumusan tolok ukur indikator kinerja dan angka target tahunan.
-            </div>
-            <div v-if="auditResult.audit_indikator?.length === 0" class="empty-tab-text">
-              Tidak ada data indikator program yang terdeteksi untuk dibandingkan.
-            </div>
-            <div v-else class="table-responsive">
-              <table class="audit-data-table">
-                <thead>
-                  <tr>
-                    <th style="width: 50px;">NO</th>
-                    <th style="width: 100px;">KODE</th>
-                    <th>INDIKATOR KINERJA</th>
-                    <th style="text-align: center; width: 85px;">SATUAN</th>
-                    <th style="text-align: center; width: 120px;">TARGET PDF</th>
-                    <th style="text-align: center; width: 120px;">TARGET DATABASE</th>
-                    <th style="text-align: center; width: 100px;">STATUS</th>
-                    <th>CATATAN</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(ind, idx) in auditResult.audit_indikator"
-                    :key="idx"
-                    :class="{ 'row-diff': !ind.is_match }"
-                  >
-                    <td class="text-center">{{ idx + 1 }}</td>
-                    <td class="text-mono">{{ ind.kodeprogram || '-' }}</td>
-                    <td class="font-medium">{{ ind.indikator }}</td>
-                    <td class="text-center">{{ ind.satuan || '-' }}</td>
-                    <td class="text-center text-mono font-bold">{{ ind.target_pdf || '-' }}</td>
-                    <td class="text-center text-mono font-bold text-blue">{{ ind.target_db || '-' }}</td>
-                    <td class="text-center">
-                      <span class="badge-audit" :class="ind.is_match ? 'badge-match' : 'badge-mismatch'">
-                        {{ ind.is_match ? 'Cocok' : 'Perlu Cek' }}
-                      </span>
-                    </td>
-                    <td class="text-keterangan">{{ ind.keterangan || '-' }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Tab 3: Nomenklatur -->
-          <div v-if="activeTab === 'nomenklatur'" class="tab-pane-content">
-            <div class="tab-pane-desc">
-              Memeriksa kesesuaian kodefikasi dan nomenklatur standar (Kepmen 050/Permendagri 90).
-            </div>
-            <div class="table-responsive">
-              <table class="audit-data-table">
-                <thead>
-                  <tr>
-                    <th style="width: 50px;">NO</th>
-                    <th style="width: 110px;">KODE</th>
-                    <th>NOMENKLATUR DI DOKUMEN PDF</th>
-                    <th>NOMENKLATUR DI DATABASE</th>
-                    <th style="text-align: center; width: 100px;">STATUS</th>
-                    <th>CATATAN</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="(nom, idx) in auditResult.audit_nomenklatur"
-                    :key="idx"
-                    :class="{ 'row-diff': !nom.is_match }"
-                  >
-                    <td class="text-center">{{ idx + 1 }}</td>
-                    <td class="text-mono font-bold">{{ nom.kode }}</td>
-                    <td>{{ nom.nama_pdf }}</td>
-                    <td class="text-blue">{{ nom.nama_db }}</td>
-                    <td class="text-center">
-                      <span class="badge-audit" :class="nom.is_match ? 'badge-match' : 'badge-mismatch'">
-                        {{ nom.is_match ? 'Sinkron' : 'Beda' }}
-                      </span>
-                    </td>
-                    <td class="text-keterangan">{{ nom.keterangan || '-' }}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <!-- Tab 4: Rekomendasi -->
+          <!-- Tab 6: Rekomendasi -->
           <div v-if="activeTab === 'rekomendasi'" class="tab-pane-content">
             <div class="rekomendasi-card">
               <div class="rekomendasi-header">
@@ -508,7 +681,8 @@ import api from '../services/api';
 
 export default {
   name: 'DokumenAiAuditModal',
-  setup() {
+  emits: ['audit-saved'],
+  setup(props, { emit }) {
     const isOpen = ref(false);
     const loading = ref(false);
     const currentStep = ref(1);
@@ -518,8 +692,10 @@ export default {
     const opdData = ref(null);
     const targetDoc = ref(null);
     const auditResult = ref(null);
-    const activeTab = ref('tujuan_sasaran'); // tujuan_sasaran, pagu, indikator, nomenklatur, rekomendasi
+    const activeTab = ref('tujuan_sasaran'); // tujuan_sasaran, program, kegiatan, subkegiatan, pagu, rekomendasi
     const tsFilter = ref('all'); // all, iku, Tujuan, Sasaran
+    const searchKegiatan = ref('');
+    const searchSubkegiatan = ref('');
 
     const countIku = computed(() => {
       return (auditResult.value?.audit_tujuan_sasaran || []).filter(i => i.is_iku).length;
@@ -537,6 +713,28 @@ export default {
         return list.filter(i => i.level?.toLowerCase() === 'sasaran');
       }
       return list;
+    });
+
+    const filteredKegiatan = computed(() => {
+      const list = auditResult.value?.audit_kegiatan || [];
+      const q = searchKegiatan.value.trim().toLowerCase();
+      if (!q) return list;
+      return list.filter(k => 
+        (k.kodekegiatan || '').toLowerCase().includes(q) ||
+        (k.uraikegiatan || '').toLowerCase().includes(q) ||
+        (k.indikator || '').toLowerCase().includes(q)
+      );
+    });
+
+    const filteredSubkegiatan = computed(() => {
+      const list = auditResult.value?.audit_subkegiatan || [];
+      const q = searchSubkegiatan.value.trim().toLowerCase();
+      if (!q) return list;
+      return list.filter(sk => 
+        (sk.kodesubkegiatan || '').toLowerCase().includes(q) ||
+        (sk.uraisubkegiatan || '').toLowerCase().includes(q) ||
+        (sk.indikator || '').toLowerCase().includes(q)
+      );
     });
 
     const auditTargetTahap = computed(() => {
@@ -565,7 +763,7 @@ export default {
       tsFilter.value = 'all';
       isOpen.value = true;
 
-      await startAudit();
+      await startAudit(false);
     };
 
     const closeModal = () => {
@@ -573,7 +771,11 @@ export default {
       loading.value = false;
     };
 
-    const startAudit = async () => {
+    const reanalyzeAudit = async () => {
+      await startAudit(true);
+    };
+
+    const startAudit = async (forceReanalyze = false) => {
       if (!opdData.value) return;
       loading.value = true;
       errorMessage.value = '';
@@ -586,8 +788,9 @@ export default {
 
       try {
         const docId = targetDoc.value ? targetDoc.value.id : null;
-        const res = await api.auditDokumenPerencanaan(opdData.value.id_skpd, docId);
+        const res = await api.auditDokumenPerencanaan(opdData.value.id_skpd, docId, forceReanalyze);
         auditResult.value = res;
+        emit('audit-saved', res);
       } catch (err) {
         console.error('Audit AI error:', err);
         errorMessage.value = err.message || 'Gagal menjalankan audit kesesuaian dokumen.';
@@ -657,11 +860,16 @@ ${(auditResult.value.rekomendasi || []).map((r, i) => `${i + 1}. ${r}`).join('\n
       tsFilter,
       countIku,
       filteredTujuanSasaran,
+      searchKegiatan,
+      searchSubkegiatan,
+      filteredKegiatan,
+      filteredSubkegiatan,
       auditTargetTahap,
       docFileUrl,
       openModal,
       closeModal,
       startAudit,
+      reanalyzeAudit,
       formatCurrency,
       getScoreCardClass,
       getStatusBadgeClass,
@@ -752,6 +960,29 @@ ${(auditResult.value.rekomendasi || []).map((r, i) => `${i + 1}. ${r}`).join('\n
   display: flex;
   align-items: center;
   gap: 0.75rem;
+}
+
+.btn-reanalyze-audit {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #f59e0b;
+  color: #1e293b;
+  border: none;
+  padding: 0.45rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.btn-reanalyze-audit:hover {
+  background: #d97706;
+  color: #ffffff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
 }
 
 .btn-open-pdf {
@@ -946,6 +1177,61 @@ ${(auditResult.value.rekomendasi || []).map((r, i) => `${i + 1}. ${r}`).join('\n
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+/* Database Status Bar */
+.audit-db-status-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.65rem 1.1rem;
+  font-size: 0.82rem;
+  color: #334155;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.db-status-left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.db-icon {
+  font-size: 1.05rem;
+}
+
+.db-text {
+  line-height: 1.4;
+}
+
+.db-text strong {
+  color: #0f172a;
+}
+
+.btn-reanalyze-link {
+  background: #ffffff;
+  border: 1px solid #94a3b8;
+  color: #1e293b;
+  padding: 0.3rem 0.75rem;
+  border-radius: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+
+.btn-reanalyze-link:hover {
+  background: #f8fafc;
+  border-color: #3b82f6;
+  color: #2563eb;
+  box-shadow: 0 1px 3px rgba(59, 130, 246, 0.2);
 }
 
 /* Scorecard Banner */
@@ -1218,8 +1504,32 @@ ${(auditResult.value.rekomendasi || []).map((r, i) => `${i + 1}. ${r}`).join('\n
 
 .text-blue { color: #1d4ed8; }
 .text-green { color: #16a34a; }
+.text-teal { color: #0d9488; }
+.text-purple { color: #7c3aed; }
+.text-amber { color: #d97706; }
 .text-red { color: #dc2626; }
 .text-slate { color: #64748b; }
+
+.search-input-wrap {
+  min-width: 280px;
+}
+
+.audit-search-input {
+  width: 100%;
+  padding: 0.38rem 0.75rem;
+  font-size: 0.8rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  outline: none;
+  background: #f8fafc;
+  transition: all 0.2s;
+}
+
+.audit-search-input:focus {
+  background: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
 
 .badge-audit {
   display: inline-block;

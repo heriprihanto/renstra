@@ -37,12 +37,25 @@ class SubPdDetail(BaseModel):
         from_attributes = True
 
 
+class OpdAuditSummaryItem(BaseModel):
+    id_dokumen: int
+    tahap: str
+    skor_kesesuaian: int
+    status: str
+    audited_at: Optional[str] = None
+    source: Optional[str] = "ai"
+
+    class Config:
+        from_attributes = True
+
+
 class OpdListItem(BaseModel):
     id_skpd: int
     kode_skpd: Optional[str] = None
     nama_skpd: Optional[str] = None
     sub_count: int = 0
     dokumen: List[DokumenItem] = []
+    latest_audit: Optional[OpdAuditSummaryItem] = None
 
     class Config:
         from_attributes = True
