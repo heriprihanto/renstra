@@ -188,80 +188,67 @@
       transform: translateY(-1px);
     }
 
-    /* Hero Banner */
-    .guide-hero {
-      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #064e3b 100%);
-      color: white;
-      padding: 3.5rem 1.5rem 3rem;
-      position: relative;
-      overflow: hidden;
-      border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    /* Compact Document Sub-bar (Tanpa Hero Banner) */
+    .doc-subbar {
+      background: var(--surface-card);
+      border-bottom: 1px solid var(--border-subtle);
+      padding: 0.75rem 1.5rem;
     }
 
-    .guide-hero::after {
-      content: '';
-      position: absolute;
-      top: -50%;
-      right: -10%;
-      width: 500px;
-      height: 500px;
-      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
-      pointer-events: none;
-    }
-
-    .guide-hero-content {
+    .doc-subbar-container {
       max-width: 1440px;
       margin: 0 auto;
-      position: relative;
-      z-index: 1;
-    }
-
-    .guide-hero h2 {
-      font-size: 2.1rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      margin-bottom: 0.75rem;
       display: flex;
       align-items: center;
-      gap: 0.75rem;
+      justify-content: space-between;
+      gap: 1rem;
       flex-wrap: wrap;
     }
 
-    .hero-badge-version {
-      background: #059669;
-      color: white;
-      font-size: 0.75rem;
-      padding: 0.25rem 0.65rem;
-      border-radius: 9999px;
-      font-weight: 700;
-      vertical-align: middle;
-      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4);
-    }
-
-    .guide-hero p {
-      font-size: 1.05rem;
-      color: #cbd5e1;
-      max-width: 820px;
-      line-height: 1.6;
-    }
-
-    .guide-hero-meta {
-      display: flex;
-      gap: 1.5rem;
-      margin-top: 1.5rem;
-      flex-wrap: wrap;
-    }
-
-    .hero-meta-item {
+    .doc-breadcrumbs {
       display: flex;
       align-items: center;
       gap: 0.5rem;
       font-size: 0.85rem;
-      color: #94a3b8;
+      color: var(--text-muted);
     }
 
-    .hero-meta-item strong {
-      color: #f1f5f9;
+    .doc-breadcrumbs a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .doc-breadcrumbs a:hover {
+      color: var(--emerald-600);
+    }
+
+    .doc-breadcrumbs .current {
+      color: var(--text-primary);
+      font-weight: 700;
+    }
+
+    .doc-meta-tags {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .doc-tag {
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 0.2rem 0.55rem;
+      border-radius: 6px;
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #e2e8f0;
+    }
+
+    .doc-tag-accent {
+      background: #ecfdf5;
+      color: #065f46;
+      border-color: #a7f3d0;
     }
 
     /* Layout: Sidebar + Main Content */
@@ -712,13 +699,10 @@
         margin-bottom: 1.5rem;
         padding: 1.5rem;
       }
-      .guide-hero {
-        background: #fff !important;
-        color: #000 !important;
-        padding: 1rem 0;
-        border-bottom: 2px solid #000;
+      .doc-subbar {
+        border-bottom: 1px solid #ccc;
+        padding: 0.5rem 0;
       }
-      .guide-hero p { color: #333 !important; }
       body { background: #fff !important; font-size: 12pt; }
     }
 
@@ -778,32 +762,21 @@
     </div>
   </header>
 
-  <!-- Hero Section -->
-  <section class="guide-hero">
-    <div class="guide-hero-content">
-      <h2>
-        <span>Buku Panduan Pengguna Aplikasi RENSTRA</span>
-        <span class="hero-badge-version">Edisi Perubahan 2026</span>
-      </h2>
-      <p>
-        Petunjuk operasional lengkap Sistem Informasi Perencanaan Pembangunan Rencana Strategis (RENSTRA) Perangkat Daerah Pemerintah Kota Tegal Periode 2025–2029. Panduan mencakup navigasi dashboard, audit dokumen perencanaan berbasis AI Engine, manajemen pohon kinerja (cascading), pengentrian target kinerja & pagu anggaran, serta cetak laporan resmi.
-      </p>
-      <div class="guide-hero-meta">
-        <div class="hero-meta-item">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-          <span>Sasaran: <strong>Operator Perangkat Daerah & Analis Bapperida</strong></span>
-        </div>
-        <div class="hero-meta-item">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span>Tahun Anggaran: <strong>2026 (Perubahan)</strong></span>
-        </div>
-        <div class="hero-meta-item">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          <span>Sesuai Regulasi: <strong>Permendagri 86/2017 & 90/2019</strong></span>
-        </div>
+  <!-- Breadcrumb & Document Meta Subbar (Tanpa Hero Banner) -->
+  <div class="doc-subbar">
+    <div class="doc-subbar-container">
+      <div class="doc-breadcrumbs">
+        <a href="/renstra/">Beranda RENSTRA</a>
+        <span>/</span>
+        <span class="current">Buku Panduan Pengguna (User Manual)</span>
+      </div>
+      <div class="doc-meta-tags">
+        <span class="doc-tag doc-tag-accent">Edisi Perubahan 2026</span>
+        <span class="doc-tag">Permendagri 86/2017 & 90/2019</span>
+        <span class="doc-tag">Kota Tegal</span>
       </div>
     </div>
-  </section>
+  </div>
 
   <!-- Main Layout -->
   <div class="guide-layout">
