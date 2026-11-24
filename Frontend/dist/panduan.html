@@ -654,6 +654,263 @@
       font-size: 0.88rem;
     }
 
+    /* Sidebar Submenu */
+    .sidebar-sub-menu {
+      list-style: none;
+      padding-left: 1rem;
+      margin: 0.2rem 0 0.4rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+      border-left: 2px solid #e2e8f0;
+      margin-left: 1.1rem;
+    }
+
+    .sidebar-sub-menu a {
+      padding: 0.25rem 0.5rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-radius: 4px;
+      display: block;
+    }
+
+    .sidebar-sub-menu a:hover {
+      color: var(--emerald-600);
+      background: #f0fdf4;
+    }
+
+    /* CRUD 10 Elements Styles */
+    .crud-quick-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.45rem;
+      margin: 1.25rem 0 2rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-subtle);
+    }
+
+    .crud-quick-nav-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.35rem 0.7rem;
+      background: white;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 0.76rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+
+    .crud-quick-nav-item:hover {
+      border-color: var(--emerald-600);
+      color: var(--emerald-600);
+      background: #f0fdf4;
+      transform: translateY(-1px);
+    }
+
+    .crud-quick-nav-item .tag-num {
+      width: 18px;
+      height: 18px;
+      background: #e2e8f0;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #475569;
+    }
+
+    .crud-element-card {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.5rem;
+      margin-bottom: 2.25rem;
+      box-shadow: var(--shadow-sm);
+      scroll-margin-top: 5rem;
+      transition: border-color 0.2s;
+    }
+
+    .crud-element-card:hover {
+      border-color: #cbd5e1;
+    }
+
+    .crud-element-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 0.85rem;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+    }
+
+    .crud-element-title-group {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .crud-num-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 0.85rem;
+      color: white;
+      background: var(--primary-700);
+      flex-shrink: 0;
+    }
+
+    .crud-num-pill.pill-tujuan { background: #059669; }
+    .crud-num-pill.pill-sasaran { background: #0284c7; }
+    .crud-num-pill.pill-program { background: #4f46e5; }
+    .crud-num-pill.pill-kegiatan { background: #d97706; }
+    .crud-num-pill.pill-subkegiatan { background: #0d9488; }
+    .crud-num-pill.pill-ind { background: #64748b; }
+
+    .crud-element-title {
+      font-size: 1.12rem;
+      font-weight: 800;
+      color: var(--text-primary);
+      margin: 0;
+    }
+
+    .crud-element-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin: 0.15rem 0 0;
+    }
+
+    .crud-grid-4 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1.15rem;
+      margin: 1.15rem 0;
+    }
+
+    @media (max-width: 860px) {
+      .crud-grid-4 {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .crud-card-action {
+      background: #f8fafc;
+      border: 1px solid var(--border-subtle);
+      border-radius: 10px;
+      padding: 1.1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.55rem;
+    }
+
+    .crud-card-action.create-action {
+      border-left: 4px solid #10b981;
+      background: linear-gradient(to right, #f0fdf4 0%, #ffffff 100%);
+    }
+
+    .crud-card-action.read-action {
+      border-left: 4px solid #3b82f6;
+      background: linear-gradient(to right, #eff6ff 0%, #ffffff 100%);
+    }
+
+    .crud-card-action.update-action {
+      border-left: 4px solid #f59e0b;
+      background: linear-gradient(to right, #fffbeb 0%, #ffffff 100%);
+    }
+
+    .crud-card-action.delete-action {
+      border-left: 4px solid #ef4444;
+      background: linear-gradient(to right, #fef2f2 0%, #ffffff 100%);
+    }
+
+    .crud-action-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .crud-action-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.72rem;
+      font-weight: 800;
+      padding: 0.2rem 0.5rem;
+      border-radius: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+
+    .badge-c { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .badge-r { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .badge-u { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-d { background: #fee2e2; color: #991b1b; border: 1px solid #fecdd3; }
+
+    .crud-card-action h6 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      margin: 0;
+      color: var(--text-primary);
+    }
+
+    .crud-card-action p, .crud-card-action ul {
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: #334155;
+      margin: 0;
+    }
+
+    .crud-card-action ul {
+      padding-left: 1.15rem;
+    }
+
+    .crud-card-action ul li {
+      margin-bottom: 0.25rem;
+    }
+
+    .cascade-alert {
+      padding: 0.65rem 0.85rem;
+      background: #fff1f2;
+      border: 1px solid #fecdd3;
+      border-radius: 6px;
+      font-size: 0.78rem;
+      color: #9f1239;
+      line-height: 1.45;
+    }
+
+    .field-table-mini {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.78rem;
+      margin-top: 0.5rem;
+    }
+
+    .field-table-mini th, .field-table-mini td {
+      padding: 0.45rem 0.65rem;
+      border: 1px solid #e2e8f0;
+      text-align: left;
+    }
+
+    .field-table-mini th {
+      background: #f8fafc;
+      font-weight: 700;
+      color: #475569;
+    }
+
     /* Footer */
     .guide-footer {
       background: #0f172a;
@@ -816,8 +1073,20 @@
         <li>
           <a href="#bab5">
             <span class="menu-num">5</span>
-            <span>Pohon Kinerja (Cascading)</span>
+            <span>Pohon Kinerja & CRUD 10 Elemen</span>
           </a>
+          <ul class="sidebar-sub-menu">
+            <li><a href="#crud-tujuan">5.1 Tujuan Renstra</a></li>
+            <li><a href="#crud-ind-tujuan">5.2 Indikator Tujuan</a></li>
+            <li><a href="#crud-sasaran">5.3 Sasaran Renstra</a></li>
+            <li><a href="#crud-ind-sasaran">5.4 Indikator Sasaran & IKU</a></li>
+            <li><a href="#crud-program">5.5 Program Prioritas</a></li>
+            <li><a href="#crud-ind-program">5.6 Indikator Program</a></li>
+            <li><a href="#crud-kegiatan">5.7 Kegiatan Renstra</a></li>
+            <li><a href="#crud-ind-kegiatan">5.8 Indikator Kegiatan</a></li>
+            <li><a href="#crud-subkegiatan">5.9 Sub Kegiatan</a></li>
+            <li><a href="#crud-ind-subkegiatan">5.10 Indikator Subkegiatan</a></li>
+          </ul>
         </li>
         <li>
           <a href="#bab6">
@@ -1177,6 +1446,881 @@
               <h5>Level 5: Sub Kegiatan & Pagu Anggaran</h5>
               <p>Unit aktivitas terkecil yang mengikat alokasi pagu belanja dan target volume keluaran riil per tahun anggaran.</p>
             </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 2rem;">
+          <h4>Panduan Lengkap CRUD 10 Elemen Perencanaan</h4>
+          <p>
+            Sistem menyediakan manajemen data penuh <strong>CRUD (Create, Read, Update, Delete)</strong> untuk setiap tingkat hirarki perencanaan. Gunakan menu pintasan berikut untuk langsung menuju petunjuk operasional elemen yang diinginkan:
+          </p>
+
+          <!-- Quick Navigation Chips for 10 Elements -->
+          <div class="crud-quick-nav">
+            <a href="#crud-tujuan" class="crud-quick-nav-item">
+              <span class="tag-num">1</span>
+              <span>Tujuan Renstra</span>
+            </a>
+            <a href="#crud-ind-tujuan" class="crud-quick-nav-item">
+              <span class="tag-num">2</span>
+              <span>Indikator Tujuan</span>
+            </a>
+            <a href="#crud-sasaran" class="crud-quick-nav-item">
+              <span class="tag-num">3</span>
+              <span>Sasaran Renstra</span>
+            </a>
+            <a href="#crud-ind-sasaran" class="crud-quick-nav-item">
+              <span class="tag-num">4</span>
+              <span>Indikator Sasaran & IKU</span>
+            </a>
+            <a href="#crud-program" class="crud-quick-nav-item">
+              <span class="tag-num">5</span>
+              <span>Program Prioritas</span>
+            </a>
+            <a href="#crud-ind-program" class="crud-quick-nav-item">
+              <span class="tag-num">6</span>
+              <span>Indikator Program</span>
+            </a>
+            <a href="#crud-kegiatan" class="crud-quick-nav-item">
+              <span class="tag-num">7</span>
+              <span>Kegiatan Renstra</span>
+            </a>
+            <a href="#crud-ind-kegiatan" class="crud-quick-nav-item">
+              <span class="tag-num">8</span>
+              <span>Indikator Kegiatan</span>
+            </a>
+            <a href="#crud-subkegiatan" class="crud-quick-nav-item">
+              <span class="tag-num">9</span>
+              <span>Sub Kegiatan</span>
+            </a>
+            <a href="#crud-ind-subkegiatan" class="crud-quick-nav-item">
+              <span class="tag-num">10</span>
+              <span>Indikator Subkegiatan</span>
+            </a>
+          </div>
+
+          <!-- 1. TUJUAN RENSTRA -->
+          <div id="crud-tujuan" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-tujuan">1</span>
+                <div>
+                  <h5 class="crud-element-title">Tujuan Renstra (Level 1)</h5>
+                  <div class="crud-element-meta">Puncak pohon kinerja Perangkat Daerah &bull; Tabel: <code>tujuan_renstra</code></div>
+                </div>
+              </div>
+              <span class="badge badge-success">Hirarki Tertinggi</span>
+            </div>
+            <p>
+              <strong>Tujuan Renstra</strong> merumuskan kondisi masa depan atau dampak pembangunan makro yang ingin diwujudkan oleh Perangkat Daerah dalam jangka waktu 5 tahun (2025–2029) yang selaras dengan Visi & Misi RPJMD Kota Tegal.
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">+ Tambah Tujuan</span>
+                </div>
+                <h6>Menambahkan Tujuan Baru</h6>
+                <ul>
+                  <li>Buka Tab <strong>"Tujuan & Sasaran"</strong> pada halaman rincian Renstra OPD.</li>
+                  <li>Klik tombol hijau <strong>"+ Tambah Tujuan"</strong> di pojok kanan atas toolbar cascading.</li>
+                  <li>Isi <strong>Uraian Tujuan</strong> (wajib, disalin persis dari Dokumen Renstra Perubahan).</li>
+                  <li>Tentukan <strong>Nomor Urut</strong> (misal: 1, 2, dst) untuk mengatur urutan susunan.</li>
+                  <li>Pilih <strong>Status Data</strong> (Otomatis / Data Baru / Ada Perubahan / Tetap).</li>
+                  <li>Klik tombol <strong>"Simpan Tujuan"</strong> untuk menyimpan ke database.</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Pohon Kinerja</span>
+                </div>
+                <h6>Tampilan di Antarmuka</h6>
+                <ul>
+                  <li>Ditampilkan sebagai <strong>Kartu Induk Level 1</strong> dengan header hijau/navy bergaris tepi emerald.</li>
+                  <li>Menampilkan nomor urut tujuan, rumusan kalimat tujuan, badge status data, dan tombol aksi (Ubah/Hapus/Tambah Sasaran).</li>
+                  <li>Memuat sub-tabel <strong>Indikator Tujuan</strong> di bagian bawah teks tujuan dan membawahi seluruh blok <strong>Sasaran</strong>.</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Edit & Rekalibrasi</span>
+                </div>
+                <h6>Memperbarui Tujuan</h6>
+                <ul>
+                  <li>Klik tombol <strong>Ubah (ikon pensil ✏️)</strong> pada header kartu Tujuan yang ingin diedit.</li>
+                  <li>Modal formulir terbuka dengan data terisi otomatis. Anda dapat memperbaiki redaksi teks kalimat, mengubah nomor urut, atau status perubahan.</li>
+                  <li>Gunakan tombol <strong>🤖 Rekomendasi AI (SMART)</strong> untuk meninjau apakah kalimat tujuan telah memenuhi standar baku perencanaan.</li>
+                  <li>Klik <strong>"Simpan Perubahan"</strong> untuk menyimpan pembaruan.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Cascade Delete</span>
+                </div>
+                <h6>Menghapus Tujuan & Dampaknya</h6>
+                <ul>
+                  <li>Klik tombol <strong>Hapus (ikon tempat sampah 🗑️)</strong> pada kartu Tujuan.</li>
+                  <li>Modal konfirmasi bahaya warna merah akan muncul meminta konfirmasi tindakan.</li>
+                  <li>
+                    <div class="cascade-alert">
+                      <strong>⚠️ Peringatan Kritis:</strong> Menghapus Tujuan akan menghapus secara permanen seluruh <strong>Indikator Tujuan, Sasaran, dan Indikator Sasaran</strong> di bawahnya secara otomatis (*cascade delete*).
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <table class="field-table-mini">
+              <thead>
+                <tr>
+                  <th>Nama Kolom Input</th>
+                  <th>Tipe / Pilihan</th>
+                  <th>Keterangan & Kaidah Pengisian</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>uraian</code> <span style="color: #ef4444;">*</span></td>
+                  <td>Text / Textarea</td>
+                  <td>Rumusan kalimat Tujuan Renstra. Wajib sama persis dengan naskah Bab IV Renstra OPD.</td>
+                </tr>
+                <tr>
+                  <td><code>no_urut</code></td>
+                  <td>Angka (Integer)</td>
+                  <td>Urutan penampilan tujuan dalam laporan resmi (1, 2, 3...).</td>
+                </tr>
+                <tr>
+                  <td><code>perubahan_status</code></td>
+                  <td>Dropdown</td>
+                  <td>Status pergeseran Renstra: <code>otomatis</code>, <code>baru</code>, <code>perubahan</code>, <code>tetap</code>.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 2. INDIKATOR TUJUAN -->
+          <div id="crud-ind-tujuan" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-ind">2</span>
+                <div>
+                  <h5 class="crud-element-title">Indikator Tujuan (Level 1b)</h5>
+                  <div class="crud-element-meta">Tolok ukur ketercapaian Tujuan Renstra &bull; Tabel: <code>indikator_tujuan_renstra</code></div>
+                </div>
+              </div>
+              <span class="badge badge-murni">Tolok Ukur Makro</span>
+            </div>
+            <p>
+              <strong>Indikator Tujuan</strong> mengukur keberhasilan dampak makro dari Tujuan Renstra, dilengkapi dengan angka baseline tahun awal (2024/2025), target tahunan murni, target perubahan (2025–2030), serta realisasi kinerja.
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">+ Indikator</span>
+                </div>
+                <h6>Menambahkan Indikator Tujuan</h6>
+                <ul>
+                  <li>Pada kartu Tujuan yang bersangkutan, klik tombol <strong>"+ Indikator"</strong> di samping judul tabel indikator.</li>
+                  <li>Masukkan <strong>Uraian Indikator Kinerja</strong> (contoh: <em>Indeks Kepuasan Layanan Perangkat Daerah</em>).</li>
+                  <li>Isi <strong>Satuan</strong> (misal: <code>%</code>, <code>Nilai</code>, <code>Poin</code>) dan pilih <strong>Status Polaritas</strong> (<code>positif</code> / <code>negatif</code> / <code>akumulatif</code>).</li>
+                  <li>Isikan nilai target murni: Target Awal (Baseline), Target 2025, 2026, 2027, 2028, 2029, dan 2030.</li>
+                  <li>Klik <strong>"Simpan Indikator"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Tabel Indikator</span>
+                </div>
+                <h6>Penyajian Data di Tabel</h6>
+                <ul>
+                  <li>Tampil dalam baris tabel di bawah Tujuan dengan nomor urut, uraian indikator, satuan, dan status polaritas arah.</li>
+                  <li>Kolom target menampilkan angka target murni dan angka target perubahan bersanding.</li>
+                  <li>Jika terdapat perbedaan antara target murni dan target perubahan pada tahun tertentu, kolom target perubahan otomatis diberi penanda visual khusus (*highlight diff*).</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Edit & Salin Target</span>
+                </div>
+                <h6>Mengubah & Rekalibrasi Target</h6>
+                <ul>
+                  <li>Klik tombol <strong>Ubah (✏️)</strong> di baris indikator tujuan yang dipilih.</li>
+                  <li>Dapat mengubah nama indikator, satuan, status polaritas, dan nomor urut.</li>
+                  <li><strong>Fitur Pintar "Salin Target Murni":</strong> Klik tombol <em>"Salin Target Murni"</em> untuk menyalin nilai seluruh tahun dari target murni ke target perubahan dengan 1-klik, lalu sesuaikan tahun yang mengalami perubahan.</li>
+                  <li>Isikan nilai <strong>Realisasi</strong> tahun berjalan jika evaluasi kinerja telah tersedia.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Hapus Indikator</span>
+                </div>
+                <h6>Penghapusan Indikator</h6>
+                <ul>
+                  <li>Klik tombol <strong>Hapus (🗑️)</strong> pada baris indikator tujuan.</li>
+                  <li>Konfirmasi penghapusan pada modal dialog.</li>
+                  <li>Data indikator beserta target 5 tahun dan riwayat realisasi akan dihapus dari tabel tujuan tanpa menghapus entri Tujuan induknya.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. SASARAN RENSTRA -->
+          <div id="crud-sasaran" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-sasaran">3</span>
+                <div>
+                  <h5 class="crud-element-title">Sasaran Renstra (Level 2)</h5>
+                  <div class="crud-element-meta">Hasil strategis turunan langsung dari Tujuan &bull; Tabel: <code>sasaran_renstra</code></div>
+                </div>
+              </div>
+              <span class="badge badge-perubahan">Outcome Strategis</span>
+            </div>
+            <p>
+              <strong>Sasaran Renstra</strong> adalah rumusan kondisi spesifik yang ingin dicapai yang merupakan penjabaran logis dari Tujuan Renstra. Sasaran menjadi jangkar bagi penetapan Program Prioritas dan Indikator Kinerja Utama (IKU).
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">+ Tambah Sasaran</span>
+                </div>
+                <h6>Menambahkan Sasaran</h6>
+                <ul>
+                  <li>Pada kartu Tujuan yang menjadi induk, klik tombol <strong>"+ Tambah Sasaran"</strong>.</li>
+                  <li>Dengan mengklik tombol di dalam kartu Tujuan terkait, sistem otomatis mengunci relasi <code>id_tujuan</code> sehingga tidak terjadi salah pengelompokan.</li>
+                  <li>Ketik <strong>Uraian Sasaran</strong> (rumusan *outcome* yang fokus dan berorientasi hasil).</li>
+                  <li>Tentukan <strong>Nomor Urut</strong> dan pilih <strong>Status Perubahan</strong>.</li>
+                  <li>Klik <strong>"Simpan Sasaran"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Blok Sub-Kartu</span>
+                </div>
+                <h6>Tampilan di Antarmuka</h6>
+                <ul>
+                  <li>Tampil sebagai sub-kartu berbingkai biru/abu-abu di dalam blok Tujuan induk.</li>
+                  <li>Memiliki badge <strong>SASARAN [No]</strong>, teks rumusan sasaran, tombol Ubah/Hapus/Tambah Indikator Sasaran, serta tabel Indikator Sasaran di bawahnya.</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Edit Rumusan</span>
+                </div>
+                <h6>Memperbarui Sasaran</h6>
+                <ul>
+                  <li>Klik tombol <strong>Ubah (✏️)</strong> pada header sub-kartu Sasaran.</li>
+                  <li>Form modal menampilkan rumusan sasaran dan nomor urut saat ini.</li>
+                  <li>Gunakan Asisten AI SMART bila membutuhkan saran perbaikan formulasi sasaran agar lebih tajam dan akuntabel.</li>
+                  <li>Klik <strong>"Simpan Perubahan"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Cascade Delete</span>
+                </div>
+                <h6>Menghapus Sasaran</h6>
+                <ul>
+                  <li>Klik tombol <strong>Hapus (🗑️)</strong> pada sub-kartu Sasaran.</li>
+                  <li>
+                    <div class="cascade-alert">
+                      <strong>⚠️ Peringatan Kritis:</strong> Menghapus Sasaran akan menghapus secara permanen seluruh <strong>Indikator Sasaran</strong> di bawahnya secara otomatis.
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4. INDIKATOR SASARAN & IKU -->
+          <div id="crud-ind-sasaran" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-ind">4</span>
+                <div>
+                  <h5 class="crud-element-title">Indikator Sasaran & IKU (Level 2b)</h5>
+                  <div class="crud-element-meta">Tolok ukur hasil Sasaran & Indikator Kinerja Utama &bull; Tabel: <code>indikator_sasaran_renstra</code></div>
+                </div>
+              </div>
+              <span class="badge badge-success">Mandat IKU Walikota</span>
+            </div>
+            <p>
+              <strong>Indikator Sasaran</strong> mengukur ketercapaian sasaran strategis. Indikator sasaran yang memiliki dampak paling esensial wajib ditandai sebagai <strong>Indikator Kinerja Utama (IKU)</strong> yang dipertanggungjawabkan dalam LAKIP dan Laporan Kinerja Walikota.
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">+ Indikator Sasaran</span>
+                </div>
+                <h6>Menambahkan Indikator Sasaran</h6>
+                <ul>
+                  <li>Pada kartu Sasaran terkait, klik tombol <strong>"+ Indikator Sasaran"</strong>.</li>
+                  <li>Ketik <strong>Uraian Indikator Kinerja</strong> dan tentukan <strong>Satuan</strong>.</li>
+                  <li>Pilih <strong>Status Polaritas</strong>: <code>positif</code> (makin tinggi makin baik), <code>negatif</code> (makin rendah makin baik, misal angka stunting), atau <code>akumulatif</code>.</li>
+                  <li><strong>Penandaan IKU:</strong> Centang kotak <em>"Tandai sebagai Indikator Kinerja Utama (IKU)"</em> jika indikator ini merupakan IKU Perangkat Daerah.</li>
+                  <li>Isi deretan Target Murni (Baseline, 2025–2030) lalu klik <strong>"Simpan Indikator"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Tabel & Badge IKU</span>
+                </div>
+                <h6>Penyajian di Antarmuka</h6>
+                <ul>
+                  <li>Ditampilkan pada tabel indikator sasaran dengan penanda visual: indikator IKU memiliki badge hijau mencolok <code>IKU</code>.</li>
+                  <li>Indikator bertanda IKU otomatis disinkronkan ke <strong>Modul Laporan IKU</strong> (Bab 7) tanpa perlu entri ganda.</li>
+                  <li>Menampilkan target murni vs target perubahan per tahun anggaran.</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Ubah Target & IKU</span>
+                </div>
+                <h6>Memperbarui Indikator Sasaran</h6>
+                <ul>
+                  <li>Klik tombol <strong>Ubah (✏️)</strong> di baris indikator sasaran.</li>
+                  <li>Dapat mengubah teks indikator, satuan, status polaritas, dan status penandaan IKU.</li>
+                  <li>Gunakan tombol <strong>"Salin Target Murni"</strong> untuk menduplikasi target ke kolom Target Perubahan dalam sekejap, kemudian ubah target tahun perubahan yang direvisi.</li>
+                  <li>Masukkan angka <strong>Realisasi</strong> hasil pengukuran kinerja tahun berjalan.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Hapus Indikator</span>
+                </div>
+                <h6>Menghapus Indikator Sasaran</h6>
+                <ul>
+                  <li>Klik tombol <strong>Hapus (🗑️)</strong> pada baris indikator sasaran.</li>
+                  <li>Konfirmasi penghapusan data.</li>
+                  <li>Jika indikator bertanda IKU dihapus, indikator tersebut otomatis terhapus dari daftar IKU di seluruh laporan resmi.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. PROGRAM PRIORITAS -->
+          <div id="crud-program" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-program">5</span>
+                <div>
+                  <h5 class="crud-element-title">Program Prioritas (Level 3)</h5>
+                  <div class="crud-element-meta">Instrumen kebijakan & pengelompokan kegiatan &bull; Tabel: <code>program_renstra</code></div>
+                </div>
+              </div>
+              <span class="badge badge-murni">Nomenklatur Permendagri 90</span>
+            </div>
+            <p>
+              <strong>Program Prioritas</strong> merupakan pengelompokan kegiatan pembangunan daerah sesuai urusan pemerintahan daerah yang berpedoman pada Kepmendagri 050-5889 / Permendagri 90/2019. Program mengakumulasikan seluruh pagu anggaran kegiatan di bawahnya.
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">+ Tambah Program</span>
+                </div>
+                <h6>Menambahkan Program</h6>
+                <ul>
+                  <li>Buka Tab <strong>"Program & Kegiatan"</strong> pada halaman rincian Renstra OPD.</li>
+                  <li>Klik tombol biru <strong>"+ Tambah Program"</strong> pada toolbar atas.</li>
+                  <li><strong>Referensi Otomatis SIPD-RI:</strong> Pilih program dari dropdown referensi resmi. Sistem otomatis mengisi <strong>Kode Program</strong> (contoh: <code>1.01.01</code>) dan <strong>Nama Program Resmi</strong>.</li>
+                  <li>Hubungkan program ke <strong>Sasaran Renstra</strong> yang relevan untuk memastikan cascading terhubung utuh.</li>
+                  <li>Klik <strong>"Simpan Program"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Grup Utama Program</span>
+                </div>
+                <h6>Tampilan di Tabel Cascading</h6>
+                <ul>
+                  <li>Ditampilkan sebagai baris induk berwarna biru dongker/navy dengan kode program tebal dan nama program resmi.</li>
+                  <li>Memuat rekapitulasi <strong>Akumulasi Total Pagu Anggaran Murni & Perubahan</strong> yang dihitung otomatis dari seluruh subkegiatan di bawahnya.</li>
+                  <li>Menampilkan baris <strong>Indikator Program</strong> tepat di bawah nama program.</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Edit & Keterkaitan</span>
+                </div>
+                <h6>Memperbarui Program</h6>
+                <ul>
+                  <li>Klik menu aksi (dropdown tiga titik atau ikon pensil ✏️) pada baris Program lalu pilih <strong>"Ubah Program"</strong>.</li>
+                  <li>Dapat menyesuaikan kode program, uraian nama program, keterkaitan sasaran pengikat, atau status pergeseran.</li>
+                  <li>Klik <strong>"Simpan Perubahan"</strong> untuk menerapkan pembaruan.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Cascade Delete Luas</span>
+                </div>
+                <h6>Menghapus Program & Dampaknya</h6>
+                <ul>
+                  <li>Pilih menu <strong>"Hapus Program"</strong> pada menu aksi baris program.</li>
+                  <li>
+                    <div class="cascade-alert">
+                      <strong>⚠️ Peringatan Kritis:</strong> Menghapus Program akan menghapus secara permanen seluruh <strong>Indikator Program, Kegiatan, Indikator Kegiatan, Subkegiatan, Indikator Subkegiatan, dan seluruh Pagu Anggaran</strong> di bawah program ini!
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 6. INDIKATOR PROGRAM -->
+          <div id="crud-ind-program" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-ind">6</span>
+                <div>
+                  <h5 class="crud-element-title">Indikator Program (Level 3b)</h5>
+                  <div class="crud-element-meta">Tolok ukur hasil (*outcome*) pelaksanaan Program &bull; Tabel: <code>indikator_program_renstra</code></div>
+                </div>
+              </div>
+              <span class="badge badge-murni">Tolok Ukur Program</span>
+            </div>
+            <p>
+              <strong>Indikator Program</strong> mengukur keluaran/hasil kumulatif dari pelaksanaan program prioritas terhadap target kinerja yang telah digariskan.
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">+ Indikator Program</span>
+                </div>
+                <h6>Menambahkan Indikator Program</h6>
+                <ul>
+                  <li>Pada baris Program terkait, klik tombol aksi <strong>"+ Indikator Program"</strong>.</li>
+                  <li>Isi <strong>Uraian Indikator Kinerja</strong>, tentukan <strong>Satuan Ukuran</strong> dan <strong>Status Polaritas</strong>.</li>
+                  <li>Isi volume target murni 2025–2030 dan target perubahan.</li>
+                  <li>Klik <strong>"Simpan Indikator"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Badge Ungu</span>
+                </div>
+                <h6>Penyajian Data</h6>
+                <ul>
+                  <li>Ditampilkan sebagai baris dengan label badge ungu <code>IND. PROGRAM</code>.</li>
+                  <li>Menampilkan kolom satuan, target murni per tahun, target perubahan per tahun, dan kolom realisasi.</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Rekalibrasi Target</span>
+                </div>
+                <h6>Mengedit Indikator Program</h6>
+                <ul>
+                  <li>Klik tombol <strong>Ubah (✏️)</strong> pada baris indikator program.</li>
+                  <li>Dapat mengedit teks rumusan indikator, satuan, target tahunan, tombol cepat <em>"Salin Target Murni"</em>, dan memasukkan angka realisasi evaluasi.</li>
+                  <li>Klik <strong>"Simpan Perubahan"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Hapus Indikator</span>
+                </div>
+                <h6>Menghapus Indikator Program</h6>
+                <ul>
+                  <li>Klik tombol <strong>Hapus (🗑️)</strong> pada baris indikator program.</li>
+                  <li>Konfirmasi penghapusan data pada kotak dialog.</li>
+                  <li>Indikator program terhapus tanpa memengaruhi baris Program induk maupun Kegiatan di bawahnya.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 7. KEGIATAN RENSTRA -->
+          <div id="crud-kegiatan" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-kegiatan">7</span>
+                <div>
+                  <h5 class="crud-element-title">Kegiatan Renstra (Level 4)</h5>
+                  <div class="crud-element-meta">Unit pelaksanaan operasional di bawah Program &bull; Tabel: <code>kegiatan_renstra</code></div>
+                </div>
+              </div>
+              <span class="badge badge-perubahan">Nomenklatur Permendagri 90</span>
+            </div>
+            <p>
+              <strong>Kegiatan</strong> adalah bagian dari program yang dilaksanakan oleh bidang/unit kerja Perangkat Daerah untuk menghasilkan keluaran (*output*) riil pendukung pencapaian program.
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">+ Tambah Kegiatan</span>
+                </div>
+                <h6>Menambahkan Kegiatan</h6>
+                <ul>
+                  <li>Pada baris Program yang menjadi induk, klik menu aksi lalu pilih <strong>"+ Tambah Kegiatan"</strong>.</li>
+                  <li><strong>Referensi SIPD-RI Terfilter:</strong> Sistem otomatis menyaring daftar Kegiatan yang resmi berada di bawah Program tersebut sesuai nomenklatur Permendagri 90/2019.</li>
+                  <li>Memilih referensi otomatis mengisikan <strong>Kode Kegiatan</strong> (contoh: <code>1.01.01.2.01</code>) dan <strong>Uraian Kegiatan</strong>.</li>
+                  <li>Klik <strong>"Simpan Kegiatan"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Indentasi Hirarki</span>
+                </div>
+                <h6>Penyajian di Tabel</h6>
+                <ul>
+                  <li>Tampil dengan indentasi 1 tingkat di bawah Program dengan badge abu-abu <code>KEGIATAN</code>.</li>
+                  <li>Menampilkan kode kegiatan, nama kegiatan, baris Indikator Kegiatan, serta rekapitulasi total pagu anggaran belanja dari subkegiatan di bawahnya.</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Ubah Kegiatan</span>
+                </div>
+                <h6>Memperbarui Kegiatan</h6>
+                <ul>
+                  <li>Pilih menu <strong>"Ubah Kegiatan"</strong> pada menu dropdown aksi kegiatan.</li>
+                  <li>Dapat memperbaiki kode kegiatan, uraian kalimat nama kegiatan, atau status pergeseran.</li>
+                  <li>Klik <strong>"Simpan Perubahan"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Cascade Delete</span>
+                </div>
+                <h6>Menghapus Kegiatan</h6>
+                <ul>
+                  <li>Pilih menu <strong>"Hapus Kegiatan"</strong> pada menu aksi kegiatan.</li>
+                  <li>
+                    <div class="cascade-alert">
+                      <strong>⚠️ Peringatan Kritis:</strong> Menghapus Kegiatan akan menghapus secara permanen seluruh <strong>Subkegiatan, Indikator Kegiatan, Indikator Subkegiatan, dan alokasi pagu anggarannya</strong> di bawah kegiatan ini!
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 8. INDIKATOR KEGIATAN -->
+          <div id="crud-ind-kegiatan" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-ind">8</span>
+                <div>
+                  <h5 class="crud-element-title">Indikator Kegiatan (Level 4b)</h5>
+                  <div class="crud-element-meta">Tolok ukur keluaran (*output*) langsung dari Kegiatan &bull; Tabel: <code>indikator_kegiatan_renstra</code></div>
+                </div>
+              </div>
+              <span class="badge badge-murni">Output Kegiatan</span>
+            </div>
+            <p>
+              <strong>Indikator Kegiatan</strong> mengukur keluaran langsung dari pelaksanaan kegiatan, menjadi jembatan antara aktivitas teknis operasional dengan capaian sasaran program.
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">+ Indikator Kegiatan</span>
+                </div>
+                <h6>Menambahkan Indikator Kegiatan</h6>
+                <ul>
+                  <li>Pada baris Kegiatan, pilih menu aksi lalu klik <strong>"+ Indikator Kegiatan"</strong>.</li>
+                  <li>Masukkan <strong>Uraian Indikator Kinerja</strong> keluaran kegiatan dan <strong>Satuan</strong> (misal: <code>Dokumen</code>, <code>Laporan</code>, <code>Orang</code>).</li>
+                  <li>Isi target volume murni per tahun anggaran (2025–2030) dan target perubahan.</li>
+                  <li>Klik <strong>"Simpan Indikator"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Badge Toska</span>
+                </div>
+                <h6>Tampilan di Tabel</h6>
+                <ul>
+                  <li>Ditampilkan tepat di bawah baris kegiatan dengan badge warna toska/teal <code>IND. KEGIATAN</code>.</li>
+                  <li>Menyajikan rincian target volume fisik tahunan serta realisasi fisik yang dicapai.</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Edit Target Volume</span>
+                </div>
+                <h6>Memperbarui Indikator Kegiatan</h6>
+                <ul>
+                  <li>Klik tombol <strong>Ubah (✏️)</strong> pada baris indikator kegiatan.</li>
+                  <li>Dapat mengedit teks tolok ukur, satuan ukuran, target tahunan murni dan perubahan (tersedia tombol cepat <em>"Salin Target Murni"</em>), serta input realisasi fisik.</li>
+                  <li>Klik <strong>"Simpan Perubahan"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Hapus Indikator</span>
+                </div>
+                <h6>Menghapus Indikator Kegiatan</h6>
+                <ul>
+                  <li>Klik tombol <strong>Hapus (🗑️)</strong> pada baris indikator kegiatan.</li>
+                  <li>Konfirmasi dialog penghapusan.</li>
+                  <li>Indikator kegiatan terhapus tanpa memengaruhi baris Kegiatan induk maupun subkegiatan di bawahnya.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- 9. SUB KEGIATAN -->
+          <div id="crud-subkegiatan" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-subkegiatan">9</span>
+                <div>
+                  <h5 class="crud-element-title">Sub Kegiatan (Level 5)</h5>
+                  <div class="crud-element-meta">Unit belanja operasional terkecil & pengikatan pagu &bull; Tabel: <code>subkegiatan_renstra</code></div>
+                </div>
+              </div>
+              <span class="badge badge-success">Pagu Anggaran & Belanja</span>
+            </div>
+            <p>
+              <strong>Sub Kegiatan</strong> merupakan unit aktivitas belanja operasional riil terkecil yang mengikat alokasi pagu belanja 5 tahunan (2025–2029) dan target volume keluaran fisik. Subkegiatan adalah jangkar utama dalam penyusunan RKA dan DPA Perangkat Daerah.
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">+ Tambah Sub Kegiatan</span>
+                </div>
+                <h6>Menambahkan Sub Kegiatan</h6>
+                <ul>
+                  <li>Pada baris Kegiatan terkait, klik menu aksi lalu pilih <strong>"+ Tambah Sub Kegiatan"</strong>.</li>
+                  <li><strong>Integrasi Referensi SIPD-RI Terpadu:</strong> Pilih subkegiatan dari dropdown referensi resmi. Sistem otomatis mengisi:
+                    <br>&bull; <strong>Kode Subkegiatan</strong> (contoh: <code>1.01.01.2.01.0001</code>)
+                    <br>&bull; <strong>Nama Subkegiatan</strong>
+                    <br>&bull; <strong>Rumusan Kinerja Subkegiatan</strong>
+                    <br>&bull; <strong>Uraian Indikator & Satuan bawaan</strong>.
+                  </li>
+                  <li>Isikan <strong>Alokasi Pagu Anggaran Murni</strong> (Tahun 2025 s.d. 2029 dalam nominal Rupiah bulat).</li>
+                  <li>Isikan <strong>Alokasi Pagu Anggaran Perubahan</strong> (tersedia tombol praktis <em>"Salin Pagu Murni"</em>).</li>
+                  <li>Klik <strong>"Simpan Subkegiatan"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Rincian Lengkap</span>
+                </div>
+                <h6>Tampilan di Tabel Cascading</h6>
+                <ul>
+                  <li>Ditampilkan dengan indentasi 2 tingkat di bawah Kegiatan.</li>
+                  <li>Menampilkan kode subkegiatan lengkap, nama subkegiatan, rumusan kinerja, baris indikator subkegiatan, total pagu murni, total pagu perubahan, dan selisih pagu.</li>
+                  <li>Nominal rupiah diformat otomatis dengan pemisah ribuan (contoh: <code>Rp 150.000.000</code>).</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Ubah Pagu & Rincian</span>
+                </div>
+                <h6>Memperbarui Sub Kegiatan</h6>
+                <ul>
+                  <li>Klik tombol <strong>Ubah (✏️)</strong> pada baris Subkegiatan.</li>
+                  <li>Modal formulir komprehensif terbuka: Anda dapat menyesuaikan nama subkegiatan, rumusan kinerja, indikator, satuan, target volume tahunan, serta nominal pagu anggaran murni dan perubahan tahun 2025 s.d. 2029.</li>
+                  <li>Gunakan tombol <strong>"Salin Pagu Murni"</strong> untuk menduplikasi pagu jika tidak terdapat pergeseran anggaran pada tahun tertentu.</li>
+                  <li>Klik <strong>"Simpan Perubahan"</strong>. Seluruh rekapitulasi total di level Kegiatan dan Program otomatis diperbarui seketika.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Hapus Subkegiatan</span>
+                </div>
+                <h6>Menghapus Sub Kegiatan</h6>
+                <ul>
+                  <li>Klik tombol <strong>Hapus (🗑️)</strong> pada baris Subkegiatan.</li>
+                  <li>
+                    <div class="cascade-alert">
+                      <strong>⚠️ Peringatan:</strong> Menghapus Subkegiatan akan menghapus seluruh data indikator volume, target tahunan, serta alokasi nominal pagu anggaran yang melekat padanya secara permanen.
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <table class="field-table-mini">
+              <thead>
+                <tr>
+                  <th>Field Alokasi Pagu</th>
+                  <th>Format / Satuan</th>
+                  <th>Kaidah Pengisian</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>pagu1</code> s.d. <code>pagu5</code></td>
+                  <td>Nominal Rupiah (Integer)</td>
+                  <td>Pagu Indikatif Murni Renstra Tahun Anggaran 2025, 2026, 2027, 2028, dan 2029.</td>
+                </tr>
+                <tr>
+                  <td><code>p_pagu1</code> s.d. <code>p_pagu5</code></td>
+                  <td>Nominal Rupiah (Integer)</td>
+                  <td>Pagu Indikatif Perubahan Renstra Tahun Anggaran 2025, 2026, 2027, 2028, dan 2029. Masukkan angka nominal bulat tanpa titik atau koma.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- 10. INDIKATOR SUBKEGIATAN -->
+          <div id="crud-ind-subkegiatan" class="crud-element-card">
+            <div class="crud-element-header">
+              <div class="crud-element-title-group">
+                <span class="crud-num-pill pill-ind">10</span>
+                <div>
+                  <h5 class="crud-element-title">Indikator Subkegiatan (Level 5b)</h5>
+                  <div class="crud-element-meta">Tolok ukur kuantitatif volume fisik Subkegiatan &bull; Tabel: Terintegrasi pada Subkegiatan</div>
+                </div>
+              </div>
+              <span class="badge badge-murni">Volume Fisik Riil</span>
+            </div>
+            <p>
+              <strong>Indikator Subkegiatan</strong> mengukur volume keluaran riil yang dihasilkan dari setiap rupiah belanja subkegiatan, memuat angka volume target murni, target perubahan, dan capaian realisasi fisik tahunan.
+            </p>
+            <div class="crud-grid-4">
+              <!-- Create -->
+              <div class="crud-card-action create-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-c">Create (Tambah)</span>
+                  <span style="font-size: 0.72rem; color: #059669; font-weight: 700;">Entri Terintegrasi</span>
+                </div>
+                <h6>Menambahkan Indikator Subkegiatan</h6>
+                <ul>
+                  <li>Dibuat secara terpadu bersamaan saat pengentrian Sub Kegiatan baru di modal form.</li>
+                  <li>Ketik <strong>Uraian Indikator Kinerja Subkegiatan</strong> (contoh: <em>Jumlah Dokumen Perencanaan yang Disusun</em>) dan tentukan <strong>Satuan</strong> (misal: <code>Dokumen</code>, <code>Paket</code>, <code>Orang</code>).</li>
+                  <li>Isikan angka <strong>Target Volume Murni</strong> untuk tahun 2025 s.d. 2030 (misal: <code>1 Dokumen</code>).</li>
+                  <li>Isikan angka <strong>Target Volume Perubahan</strong> (tersedia tombol praktis <em>"Salin Target Murni"</em>).</li>
+                </ul>
+              </div>
+              <!-- Read -->
+              <div class="crud-card-action read-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-r">Read (Lihat)</span>
+                  <span style="font-size: 0.72rem; color: #2563eb; font-weight: 700;">Sorotan Selisih</span>
+                </div>
+                <h6>Tampilan di Tabel</h6>
+                <ul>
+                  <li>Ditampilkan sebagai baris dengan label badge abu-abu <code>IND. SUBKEGIATAN</code>.</li>
+                  <li>Menampilkan deretan volume target murni dan target perubahan per tahun anggaran.</li>
+                  <li><strong>Sorotan Selisih (*Target Diff Highlight*):</strong> Jika target perubahan pada tahun tertentu berbeda dari target murni, sel tersebut otomatis diberi warna sorotan kuning/oranye untuk memudahkan verifikasi analis Bapperida.</li>
+                </ul>
+              </div>
+              <!-- Update -->
+              <div class="crud-card-action update-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-u">Update (Ubah)</span>
+                  <span style="font-size: 0.72rem; color: #d97706; font-weight: 700;">Ubah Volume & Realisasi</span>
+                </div>
+                <h6>Memperbarui Indikator Subkegiatan</h6>
+                <ul>
+                  <li>Klik tombol <strong>Ubah (✏️)</strong> pada baris Subkegiatan terkait.</li>
+                  <li>Pada bagian formulir <em>"Indikator Kinerja Subkegiatan"</em>, perbarui uraian indikator atau satuannya.</li>
+                  <li>Gunakan tombol <strong>"Salin Target Murni"</strong> untuk sinkronisasi cepat seluruh kolom target volume.</li>
+                  <li>Sesuaikan angka target perubahan pada tahun-tahun yang direkalibrasi.</li>
+                  <li>Isikan nilai <strong>Realisasi Fisik</strong> tahun berjalan (misal: <code>100%</code> atau <code>1 Dokumen</code>).</li>
+                  <li>Klik <strong>"Simpan Perubahan"</strong>.</li>
+                </ul>
+              </div>
+              <!-- Delete -->
+              <div class="crud-card-action delete-action">
+                <div class="crud-action-head">
+                  <span class="crud-action-badge badge-d">Delete (Hapus)</span>
+                  <span style="font-size: 0.72rem; color: #dc2626; font-weight: 700;">Reset Indikator</span>
+                </div>
+                <h6>Menghapus / Mereset Indikator</h6>
+                <ul>
+                  <li>Indikator subkegiatan terikat langsung dengan subkegiatan induknya.</li>
+                  <li>Untuk menghapus indikator keluaran, pengguna dapat mengosongkan field indikator pada modal edit subkegiatan atau menghapus subkegiatan tersebut secara keseluruhan.</li>
+                </ul>
+              </div>
+            </div>
+            <table class="field-table-mini">
+              <thead>
+                <tr>
+                  <th>Field Volume Target</th>
+                  <th>Tipe Data</th>
+                  <th>Keterangan Pengisian</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>volume_0</code> s.d. <code>volume_5</code></td>
+                  <td>String / Angka</td>
+                  <td>Target Volume Kinerja Murni Tahun 2025 (vol 0), 2026 (vol 1) s.d. 2030 (vol 5). Contoh: <code>12 Bulan</code>, <code>1 Dokumen</code>.</td>
+                </tr>
+                <tr>
+                  <td><code>p_volume_0</code> s.d. <code>p_volume_5</code></td>
+                  <td>String / Angka</td>
+                  <td>Target Volume Kinerja Perubahan Tahun 2025 s.d. 2030. Dapat disalin otomatis dari target murni dengan tombol pintasan.</td>
+                </tr>
+                <tr>
+                  <td><code>realisasi2025</code> s.d. <code>realisasi2030</code></td>
+                  <td>String / Angka</td>
+                  <td>Realisasi volume fisik riil hasil evaluasi pelaksanaan kegiatan tahun berjalan.</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </section>

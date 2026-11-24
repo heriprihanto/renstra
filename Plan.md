@@ -464,3 +464,16 @@ Format HTML
 Desain mengikuti seperti desain aplikasi
 Tambah  menu pada halaman utama aplikasi ini untuk membuka panduan
 aaaaaaaaaaa
+
+Revisi Buku Panduan
+Buat Detail untuk CRUD :
+Tujuan
+Indikator Tujuan
+Sasaran
+Indikator Sasaran
+Program
+Indikator Program
+Kegiatan
+Indikator Kegiatan
+Sub Kegiatan
+Indikator Subkegiatan
