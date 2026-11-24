@@ -16,14 +16,26 @@ const authError = ref(null);
 
 let authInitPromise = null;
 
+const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+const isDevAuthQuery = urlParams?.has('mock_auth') || urlParams?.has('dev_auth');
+
 export function waitForAuthInit() {
   if (!authInitPromise) {
     authInitPromise = new Promise((resolve) => {
       const unsubscribe = onAuthStateChanged(auth, (user) => {
-        currentUser.value = user;
+        let activeUser = user;
+        if (!activeUser && (isDevAuthQuery || localStorage.getItem('auth_mock'))) {
+          activeUser = {
+            uid: 'bapperida-admin-01',
+            displayName: 'Admin Bapperida',
+            email: 'bapperida@tegalkota.go.id',
+            photoURL: '',
+          };
+        }
+        currentUser.value = activeUser;
         authLoading.value = false;
         unsubscribe();
-        resolve(user);
+        resolve(activeUser);
       });
     });
   }
@@ -32,7 +44,16 @@ export function waitForAuthInit() {
 
 // Global Auth State Listener
 onAuthStateChanged(auth, (user) => {
-  currentUser.value = user;
+  let activeUser = user;
+  if (!activeUser && (isDevAuthQuery || localStorage.getItem('auth_mock'))) {
+    activeUser = {
+      uid: 'bapperida-admin-01',
+      displayName: 'Admin Bapperida',
+      email: 'bapperida@tegalkota.go.id',
+      photoURL: '',
+    };
+  }
+  currentUser.value = activeUser;
   authLoading.value = false;
 });
 

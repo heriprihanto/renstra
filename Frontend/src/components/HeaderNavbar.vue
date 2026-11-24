@@ -30,6 +30,17 @@
             <span>Data RENSTRA</span>
           </router-link>
 
+          <!-- Menu Buku Panduan -->
+          <router-link to="/panduan" class="nav-menu-item" :class="{ active: route.path.startsWith('/panduan') }">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+              <line x1="9" y1="7" x2="15" y2="7"/>
+              <line x1="9" y1="11" x2="13" y2="11"/>
+            </svg>
+            <span>Buku Panduan</span>
+          </router-link>
+
           <!-- Dropdown Menu Laporan -->
           <div class="nav-dropdown-wrap" ref="dropdownRef">
             <button
@@ -217,6 +228,20 @@
 
         <!-- Meta badges: Year, Connection Status, Firebase Auth -->
         <div class="nav-actions">
+          <!-- Tombol Akses Cepat Buku Panduan -->
+          <router-link
+            to="/panduan"
+            class="btn-nav-guide-quick"
+            :class="{ active: route.path.startsWith('/panduan') }"
+            title="Buka Buku Panduan Pengguna RENSTRA"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+              <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            </svg>
+            <span>Panduan</span>
+          </router-link>
+
           <div class="badge-year">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
@@ -597,5 +622,30 @@ onUnmounted(() => {
   border-radius: 50%;
   background-color: #10b981;
   flex-shrink: 0;
+}
+
+.btn-nav-guide-quick {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  padding: 0.32rem 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+}
+
+.btn-nav-guide-quick:hover,
+.btn-nav-guide-quick.active {
+  background: #059669;
+  color: #ffffff;
+  border-color: #10b981;
+  box-shadow: 0 2px 6px rgba(5, 150, 105, 0.35);
+  transform: translateY(-1px);
 }
 </style>

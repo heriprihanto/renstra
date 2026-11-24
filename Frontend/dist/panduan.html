@@ -1,0 +1,1479 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Buku Panduan Pengguna - Aplikasi RENSTRA Perubahan Pemerintah Kota Tegal</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23059669'><path d='M12 2L3 7v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-9-5zm0 2.18l7 3.89v5.93c0 4.54-3.08 8.79-7 9.94-3.92-1.15-7-5.4-7-9.94V8.07l7-3.89z'/></svg>" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --primary-950: #090e17;
+      --primary-900: #0f172a;
+      --primary-850: #172554;
+      --primary-800: #1e293b;
+      --primary-700: #1d4ed8;
+      --primary-600: #2563eb;
+      --primary-500: #3b82f6;
+      --primary-100: #dbeafe;
+      --primary-50: #eff6ff;
+
+      --emerald-800: #065f46;
+      --emerald-700: #047857;
+      --emerald-600: #059669;
+      --emerald-500: #10b981;
+      --emerald-100: #d1fae5;
+      --emerald-50: #ecfdf5;
+
+      --teal-700: #0f766e;
+      --teal-600: #0d9488;
+      --teal-50: #f0fdfa;
+
+      --amber-600: #d97706;
+      --amber-500: #f59e0b;
+      --amber-100: #fef3c7;
+      --amber-50: #fffbeb;
+
+      --rose-600: #e11d48;
+      --rose-500: #f43f5e;
+      --rose-100: #ffe4e6;
+      --rose-50: #fff1f2;
+
+      --bg-app: #f4f6fb;
+      --surface-card: #ffffff;
+      --surface-hover: #f8fafc;
+      --border-subtle: #e2e8f0;
+      --border-strong: #cbd5e1;
+
+      --text-main: #0f172a;
+      --text-secondary: #334155;
+      --text-muted: #64748b;
+      --text-inverse: #ffffff;
+
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --radius-xl: 22px;
+
+      --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+      --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.07), 0 2px 4px -2px rgb(0 0 0 / 0.05);
+      --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.08), 0 4px 6px -4px rgb(0 0 0 / 0.04);
+      --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.06);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--bg-app);
+      color: var(--text-main);
+      line-height: 1.65;
+      font-size: 15px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Civic Executive Top Header */
+    .guide-navbar {
+      background: linear-gradient(135deg, #090e17 0%, #0f172a 60%, #172554 100%);
+      color: var(--text-inverse);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .navbar-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .brand-emblem {
+      width: 42px;
+      height: 42px;
+      background: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(5, 150, 105, 0.35);
+      color: white;
+    }
+
+    .brand-text h1 {
+      font-size: 1.05rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      line-height: 1.2;
+    }
+
+    .brand-text .sub-title {
+      font-size: 0.75rem;
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .nav-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .badge-guide-tag {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      padding: 0.35rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-nav-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      padding: 0.45rem 0.9rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .btn-back-app {
+      background: rgba(255, 255, 255, 0.1);
+      color: #f8fafc;
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .btn-back-app:hover {
+      background: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
+    }
+
+    .btn-print-guide {
+      background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+    }
+
+    .btn-print-guide:hover {
+      background: linear-gradient(135deg, #047857 0%, #059669 100%);
+      transform: translateY(-1px);
+    }
+
+    /* Hero Banner */
+    .guide-hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #064e3b 100%);
+      color: white;
+      padding: 3.5rem 1.5rem 3rem;
+      position: relative;
+      overflow: hidden;
+      border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .guide-hero::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      right: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(16, 185, 129, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .guide-hero-content {
+      max-width: 1440px;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+    }
+
+    .guide-hero h2 {
+      font-size: 2.1rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-badge-version {
+      background: #059669;
+      color: white;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      font-weight: 700;
+      vertical-align: middle;
+      box-shadow: 0 2px 6px rgba(5, 150, 105, 0.4);
+    }
+
+    .guide-hero p {
+      font-size: 1.05rem;
+      color: #cbd5e1;
+      max-width: 820px;
+      line-height: 1.6;
+    }
+
+    .guide-hero-meta {
+      display: flex;
+      gap: 1.5rem;
+      margin-top: 1.5rem;
+      flex-wrap: wrap;
+    }
+
+    .hero-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: #94a3b8;
+    }
+
+    .hero-meta-item strong {
+      color: #f1f5f9;
+    }
+
+    /* Layout: Sidebar + Main Content */
+    .guide-layout {
+      max-width: 1440px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      display: grid;
+      grid-template-columns: 290px 1fr;
+      gap: 2rem;
+      align-items: start;
+    }
+
+    /* Sticky Sidebar Navigation */
+    .guide-sidebar {
+      position: sticky;
+      top: 5rem;
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 1.25rem;
+      box-shadow: var(--shadow-sm);
+      max-height: calc(100vh - 6.5rem);
+      overflow-y: auto;
+    }
+
+    .sidebar-header {
+      font-size: 0.8rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.85rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar-search {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.82rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      margin-bottom: 1rem;
+      outline: none;
+      font-family: inherit;
+      background: #f8fafc;
+      transition: all 0.2s ease;
+    }
+
+    .sidebar-search:focus {
+      background: #fff;
+      border-color: var(--primary-500);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .sidebar-menu a {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      padding: 0.55rem 0.75rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      font-size: 0.84rem;
+      font-weight: 600;
+      border-radius: 8px;
+      transition: all 0.15s ease;
+    }
+
+    .sidebar-menu a:hover {
+      background: #f1f5f9;
+      color: var(--primary-700);
+    }
+
+    .sidebar-menu a.active {
+      background: #eff6ff;
+      color: var(--primary-700);
+      font-weight: 700;
+      border-left: 3px solid var(--primary-600);
+    }
+
+    .menu-num {
+      width: 22px;
+      height: 22px;
+      background: #e2e8f0;
+      color: #475569;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .sidebar-menu a.active .menu-num {
+      background: var(--primary-600);
+      color: white;
+    }
+
+    /* Main Guide Content */
+    .guide-main {
+      min-width: 0;
+    }
+
+    .guide-section {
+      background: var(--surface-card);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-lg);
+      padding: 2.25rem;
+      margin-bottom: 2rem;
+      box-shadow: var(--shadow-sm);
+      scroll-margin-top: 5.5rem;
+      transition: box-shadow 0.2s ease;
+    }
+
+    .guide-section:hover {
+      box-shadow: var(--shadow-md);
+    }
+
+    .section-header {
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .section-title-wrap {
+      display: flex;
+      align-items: center;
+      gap: 0.85rem;
+    }
+
+    .section-number-badge {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      color: white;
+      font-size: 1rem;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.2);
+    }
+
+    .guide-section h3 {
+      font-size: 1.45rem;
+      font-weight: 800;
+      color: var(--text-main);
+      letter-spacing: -0.01em;
+    }
+
+    .guide-section h4 {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 1.75rem 0 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .guide-section p {
+      color: var(--text-secondary);
+      margin-bottom: 1.15rem;
+      line-height: 1.7;
+    }
+
+    .guide-section ul, .guide-section ol {
+      margin-left: 1.35rem;
+      margin-bottom: 1.25rem;
+      color: var(--text-secondary);
+    }
+
+    .guide-section li {
+      margin-bottom: 0.5rem;
+      line-height: 1.65;
+    }
+
+    /* Callout Boxes (Alerts) */
+    .callout {
+      padding: 1.15rem 1.35rem;
+      border-radius: 12px;
+      margin: 1.35rem 0;
+      font-size: 0.92rem;
+      display: flex;
+      gap: 0.85rem;
+      align-items: flex-start;
+      border: 1px solid transparent;
+      line-height: 1.6;
+    }
+
+    .callout-icon {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .callout-title {
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    .callout-info {
+      background: #eff6ff;
+      border-color: #bfdbfe;
+      color: #1e40af;
+    }
+    .callout-info .callout-icon { color: #2563eb; }
+
+    .callout-success {
+      background: #ecfdf5;
+      border-color: #a7f3d0;
+      color: #065f46;
+    }
+    .callout-success .callout-icon { color: #059669; }
+
+    .callout-warning {
+      background: #fffbeb;
+      border-color: #fde68a;
+      color: #92400e;
+    }
+    .callout-warning .callout-icon { color: #d97706; }
+
+    .callout-danger {
+      background: #fff1f2;
+      border-color: #fecdd3;
+      color: #9f1239;
+    }
+    .callout-danger .callout-icon { color: #e11d48; }
+
+    /* Screenshot Container */
+    .screenshot-card {
+      margin: 1.75rem 0 2rem;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid #cbd5e1;
+      background: #0f172a;
+      box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.12), 0 8px 10px -6px rgba(15, 23, 42, 0.08);
+    }
+
+    .screenshot-toolbar {
+      background: #1e293b;
+      padding: 0.55rem 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .toolbar-dots {
+      display: flex;
+      gap: 6px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+    .dot-red { background: #ef4444; }
+    .dot-yellow { background: #f59e0b; }
+    .dot-green { background: #10b981; }
+
+    .toolbar-url {
+      background: rgba(0, 0, 0, 0.35);
+      color: #94a3b8;
+      font-size: 0.72rem;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 0.2rem 0.75rem;
+      border-radius: 6px;
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+
+    .screenshot-img {
+      width: 100%;
+      height: auto;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+
+    .screenshot-caption {
+      background: #f8fafc;
+      padding: 0.75rem 1rem;
+      font-size: 0.84rem;
+      color: #475569;
+      border-top: 1px solid #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .screenshot-caption strong {
+      color: #0f172a;
+    }
+
+    /* Badges & Tags */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 700;
+    }
+    .badge-murni { background: #dbeafe; color: #1e40af; border: 1px solid #bfdbfe; }
+    .badge-perubahan { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+    .badge-success { background: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; }
+    .badge-danger { background: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
+
+    /* Tables */
+    .guide-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.25rem 0;
+      font-size: 0.88rem;
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .guide-table th {
+      background: #f8fafc;
+      color: #0f172a;
+      font-weight: 700;
+      text-align: left;
+      padding: 0.75rem 1rem;
+      border-bottom: 2px solid var(--border-subtle);
+    }
+
+    .guide-table td {
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border-subtle);
+      color: var(--text-secondary);
+    }
+
+    .guide-table tr:last-child td {
+      border-bottom: none;
+    }
+
+    .guide-table tr:hover td {
+      background: #f8fafc;
+    }
+
+    /* Steps Cards */
+    .steps-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1.25rem 0;
+    }
+
+    .step-card {
+      display: flex;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      align-items: flex-start;
+    }
+
+    .step-number {
+      width: 28px;
+      height: 28px;
+      background: var(--primary-600);
+      color: white;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+
+    .step-body h5 {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #0f172a;
+      margin-bottom: 0.25rem;
+    }
+
+    .step-body p {
+      margin-bottom: 0;
+      font-size: 0.88rem;
+    }
+
+    /* Footer */
+    .guide-footer {
+      background: #0f172a;
+      color: #94a3b8;
+      padding: 3rem 1.5rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      margin-top: 4rem;
+    }
+
+    .footer-container {
+      max-width: 1440px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      font-size: 0.85rem;
+    }
+
+    .footer-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      color: white;
+      font-weight: 700;
+    }
+
+    /* Print Style Optimization */
+    @media print {
+      .guide-navbar, .guide-sidebar, .btn-print-guide, .btn-back-app, .sidebar-search {
+        display: none !important;
+      }
+      .guide-layout {
+        display: block;
+        padding: 0;
+        margin: 0;
+      }
+      .guide-section {
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+        margin-bottom: 1.5rem;
+        padding: 1.5rem;
+      }
+      .guide-hero {
+        background: #fff !important;
+        color: #000 !important;
+        padding: 1rem 0;
+        border-bottom: 2px solid #000;
+      }
+      .guide-hero p { color: #333 !important; }
+      body { background: #fff !important; font-size: 12pt; }
+    }
+
+    @media (max-width: 1024px) {
+      .guide-layout {
+        grid-template-columns: 1fr;
+      }
+      .guide-sidebar {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Civic Executive Header Navbar -->
+  <header class="guide-navbar">
+    <div class="navbar-container">
+      <a href="/renstra/" class="nav-brand">
+        <div class="brand-emblem">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            <path d="m9 12 2 2 4-4"/>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <h1>PEMERINTAH KOTA TEGAL</h1>
+          <div class="sub-title">Sistem Informasi Perencanaan Pembangunan Daerah &bull; RENSTRA</div>
+        </div>
+      </a>
+
+      <div class="nav-actions">
+        <div class="badge-guide-tag">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+          </svg>
+          <span>Buku Panduan Pengguna</span>
+        </div>
+
+        <button type="button" class="btn-nav-action btn-print-guide" onclick="window.print()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+            <rect x="6" y="14" width="12" height="8"></rect>
+          </svg>
+          <span>Cetak / PDF</span>
+        </button>
+
+        <a href="/renstra/" class="btn-nav-action btn-back-app">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="15 18 9 12 15 6"></polyline>
+          </svg>
+          <span>Kembali ke Aplikasi</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="guide-hero">
+    <div class="guide-hero-content">
+      <h2>
+        <span>Buku Panduan Pengguna Aplikasi RENSTRA</span>
+        <span class="hero-badge-version">Edisi Perubahan 2026</span>
+      </h2>
+      <p>
+        Petunjuk operasional lengkap Sistem Informasi Perencanaan Pembangunan Rencana Strategis (RENSTRA) Perangkat Daerah Pemerintah Kota Tegal Periode 2025–2029. Panduan mencakup navigasi dashboard, audit dokumen perencanaan berbasis AI Engine, manajemen pohon kinerja (cascading), pengentrian target kinerja & pagu anggaran, serta cetak laporan resmi.
+      </p>
+      <div class="guide-hero-meta">
+        <div class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          <span>Sasaran: <strong>Operator Perangkat Daerah & Analis Bapperida</strong></span>
+        </div>
+        <div class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Tahun Anggaran: <strong>2026 (Perubahan)</strong></span>
+        </div>
+        <div class="hero-meta-item">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+          <span>Sesuai Regulasi: <strong>Permendagri 86/2017 & 90/2019</strong></span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Layout -->
+  <div class="guide-layout">
+
+    <!-- Sticky Table of Contents Sidebar -->
+    <aside class="guide-sidebar">
+      <div class="sidebar-header">
+        <span>Daftar Isi Panduan</span>
+        <span style="font-size: 0.72rem; color: var(--emerald-600); font-weight: 700;">8 Bab</span>
+      </div>
+      <input type="text" id="topicSearch" class="sidebar-search" placeholder="Cari topik atau fitur..." onkeyup="filterTopics()" />
+      <ul class="sidebar-menu" id="menuList">
+        <li>
+          <a href="#bab1" class="active">
+            <span class="menu-num">1</span>
+            <span>Pendahuluan & Konsep</span>
+          </a>
+        </li>
+        <li>
+          <a href="#bab2">
+            <span class="menu-num">2</span>
+            <span>Akses & Login Akun</span>
+          </a>
+        </li>
+        <li>
+          <a href="#bab3">
+            <span class="menu-num">3</span>
+            <span>Navigasi Halaman Utama</span>
+          </a>
+        </li>
+        <li>
+          <a href="#bab4">
+            <span class="menu-num">4</span>
+            <span>Audit Dokumen AI (10 Elemen)</span>
+          </a>
+        </li>
+        <li>
+          <a href="#bab5">
+            <span class="menu-num">5</span>
+            <span>Pohon Kinerja (Cascading)</span>
+          </a>
+        </li>
+        <li>
+          <a href="#bab6">
+            <span class="menu-num">6</span>
+            <span>Entri Target & Pagu Anggaran</span>
+          </a>
+        </li>
+        <li>
+          <a href="#bab7">
+            <span class="menu-num">7</span>
+            <span>Modul Laporan & Export Excel</span>
+          </a>
+        </li>
+        <li>
+          <a href="#bab8">
+            <span class="menu-num">8</span>
+            <span>FAQ & Bantuan Teknis</span>
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="guide-main">
+
+      <!-- BAB 1 -->
+      <section id="bab1" class="guide-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="section-number-badge">1</div>
+            <div>
+              <h3>Pendahuluan & Konsep Sistem</h3>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Kerangka kerja perencanaan perubahan Renstra Kota Tegal Periode 2025–2029</p>
+            </div>
+          </div>
+          <span class="badge badge-success">Regulasi Resmi</span>
+        </div>
+
+        <p>
+          Aplikasi <strong>RENSTRA (Rencana Strategis Perangkat Daerah) Perubahan Pemerintah Kota Tegal</strong> merupakan platform digital terpadu yang memfasilitasi penyusunan, pengendalian, evaluasi, dan penyelarasan dokumen perencanaan lima tahunan Perangkat Daerah terhadap RPJMD Kota Tegal Tahun 2025–2029.
+        </p>
+
+        <h4>Landasan Hukum & Kebijakan</h4>
+        <ul style="list-style-type: disc;">
+          <li><strong>Undang-Undang Nomor 23 Tahun 2014</strong> tentang Pemerintahan Daerah.</li>
+          <li><strong>Peraturan Menteri Dalam Negeri Nomor 86 Tahun 2017</strong> tentang Tata Cara Perencanaan, Pengendalian dan Evaluasi Pembangunan Daerah, Tata Cara Evaluasi Rancangan Perda tentang RPJPD dan RPJMD, serta Tata Cara Perubahan RPJPD, RPJMD, dan Renstra Perangkat Daerah.</li>
+          <li><strong>Peraturan Menteri Dalam Negeri Nomor 90 Tahun 2019</strong> tentang Klasifikasi, Kodefikasi, dan Nomenklatur Perencanaan Pembangunan dan Keuangan Daerah.</li>
+          <li><strong>Keputusan Menteri Dalam Negeri Nomor 050-5889 Tahun 2021</strong> dan pemutakhirannya terkait pemutakhiran nomenklatur urusan, program, kegiatan, dan subkegiatan.</li>
+        </ul>
+
+        <div class="callout callout-info">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          </div>
+          <div>
+            <div class="callout-title">Tujuan Edisi Perubahan Renstra 2026</div>
+            Penyesuaian target indikator kinerja (IKU dan Indikator Program/Kegiatan), pergeseran pagu indikatif tahun anggaran 2026 s.d. 2029, serta penyelarasan kembali terhadap perubahan dokumen RPJMD dan dinamika fiskal Kota Tegal.
+          </div>
+        </div>
+      </section>
+
+      <!-- BAB 2 -->
+      <section id="bab2" class="guide-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="section-number-badge">2</div>
+            <div>
+              <h3>Akses & Login Akun Pengguna</h3>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Prosedur autentikasi aman menggunakan Single Sign-On (SSO) Google</p>
+            </div>
+          </div>
+          <span class="badge badge-murni">Keamanan Terjamin</span>
+        </div>
+
+        <p>
+          Aplikasi menggunakan sistem keamanan <strong>Firebase Authentication</strong> dengan integrasi Google OAuth 2.0. Setiap pejabat perencana, operator Perangkat Daerah, dan tim Bapperida dapat masuk menggunakan akun Google resmi instansi atau akun email terverifikasi.
+        </p>
+
+        <div class="steps-container">
+          <div class="step-card">
+            <div class="step-number">1</div>
+            <div class="step-body">
+              <h5>Buka Peramban & Kunjungi Aplikasi</h5>
+              <p>Akses alamat sistem perencanaan RENSTRA melalui peramban resmi (disarankan Google Chrome, Microsoft Edge, atau Mozilla Firefox terbaru).</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">2</div>
+            <div class="step-body">
+              <h5>Klik Tombol "Masuk dengan Akun Google"</h5>
+              <p>Pada layar login, klik tombol utama berwarna putih-biru bertuliskan <strong>Masuk dengan Akun Google</strong>.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">3</div>
+            <div class="step-body">
+              <h5>Pilih Akun & Izinkan Akses</h5>
+              <p>Pilih akun email kedinasan Anda pada jendela pop-up otentikasi Google. Sistem secara otomatis membaca peran dan membuka halaman dashboard.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Screenshot Login -->
+        <div class="screenshot-card">
+          <div class="screenshot-toolbar">
+            <div class="toolbar-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="toolbar-url">https://monevrkpd.tegalkota.go.id/renstra/login</div>
+          </div>
+          <img src="panduan-assets/screenshot-login.png" class="screenshot-img" alt="Halaman Login Akun Google Aplikasi RENSTRA" />
+          <div class="screenshot-caption">
+            <span><strong>Gambar 2.1:</strong> Tampilan Halaman Masuk (Login) Aplikasi RENSTRA Kota Tegal dengan Single Sign-On Google</span>
+            <span class="badge badge-murni">Layar Autentikasi</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- BAB 3 -->
+      <section id="bab3" class="guide-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="section-number-badge">3</div>
+            <div>
+              <h3>Navigasi Halaman Utama (Daftar Perangkat Daerah)</h3>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Pusat kendali monitoring data dan status dokumen perencanaan</p>
+            </div>
+          </div>
+          <span class="badge badge-success">Dashboard Master</span>
+        </div>
+
+        <p>
+          Halaman utama menyajikan direktori lengkap seluruh Organisasi Perangkat Daerah (OPD) di lingkungan Pemerintah Kota Tegal beserta metadata perencanaan tahun bersangkutan:
+        </p>
+
+        <div class="screenshot-card">
+          <div class="screenshot-toolbar">
+            <div class="toolbar-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="toolbar-url">https://monevrkpd.tegalkota.go.id/renstra/ (Dashboard Perangkat Daerah)</div>
+          </div>
+          <img src="panduan-assets/screenshot-dashboard.png" class="screenshot-img" alt="Halaman Utama Daftar Perangkat Daerah dan Skor Audit AI" />
+          <div class="screenshot-caption">
+            <span><strong>Gambar 3.1:</strong> Antarmuka Utama: Daftar Perangkat Daerah, Portal Upload Dokren, Filter Cepat, dan Badge Skor Audit AI</span>
+            <span class="badge badge-success">Dashboard Eksekutif</span>
+          </div>
+        </div>
+
+        <h4>Elemen-Elemen Kunci pada Halaman Utama</h4>
+        <table class="guide-table">
+          <thead>
+            <tr>
+              <th style="width: 25%;">Komponen</th>
+              <th style="width: 35%;">Deskripsi & Lokasi</th>
+              <th style="width: 40%;">Fungsi Operasional</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Tombol "Upload Dokumen Renstra"</strong></td>
+              <td>Header atas kanan banner hero</td>
+              <td>Tautan langsung menuju portal <code>monevrkpd.tegalkota.go.id/dokren</code> untuk mengunggah dokumen PDF resmi (Rancangan Awal, Rancangan Akhir, atau Penetapan).</td>
+            </tr>
+            <tr>
+              <td><strong>Kotak Pencarian Cepat</strong></td>
+              <td>Atas tabel OPD</td>
+              <td>Menyaring nama perangkat daerah secara instan berdasarkan nama atau kode SKPD tanpa me-refresh halaman.</td>
+            </tr>
+            <tr>
+              <td><strong>Kolom Dokumen Renstra</strong></td>
+              <td>Kolom tabel status dokumen</td>
+              <td>Menampilkan nama file dokumen PDF terbaru yang telah diunggah oleh Perangkat Daerah beserta tanggal pengesahannya.</td>
+            </tr>
+            <tr>
+              <td><strong>Badge Skor Audit AI</strong></td>
+              <td>Kolom khusus Audit AI</td>
+              <td>Menampilkan persentase kecocokan 10 elemen perencanaan antara berkas PDF dengan database aplikasi (Warna Hijau, Kuning, Merah).</td>
+            </tr>
+            <tr>
+              <td><strong>Tombol "Detail Renstra"</strong></td>
+              <td>Kolom aksi paling kanan</td>
+              <td>Membuka halaman struktur pohon cascading (Tujuan, Sasaran, Program, Kegiatan, Sub Kegiatan) dari Perangkat Daerah bersangkutan.</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <!-- BAB 4 -->
+      <section id="bab4" class="guide-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="section-number-badge">4</div>
+            <div>
+              <h3>Audit Kesesuaian Dokumen Renstra (AI Audit Engine)</h3>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Pemeriksaan ketat kepatuhan kalimat sama persis antara Dokumen PDF dengan Database</p>
+            </div>
+          </div>
+          <span class="badge badge-perubahan">Fitur Unggulan AI</span>
+        </div>
+
+        <p>
+          Fitur <strong>Audit Dokumen AI</strong> dirancang khusus oleh Bapperida Kota Tegal untuk memverifikasi keselarasan redaksional dan numerik antara dokumen perencanaan yang telah diunggah (Penetapan Renstra atau Rancangan Akhir) dengan data riil yang dientri ke dalam database aplikasi.
+        </p>
+
+        <div class="callout callout-warning">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          </div>
+          <div>
+            <div class="callout-title">Aturan Baku: Rumusan Kalimat Harus Sama Persis (Exact Match)</div>
+            Audit tidak mentolerir perbedaan urutan kata atau parafrase bebas. Kalimat rumusan Tujuan, Sasaran, Program, Kegiatan, dan Subkegiatan beserta seluruh indikatornya pada database <strong>harus sama persis</strong> dengan naskah Bab III dan Bab IV dokumen PDF.
+          </div>
+        </div>
+
+        <h4>10 Elemen yang Wajib Sama Persis</h4>
+        <ol>
+          <li><strong>Kalimat Tujuan</strong> (<code>uraitujuan</code>)</li>
+          <li><strong>Kalimat Indikator Tujuan</strong> (<code>uraitujuan_indikator</code>)</li>
+          <li><strong>Kalimat Sasaran</strong> (<code>uraisasaran</code>)</li>
+          <li><strong>Kalimat Indikator Sasaran</strong> (<code>uraisasaran_indikator</code>)</li>
+          <li><strong>Kalimat Program</strong> (<code>uraiprogram</code>)</li>
+          <li><strong>Kalimat Indikator Program</strong> (<code>uraiindikator</code>)</li>
+          <li><strong>Kalimat Kegiatan</strong> (<code>uraikegiatan</code>)</li>
+          <li><strong>Kalimat Indikator Kegiatan</strong> (<code>uraiindikator</code>)</li>
+          <li><strong>Kalimat Subkegiatan</strong> (<code>uraisubkegiatan</code>)</li>
+          <li><strong>Kalimat Indikator Subkegiatan</strong> (<code>uraisubkegiatan_indikator</code>)</li>
+        </ol>
+
+        <!-- Screenshot Audit Modal -->
+        <div class="screenshot-card">
+          <div class="screenshot-toolbar">
+            <div class="toolbar-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="toolbar-url">Audit Kesesuaian Dokumen AI - Modal Analisis Komparasi 10 Elemen</div>
+          </div>
+          <img src="panduan-assets/screenshot-audit-modal.png" class="screenshot-img" alt="Modal Audit Kesesuaian Dokumen Renstra AI" />
+          <div class="screenshot-caption">
+            <span><strong>Gambar 4.1:</strong> Modal Hasil Audit AI: Skor Kesesuaian, Rincian Tab Tujuan/Sasaran/Program/Kegiatan/Subkegiatan, Pagu & Tombol Analisa Ulang</span>
+            <span class="badge badge-success">Modal AI Audit</span>
+          </div>
+        </div>
+
+        <h4>Tingkat Kategori Skor & Pinalti Data</h4>
+        <table class="guide-table">
+          <thead>
+            <tr>
+              <th>Rentang Skor</th>
+              <th>Status Hasil Audit</th>
+              <th>Arti & Konsekuensi</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="badge badge-success">90% - 100%</span></td>
+              <td><strong>Sangat Sesuai</strong></td>
+              <td>Semua rumusan kalimat 10 elemen dan pagu anggaran telah identik dan selaras penuh.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-murni">75% - 89%</span></td>
+              <td><strong>Sesuai</strong></td>
+              <td>Mayoritas elemen selaras; terdapat beberapa perbedaan redaksi kecil atau target minor.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-perubahan">&lt; 75%</span></td>
+              <td><strong>Terdapat Selisih</strong></td>
+              <td>Terdapat selisih nominal pagu anggaran atau perbedaan redaksi kalimat yang memerlukan koreksi.</td>
+            </tr>
+            <tr>
+              <td><span class="badge badge-danger">Maks. 50%</span></td>
+              <td><strong>Perlu Perbaikan (Belum Entri Tujuan/Sasaran)</strong></td>
+              <td><strong>Pinalti Otomatis:</strong> Jika Perangkat Daerah belum mengentri rumusan Tujuan dan/atau Sasaran di database, sistem mengunci nilai maksimal 50% dan menolak pemberian skor tinggi sampai entri cascading diselesaikan.</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <h4>Tombol "Analisa Ulang"</h4>
+        <p>
+          Setelah Perangkat Daerah memperbaiki susunan kalimat atau angka di database maupun mengunggah revisi PDF di portal Dokren, klik tombol hijau <strong>"Analisa Ulang"</strong> pada bagian bawah modal audit untuk memicu audit ulang secara instan.
+        </p>
+      </section>
+
+      <!-- BAB 5 -->
+      <section id="bab5" class="guide-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="section-number-badge">5</div>
+            <div>
+              <h3>Pohon Kinerja (Cascading) Renstra</h3>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Visualisasi dan navigasi struktur berjenjang dari Tujuan hingga Sub Kegiatan</p>
+            </div>
+          </div>
+          <span class="badge badge-murni">Cascading Akuntabel</span>
+        </div>
+
+        <p>
+          Halaman Rincian RENSTRA OPD menampilkan cascading berjenjang yang mencerminkan logika perencanaan kinerja pembangunan daerah:
+        </p>
+
+        <!-- Screenshot Detail Renstra -->
+        <div class="screenshot-card">
+          <div class="screenshot-toolbar">
+            <div class="toolbar-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="toolbar-url">https://monevrkpd.tegalkota.go.id/renstra/opd/482 (Detail Struktur RENSTRA)</div>
+          </div>
+          <img src="panduan-assets/screenshot-detail-renstra.png" class="screenshot-img" alt="Pohon Kinerja Cascading RENSTRA Perangkat Daerah" />
+          <div class="screenshot-caption">
+            <span><strong>Gambar 5.1:</strong> Struktur Hierarki Cascading: Kartu Tujuan, Sasaran Strategis, Program, Kegiatan, dan Subkegiatan</span>
+            <span class="badge badge-murni">Pohon Kinerja</span>
+          </div>
+        </div>
+
+        <h4>Hierarki 5 Level Perencanaan:</h4>
+        <div class="steps-container">
+          <div class="step-card">
+            <div class="step-number">T</div>
+            <div class="step-body">
+              <h5>Level 1: Tujuan Renstra</h5>
+              <p>Pernyataan kondisi akhir yang ingin dicapai OPD selama 5 tahun, dilengkapi dengan <strong>Indikator Tujuan</strong> dan target tahunan.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">S</div>
+            <div class="step-body">
+              <h5>Level 2: Sasaran Renstra & IKU</h5>
+              <p>Rumusan hasil (*outcome*) strategis turunan dari Tujuan. Indikator sasaran yang berstatus kunci ditandai sebagai <strong>Indikator Kinerja Utama (IKU)</strong>.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">P</div>
+            <div class="step-body">
+              <h5>Level 3: Program Prioritas</h5>
+              <p>Kumpulan instrumen kebijakan dan urusan yang mengelompokkan kegiatan pembangunan, dilengkapi <strong>Indikator Program</strong> dan akumulasi pagu indikatif.</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">K</div>
+            <div class="step-body">
+              <h5>Level 4: Kegiatan</h5>
+              <p>Bagian dari program yang dilaksanakan oleh bidang/unit kerja operasional untuk menghasilkan keluaran (*output*).</p>
+            </div>
+          </div>
+          <div class="step-card">
+            <div class="step-number">SK</div>
+            <div class="step-body">
+              <h5>Level 5: Sub Kegiatan & Pagu Anggaran</h5>
+              <p>Unit aktivitas terkecil yang mengikat alokasi pagu belanja dan target volume keluaran riil per tahun anggaran.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BAB 6 -->
+      <section id="bab6" class="guide-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="section-number-badge">6</div>
+            <div>
+              <h3>Entri & Pengubahan Target Kinerja serta Pagu Anggaran</h3>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Pengelolaan nilai Target Murni, Target Perubahan, Pagu 2025–2029, dan Realisasi</p>
+            </div>
+          </div>
+          <span class="badge badge-perubahan">Formulir Interaktif</span>
+        </div>
+
+        <p>
+          Setiap entri data pada tabel dilengkapi modal pengentrian komprehensif untuk merekam target kinerja dan alokasi pagu anggaran baik pada periode perencanaan murni maupun perubahan.
+        </p>
+
+        <!-- Screenshot CRUD Modal -->
+        <div class="screenshot-card">
+          <div class="screenshot-toolbar">
+            <div class="toolbar-dots">
+              <span class="dot dot-red"></span>
+              <span class="dot dot-yellow"></span>
+              <span class="dot dot-green"></span>
+            </div>
+            <div class="toolbar-url">Modal Formulir Entri & Pembaruan Data RENSTRA</div>
+          </div>
+          <img src="panduan-assets/screenshot-crud-modal.png" class="screenshot-img" alt="Modal Formulir Entri Data RENSTRA" />
+          <div class="screenshot-caption">
+            <span><strong>Gambar 6.1:</strong> Formulir Entri/Ubah Target Kinerja, Pagu Anggaran 5 Tahunan, dan Bantuan Rekomendasi Cerdas AI</span>
+            <span class="badge badge-perubahan">Form Entri</span>
+          </div>
+        </div>
+
+        <h4>Aturan Pengisian Formulir:</h4>
+        <table class="guide-table">
+          <thead>
+            <tr>
+              <th>Kolom Formulir</th>
+              <th>Pedoman Pengisian</th>
+              <th>Contoh Masukan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Uraian Kalimat</strong></td>
+              <td>Harus disalin identik dari naskah Renstra PDF yang disahkan oleh Walikota Tegal.</td>
+              <td><code>Meningkatnya kualitas pelayanan perizinan terpadu</code></td>
+            </tr>
+            <tr>
+              <td><strong>Satuan Ukuran</strong></td>
+              <td>Gunakan satuan baku (Persen, Indeks, Dokumen, Orang, Unit, dsb).</td>
+              <td><code>Persen (%)</code>, <code>Nilai</code>, <code>Paket</code></td>
+            </tr>
+            <tr>
+              <td><strong>Target Murni vs Perubahan</strong></td>
+              <td>Kolom Murni merekam target penetapan awal; kolom Perubahan merekam target hasil evaluasi atau rekalibrasi.</td>
+              <td>Murni: <code>85%</code>, Perubahan: <code>88%</code></td>
+            </tr>
+            <tr>
+              <td><strong>Pagu Anggaran (Rp)</strong></td>
+              <td>Masukkan angka nominal bulat tanpa tanda titik atau koma (sistem otomatis memformat mata uang).</td>
+              <td><code>150000000</code> &rarr; <code>Rp 150.000.000</code></td>
+            </tr>
+            <tr>
+              <td><strong>Realisasi Kinerja</strong></td>
+              <td>Tercatat pada evaluasi tahun berjalan untuk membandingkan capaian fisik terhadap target.</td>
+              <td><code>87.5%</code></td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="callout callout-success">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+          </div>
+          <div>
+            <div class="callout-title">Bantuan Asisten Cerdas AI (Smart AI Assistant)</div>
+            Di dalam setiap form pengisian indikator, terdapat fitur <strong>Smart AI Assistant</strong> yang otomatis menganalisis apakah indikator memenuhi kaidah SMART (*Specific, Measurable, Achievable, Relevant, Time-bound*) dan memberikan usulan formula perhitungan.
+          </div>
+        </div>
+      </section>
+
+      <!-- BAB 7 -->
+      <section id="bab7" class="guide-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="section-number-badge">7</div>
+            <div>
+              <h3>Modul Laporan & Ekspor Microsoft Excel</h3>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Penerbitan dokumen matriks resmi Permendagri 86/2017 sekali klik</p>
+            </div>
+          </div>
+          <span class="badge badge-success">Ekspor Excel Resmi</span>
+        </div>
+
+        <p>
+          Aplikasi menyediakan 6 menu laporan resmi yang dapat dicetak langsung atau diunduh ke format spreadsheet (.xlsx) sesuai dengan format baku lampiran Permendagri Nomor 86 Tahun 2017:
+        </p>
+
+        <!-- Laporan 3.1 -->
+        <h4 style="margin-top: 1rem;">1. Laporan Tabel 3.1: Tujuan dan Sasaran Jangka Menengah</h4>
+        <p>Menampilkan matriks keselarasan visi, misi, tujuan, sasaran, indikator sasaran, baseline, dan target tahunan 2025–2029.</p>
+        <div class="screenshot-card">
+          <div class="screenshot-toolbar">
+            <div class="toolbar-dots"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></div>
+            <div class="toolbar-url">https://monevrkpd.tegalkota.go.id/renstra/laporan/tujuan-sasaran</div>
+          </div>
+          <img src="panduan-assets/screenshot-laporan-tabel31.png" class="screenshot-img" alt="Laporan Tabel 3.1 Tujuan dan Sasaran Renstra" />
+          <div class="screenshot-caption">
+            <span><strong>Gambar 7.1:</strong> Laporan Tabel 3.1: Matriks Indikator Tujuan dan Sasaran Jangka Menengah beserta tombol Download Excel</span>
+            <span class="badge badge-success">Tabel 3.1</span>
+          </div>
+        </div>
+
+        <!-- Laporan 4.1 -->
+        <h4>2. Laporan Tabel 4.1: Rencana Program, Kegiatan & Kerangka Pendanaan</h4>
+        <p>Menyajikan matriks rincian seluruh Program, Kegiatan, dan Sub Kegiatan beserta pagu anggaran indikatif dan target kinerja tahunan se-Kota Tegal.</p>
+        <div class="screenshot-card">
+          <div class="screenshot-toolbar">
+            <div class="toolbar-dots"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></div>
+            <div class="toolbar-url">https://monevrkpd.tegalkota.go.id/renstra/laporan/program-kegiatan</div>
+          </div>
+          <img src="panduan-assets/screenshot-laporan-tabel41.png" class="screenshot-img" alt="Laporan Tabel 4.1 Rencana Program dan Pendanaan Renstra" />
+          <div class="screenshot-caption">
+            <span><strong>Gambar 7.2:</strong> Laporan Tabel 4.1: Matriks Rencana Program, Kegiatan, Sub Kegiatan, Target Kinerja dan Pagu Indikatif</span>
+            <span class="badge badge-success">Tabel 4.1</span>
+          </div>
+        </div>
+
+        <!-- Laporan IKU & Pagu -->
+        <h4>3. Laporan Daftar IKU & Komparasi Pagu RPJMD vs Renstra</h4>
+        <p>Digunakan oleh pimpinan daerah dan Bapperida untuk memastikan tidak ada indikator strategis yang terlewat atau pelampauan pagu batas RPJMD.</p>
+        <div class="screenshot-card">
+          <div class="screenshot-toolbar">
+            <div class="toolbar-dots"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></div>
+            <div class="toolbar-url">https://monevrkpd.tegalkota.go.id/renstra/laporan/daftar-iku</div>
+          </div>
+          <img src="panduan-assets/screenshot-laporan-iku.png" class="screenshot-img" alt="Laporan 6: Daftar IKU Perangkat Daerah se-Kota Tegal" />
+          <div class="screenshot-caption">
+            <span><strong>Gambar 7.3:</strong> Laporan 6: Rekapitulasi Indikator Kinerja Utama (IKU) Seluruh Perangkat Daerah Pemerintah Kota Tegal</span>
+            <span class="badge badge-murni">Laporan IKU</span>
+          </div>
+        </div>
+
+        <div class="screenshot-card">
+          <div class="screenshot-toolbar">
+            <div class="toolbar-dots"><span class="dot dot-red"></span><span class="dot dot-yellow"></span><span class="dot dot-green"></span></div>
+            <div class="toolbar-url">https://monevrkpd.tegalkota.go.id/renstra/laporan/rpjmd-vs-renstra</div>
+          </div>
+          <img src="panduan-assets/screenshot-laporan-pagu.png" class="screenshot-img" alt="Laporan 7: Komparasi Pagu RPJMD vs Renstra" />
+          <div class="screenshot-caption">
+            <span><strong>Gambar 7.4:</strong> Laporan 7: Analisis Keselarasan Pagu RPJMD vs Renstra & Deteksi Otomatis Selisih Anggaran</span>
+            <span class="badge badge-perubahan">Komparasi Pagu</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- BAB 8 -->
+      <section id="bab8" class="guide-section">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <div class="section-number-badge">8</div>
+            <div>
+              <h3>Tanya Jawab (FAQ) & Bantuan Teknis</h3>
+              <p style="margin: 0; font-size: 0.85rem; color: var(--text-muted);">Solusi cepat atas kendala yang kerap dihadapi pengguna</p>
+            </div>
+          </div>
+          <span class="badge badge-murni">Bantuan</span>
+        </div>
+
+        <h4>Pertanyaan yang Sering Diajukan</h4>
+        <div class="steps-container">
+          <div class="step-card">
+            <div class="step-number">?</div>
+            <div class="step-body">
+              <h5>Mengapa Skor Audit AI OPD saya hanya 25% atau 50%?</h5>
+              <p>Periksa tab <strong>Tujuan & Sasaran</strong> pada modal audit. Jika Perangkat Daerah belum mengentri Tujuan atau Sasaran di database, sistem memberikan pinalti otomatis maksimal 50% dan status <em>"Perlu Perbaikan (Belum Entri Tujuan/Sasaran)"</em>. Segera entri Tujuan dan Sasaran agar skor meningkat.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">?</div>
+            <div class="step-body">
+              <h5>Mengapa kalimat yang mirip tetap ditandai "Tidak Cocok"?</h5>
+              <p>Sistem menerapkan aturan <strong>harus sama persis</strong>. Perbedaan kata seperti <em>"Meningkatnya tertib penyelenggaraan..."</em> vs <em>"Meningkatkan tercapainya tertib administrasi..."</em> akan dideteksi sebagai ketidaksesuaian. Samakan redaksi database dengan dokumen PDF.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">?</div>
+            <div class="step-body">
+              <h5>Bagaimana cara mengunggah dokumen Renstra Penetapan terbaru?</h5>
+              <p>Klik tombol <strong>"Upload Dokumen Renstra"</strong> pada header halaman utama. Anda akan diarahkan ke portal <code>monevrkpd.tegalkota.go.id/dokren</code>. Unggah berkas PDF penetapan di sana, lalu kembali ke aplikasi dan klik <strong>"Analisa Ulang"</strong>.</p>
+            </div>
+          </div>
+
+          <div class="step-card">
+            <div class="step-number">?</div>
+            <div class="step-body">
+              <h5>Apakah hasil ekspor Excel sudah sesuai format BPK / Kemendagri?</h5>
+              <p>Ya, tata letak kolom, judul bab, dan penomoran tabel telah disesuaikan persis dengan formulir Permendagri Nomor 86 Tahun 2017 sehingga siap dilampirkan dalam rancangan akhir atau evaluasi triwulanan/tahunan.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="callout callout-info" style="margin-top: 2rem;">
+          <div class="callout-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          </div>
+          <div>
+            <div class="callout-title">Layanan Bantuan Teknis Bapperida Kota Tegal</div>
+            Bidang Perencanaan, Pengendalian dan Evaluasi Pembangunan Daerah (PPEPD)<br />
+            <strong>Badan Perencanaan Pembangunan, Penelitian dan Pengembangan Daerah (Bapperida) Kota Tegal</strong><br />
+            Gedung Balai Kota Tegal &bull; Telepon: (0283) 351001 &bull; Email: <code>bapperida@tegalkota.go.id</code>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Civic Executive Footer -->
+  <footer class="guide-footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        <span>Pemerintah Kota Tegal &bull; Bapperida Kota Tegal</span>
+      </div>
+      <div>
+        Sistem Informasi Perencanaan Pembangunan Daerah &bull; RENSTRA 2025 - 2029 (Perubahan 2026)
+      </div>
+    </div>
+  </footer>
+
+  <!-- Simple Search and Scrollspy Script -->
+  <script>
+    function filterTopics() {
+      const q = document.getElementById('topicSearch').value.toLowerCase();
+      const items = document.querySelectorAll('#menuList li');
+      items.forEach(it => {
+        const text = it.textContent.toLowerCase();
+        it.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    // Scrollspy navigation highlight
+    window.addEventListener('scroll', () => {
+      const sections = document.querySelectorAll('.guide-section');
+      const menuLinks = document.querySelectorAll('.sidebar-menu a');
+      let currentSection = '';
+
+      sections.forEach(sec => {
+        const sectionTop = sec.offsetTop - 120;
+        if (pageYOffset >= sectionTop) {
+          currentSection = sec.getAttribute('id');
+        }
+      });
+
+      menuLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === '#' + currentSection) {
+          link.classList.add('active');
+        }
+      });
+    });
+  </script>
+</body>
+</html>

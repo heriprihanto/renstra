@@ -10,6 +10,7 @@ import ProgramKegiatanReportView from '../views/ProgramKegiatanReportView.vue';
 import EvaluasiRenstraReportView from '../views/EvaluasiRenstraReportView.vue';
 import DaftarIkuReportView from '../views/DaftarIkuReportView.vue';
 import RpjmdVsRenstraReportView from '../views/RpjmdVsRenstraReportView.vue';
+import PanduanView from '../views/PanduanView.vue';
 import { useAuth, waitForAuthInit } from '../services/auth';
 
 const routes = [
@@ -18,6 +19,12 @@ const routes = [
     name: 'Login',
     component: LoginView,
     meta: { title: 'Masuk - RENSTRA Kota Tegal', public: true }
+  },
+  {
+    path: '/panduan',
+    name: 'Panduan',
+    component: PanduanView,
+    meta: { title: 'Buku Panduan Pengguna - RENSTRA Kota Tegal', public: true }
   },
   {
     path: '/',
@@ -107,8 +114,8 @@ router.beforeEach(async (to, from, next) => {
 
   const { isAuthenticated } = useAuth();
 
-  if (to.path === '/login') {
-    if (isAuthenticated.value) {
+  if (to.meta.public) {
+    if (to.path === '/login' && isAuthenticated.value) {
       next('/');
     } else {
       next();

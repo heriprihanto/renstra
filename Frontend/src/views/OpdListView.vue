@@ -15,6 +15,21 @@
           </div>
 
           <div class="hero-actions">
+            <!-- Tombol Buku Panduan Pengguna -->
+            <router-link
+              to="/panduan"
+              class="btn-guide-hero"
+              title="Buka Buku Panduan Pengguna RENSTRA Kota Tegal"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+                <line x1="9" y1="7" x2="15" y2="7"/>
+                <line x1="9" y1="11" x2="13" y2="11"/>
+              </svg>
+              <span>Buku Panduan</span>
+            </router-link>
+
             <a
               href="https://monevrkpd.tegalkota.go.id/dokren"
               target="_blank"
@@ -122,6 +137,30 @@ onMounted(() => {
   background: linear-gradient(135deg, #0369a1 0%, #075985 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(2, 132, 199, 0.35);
+  color: #ffffff;
+}
+
+.btn-guide-hero {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-md, 8px);
+  font-size: 0.82rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  color: #ffffff;
+  border: 1px solid #059669;
+  text-decoration: none;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.25);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.btn-guide-hero:hover {
+  background: linear-gradient(135deg, #047857 0%, #059669 100%);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(5, 150, 105, 0.35);
   color: #ffffff;
 }
 </style>

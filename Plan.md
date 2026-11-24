@@ -458,3 +458,8 @@ Audit kesesuaian kalimat Tujuan, Indikator Tujuan, Sasaran, Indikator Sasaran, P
 tampilkan skor di Daftar Perangkat Daerah
 
 Kalimat Tujuan, Indikator Tujuan, Sasaran, Indikator Sasaran, Program, Indikator Program, Kegiatan, Indikator Kegiatan, SUb kegiatan, Indikator Subkegiatan harus sama persis antara Database Aplikasi dengan Dokumen yang sudah diupload
+
+Buatkan Buku Panduan untuk Pengguna aplikasi ini, tambahkan screenshoot
+Format HTML
+Desain mengikuti seperti desain aplikasi
+Tambah  menu pada halaman utama aplikasi ini untuk membuka panduan
